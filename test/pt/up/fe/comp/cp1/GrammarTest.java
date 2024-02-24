@@ -20,7 +20,7 @@ public class GrammarTest {
 
 
     // TODO: Set name of imports grammar rule
-    private static final String IMPORT = "CHANGE ME! - name of import grammar rule";
+    private static final String IMPORT = "importDecl";
     // TODO: Set name of main method grammar rule
     private static final String MAIN_METHOD = "CHANGE ME! - name of main method grammar rule";
     private static final String INSTANCE_METHOD = "methodDecl";

@@ -6,6 +6,7 @@ grammar Javamm;
 
 EQUALS : '=';
 SEMI : ';' ;
+DOT : '.';
 LCURLY : '{' ;
 RCURLY : '}' ;
 LPAREN : '(' ;
@@ -15,10 +16,13 @@ DIV : '/' ;
 ADD : '+' ;
 SUB : '-' ;
 
+IMPORT : 'import';
 CLASS : 'class' ;
+EXTENDS : 'extends';
 INT : 'int' ;
 PUBLIC : 'public' ;
 RETURN : 'return' ;
+
 
 INTEGER : [0-9] ;
 ID : [a-zA-Z]+ ;
@@ -26,15 +30,21 @@ ID : [a-zA-Z]+ ;
 WS : [ \t\n\r\f]+ -> skip ;
 
 program
-    : classDecl EOF
+    : importDecl* classDecl EOF
     ;
 
 
 classDecl
     : CLASS name=ID
+        (EXTENDS ID)?
         LCURLY
+        varDecl*
         methodDecl*
         RCURLY
+    ;
+
+importDecl
+    : IMPORT name=ID (DOT name=ID)* SEMI
     ;
 
 varDecl
@@ -42,7 +52,8 @@ varDecl
     ;
 
 type
-    : name= INT ;
+    : name= INT
+    ;
 
 methodDecl locals[boolean isPublic=false]
     : (PUBLIC {$isPublic=true;})?
