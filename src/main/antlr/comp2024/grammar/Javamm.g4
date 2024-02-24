@@ -4,9 +4,10 @@ grammar Javamm;
     package pt.up.fe.comp2024;
 }
 
-EQUALS : '=';
+EQUALS : '=' ;
 SEMI : ';' ;
-DOT : '.';
+COMA : ',' ;
+DOT : '.' ;
 LCURLY : '{' ;
 RCURLY : '}' ;
 LPAREN : '(' ;
@@ -16,16 +17,22 @@ DIV : '/' ;
 ADD : '+' ;
 SUB : '-' ;
 
-IMPORT : 'import';
+IMPORT : 'import' ;
 CLASS : 'class' ;
-EXTENDS : 'extends';
-INT : 'int' ;
+EXTENDS : 'extends' ;
 PUBLIC : 'public' ;
+IF : 'if' ;
+ELSE : 'else' ;
+WHILE : 'while' ;
 RETURN : 'return' ;
 
+INT : 'int' ;
+INTL : 'int''['']' ; //INT list
+INTS : 'int''...' ; //multiple INTs
+BOOLEAN: 'boolean' ;
 
 INTEGER : [0-9] ;
-ID : [a-zA-Z]+ ;
+ID : [a-zA-Z][0-9a-zA-Z_$]* ;
 
 WS : [ \t\n\r\f]+ -> skip ;
 
@@ -52,7 +59,11 @@ varDecl
     ;
 
 type
-    : name= INT
+    : name=INT
+    | name=BOOLEAN
+    | name=INTL
+    | name=INTS
+    | name=ID //To discuss: Are other types always uppercase in the first letter? if so create new token or is that later dealt with elewhere
     ;
 
 methodDecl locals[boolean isPublic=false]
@@ -60,15 +71,23 @@ methodDecl locals[boolean isPublic=false]
         type name=ID
         LPAREN param RPAREN
         LCURLY varDecl* stmt* RCURLY
+    | (PUBLIC {$isPublic=true;})?
+        'static' 'void' 'main'
+        LPAREN 'String' '['']' name=ID RPAREN
+        LCURLY varDecl* stmt* RCURLY
     ;
 
 param
-    : type name=ID
+    : (type name=ID (COMA type name=ID)*)?
     ;
 
 stmt
-    : expr EQUALS expr SEMI #AssignStmt //
-    | RETURN expr SEMI #ReturnStmt
+    : LCURLY stmt* RCURLY #MultStmt
+    | IF LPAREN expr RPAREN stmt ELSE stmt #IfStmt
+    | WHILE LPAREN expr RPAREN stmt #WhileStmt
+    | expr SEMI #ExprCall
+    | expr EQUALS expr SEMI #AssignStmt //
+    | RETURN expr SEMI #ReturnStmt //To discuss: should tecnically be in methodDecl or at least a separate stmt so it can be put there
     ;
 
 expr
