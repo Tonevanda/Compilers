@@ -83,7 +83,7 @@ program
 
 classDecl
     : CLASS name=ID
-        (EXTENDS ID)?
+        (EXTENDS superName=ID)?
         LCURLY
         varDecl*
         methodDecl*

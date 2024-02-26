@@ -12,24 +12,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static pt.up.fe.comp2024.ast.Kind.METHOD_DECL;
-import static pt.up.fe.comp2024.ast.Kind.VAR_DECL;
+import static pt.up.fe.comp2024.ast.Kind.*;
 
 public class JmmSymbolTableBuilder {
 
-
     public static JmmSymbolTable build(JmmNode root) {
-
-        var classDecl = root.getJmmChild(0);
+        List<String> imports = buildImports(root);
+        JmmNode classDecl = root.getChild(root.getNumChildren()-1);
         SpecsCheck.checkArgument(Kind.CLASS_DECL.check(classDecl), () -> "Expected a class declaration: " + classDecl);
-        String className = classDecl.get("name");
 
+        String className = classDecl.get("name");
+        String superName = classDecl.get("superName");
         var methods = buildMethods(classDecl);
         var returnTypes = buildReturnTypes(classDecl);
         var params = buildParams(classDecl);
         var locals = buildLocals(classDecl);
 
-        return new JmmSymbolTable(className, methods, returnTypes, params, locals);
+        return new JmmSymbolTable(imports, className, superName, methods, returnTypes, params, locals);
+    }
+
+    private static List<String> buildImports(JmmNode root) {
+        // TODO: Simple implementation that needs to be expanded
+        return root.getChildren(IMPORT_DECL).stream()
+                .map(method -> method.get("name"))
+                .toList();
     }
 
     private static Map<String, Type> buildReturnTypes(JmmNode classDecl) {
