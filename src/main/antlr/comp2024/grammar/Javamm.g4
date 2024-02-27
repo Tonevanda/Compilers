@@ -57,7 +57,6 @@ RETURN : 'return' ;
 
 // TYPES
 INT : 'int' ;
-INTL : 'int''['']' ; //INT list
 INTS : 'int''...' ; //VARARGS INTs
 BOOLEAN : 'boolean' ;
 STRING : 'String';
@@ -73,6 +72,7 @@ SEMI : ';' ;
 COMMA : ',' ;
 LCURLY : '{' ;
 RCURLY : '}' ;
+QUOTE : '"' ;
 
 WS : [ \t\n\r\f]+ -> skip ;
 
@@ -99,9 +99,9 @@ varDecl
     ;
 
 type
-    : name=INT
+    : type '['']'
+    | name=INT
     | name=BOOLEAN
-    | name=INTL
     | name=INTS
     | name=STRING
     | name=ID //To discuss: Are other types always uppercase in the first letter? if so create new token or is that later dealt with elewhere
@@ -110,16 +110,16 @@ type
 methodDecl locals[boolean isPublic=false]
     : (PUBLIC {$isPublic=true;})?
         type name=ID
-        LPAREN param RPAREN
+        LPAREN (param (COMMA param)*)? RPAREN
         LCURLY varDecl* stmt* RCURLY
     | (PUBLIC {$isPublic=true;})?
-        'static' 'void' 'main'
-        LPAREN 'String' '['']' name=ID RPAREN
+        'static' type name='main'
+        LPAREN type name=ID RPAREN
         LCURLY varDecl* stmt* RCURLY
     ;
 
 param
-    : (type name=ID (COMMA type name=ID)*)?
+    : type name=ID
     ;
 
 stmt
@@ -148,6 +148,7 @@ expr
     | LBRACK (expr (COMMA expr)*)? RBRACK #ArrayInit
     | value=INTEGER #IntLiteral
     | value=(TRUE | FALSE) #BoolLiteral
+    | value= QUOTE ID QUOTE #StringLiteral
     | name=ID #Var
     | name=THIS #This
     ;

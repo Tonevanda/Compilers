@@ -7,9 +7,33 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 public class TypeUtils {
 
     private static final String INT_TYPE_NAME = "int";
+    private static final String BOOLEAN_TYPE_NAME = "boolean";
+    private static final String INTS_TYPE_NAME = "int...";
+    private static final String STRING_TYPE_NAME = "String";
 
     public static String getIntTypeName() {
         return INT_TYPE_NAME;
+    }
+
+    public static Type getType(JmmNode type_node) {
+        String type_name;
+        Boolean isArray;
+
+        if (type_node.hasAttribute("name")) { //not array
+            type_name = type_node.get("name");
+            isArray = false;
+        } else {
+            type_name = type_node.getChild(0).get("name");
+            isArray = true;
+        }
+
+        return switch (type_name) {
+            case INT_TYPE_NAME -> new Type(INT_TYPE_NAME, isArray);
+            case BOOLEAN_TYPE_NAME -> new Type(BOOLEAN_TYPE_NAME, isArray);
+            case INTS_TYPE_NAME -> new Type(INTS_TYPE_NAME, isArray);
+            case STRING_TYPE_NAME -> new Type(STRING_TYPE_NAME, isArray);
+            default -> new Type(type_name, isArray);
+        };
     }
 
     /**
