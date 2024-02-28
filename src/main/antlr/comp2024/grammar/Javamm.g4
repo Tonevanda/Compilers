@@ -59,7 +59,6 @@ RETURN : 'return' ;
 INT : 'int' ;
 INTS : 'int''...' ; //VARARGS INTs
 BOOLEAN : 'boolean' ;
-STRING : 'String';
 
 // VALUES
 TRUE : 'true';
@@ -72,7 +71,6 @@ SEMI : ';' ;
 COMMA : ',' ;
 LCURLY : '{' ;
 RCURLY : '}' ;
-QUOTE : '"' ;
 
 WS : [ \t\n\r\f]+ -> skip ;
 
@@ -103,7 +101,6 @@ type
     | name=INT
     | name=BOOLEAN
     | name=INTS
-    | name=STRING
     | name=ID //To discuss: Are other types always uppercase in the first letter? if so create new token or is that later dealt with elewhere
     ;
 
@@ -148,7 +145,6 @@ expr
     | LBRACK (expr (COMMA expr)*)? RBRACK #ArrayInit
     | value=INTEGER #IntLiteral
     | value=(TRUE | FALSE) #BoolLiteral
-    | value= QUOTE ID QUOTE #StringLiteral
     | name=ID #Var
     | name=THIS #This
     ;

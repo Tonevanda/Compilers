@@ -30,7 +30,7 @@ public class TypeUtils {
         return switch (type_name) {
             case INT_TYPE_NAME -> new Type(INT_TYPE_NAME, isArray);
             case BOOLEAN_TYPE_NAME -> new Type(BOOLEAN_TYPE_NAME, isArray);
-            case INTS_TYPE_NAME -> new Type(INTS_TYPE_NAME, isArray);
+            case INTS_TYPE_NAME -> new Type(INTS_TYPE_NAME, true);
             case STRING_TYPE_NAME -> new Type(STRING_TYPE_NAME, isArray);
             default -> new Type(type_name, isArray);
         };
