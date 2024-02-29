@@ -57,7 +57,7 @@ RETURN : 'return' ;
 
 // TYPES
 INT : 'int' ;
-INTS : 'int''...' ; //VARARGS INTs
+//INTS : 'int''...' ; //VARARGS INTs
 BOOLEAN : 'boolean' ;
 CHAR : 'char' ;
 
@@ -101,10 +101,11 @@ varDecl
 
 type
     : type '['']'
+    | name=INT '...'
     | name=INT
     | name=BOOLEAN
     | name=CHAR
-    | name=INTS
+//    | name=INTS
     | name=ID //To discuss: Are other types always uppercase in the first letter? if so create new token or is that later dealt with elewhere
     ;
 
