@@ -57,9 +57,8 @@ RETURN : 'return' ;
 
 // TYPES
 INT : 'int' ;
-//INTS : 'int''...' ; //VARARGS INTs
 BOOLEAN : 'boolean' ;
-CHAR : 'char' ;
+STRING : 'String' ;
 
 // VALUES
 TRUE : 'true';
@@ -104,9 +103,8 @@ type
     | name=INT '...'
     | name=INT
     | name=BOOLEAN
-    | name=CHAR
-//    | name=INTS
-    | name=ID //To discuss: Are other types always uppercase in the first letter? if so create new token or is that later dealt with elewhere
+    | name=STRING
+    | name=ID
     ;
 
 methodDecl locals[boolean isPublic=false]
@@ -116,7 +114,7 @@ methodDecl locals[boolean isPublic=false]
         LCURLY varDecl* stmt* RCURLY
     | (PUBLIC {$isPublic=true;})?
         'static' type name='main'
-        LPAREN type name=ID RPAREN
+        LPAREN STRING LBRACK RBRACK name=ID RPAREN
         LCURLY varDecl* stmt* RCURLY
     ;
 
@@ -130,7 +128,7 @@ stmt
     | WHILE LPAREN expr RPAREN stmt #WhileStmt
     | expr SEMI #ExprCall
     | expr EQUALS expr SEMI #AssignStmt //
-    | RETURN expr SEMI #ReturnStmt //To discuss: should tecnically be in methodDecl or at least a separate stmt so it can be put there
+    | RETURN expr SEMI #ReturnStmt
     ;
 
 expr
