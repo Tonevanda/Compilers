@@ -58,7 +58,6 @@ RETURN : 'return' ;
 // TYPES
 INT : 'int' ;
 BOOLEAN : 'boolean' ;
-STRING : 'String' ;
 
 // VALUES
 TRUE : 'true';
@@ -103,7 +102,6 @@ type
     | name=INT '...'
     | name=INT
     | name=BOOLEAN
-    | name=STRING
     | name=ID
     ;
 
@@ -114,7 +112,7 @@ methodDecl locals[boolean isPublic=false]
         LCURLY varDecl* stmt* RCURLY
     | (PUBLIC {$isPublic=true;})?
         'static' type name='main'
-        LPAREN STRING LBRACK RBRACK name=ID RPAREN
+        LPAREN type name=ID RPAREN
         LCURLY varDecl* stmt* RCURLY
     ;
 
