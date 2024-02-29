@@ -65,7 +65,7 @@ CHAR : 'char' ;
 TRUE : 'true';
 FALSE : 'false';
 THIS : 'this';
-INTEGER : [0-9]+ ;
+INTEGER : '0' | [1-9] [0-9]* ;
 ID : [a-zA-Z][0-9a-zA-Z_$]* ;
 
 SEMI : ';' ;
