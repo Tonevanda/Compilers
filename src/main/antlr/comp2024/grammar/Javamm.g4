@@ -71,6 +71,8 @@ SEMI : ';' ;
 COMMA : ',' ;
 LCURLY : '{' ;
 RCURLY : '}' ;
+LINECOMMENT : '//' ~('\n'|'\r')* -> skip ; // Single Line Comment
+COMMENT : '/*' .*? '*/' -> skip ;          // Multi-Line Comment
 
 WS : [ \t\n\r\f]+ -> skip ;
 
