@@ -59,6 +59,7 @@ RETURN : 'return' ;
 INT : 'int' ;
 INTS : 'int''...' ; //VARARGS INTs
 BOOLEAN : 'boolean' ;
+CHAR : 'char' ;
 
 // VALUES
 TRUE : 'true';
@@ -102,6 +103,7 @@ type
     : type '['']'
     | name=INT
     | name=BOOLEAN
+    | name=CHAR
     | name=INTS
     | name=ID //To discuss: Are other types always uppercase in the first letter? if so create new token or is that later dealt with elewhere
     ;
