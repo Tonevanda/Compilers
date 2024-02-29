@@ -109,7 +109,7 @@ methodDecl locals[boolean isPublic=false]
     : (PUBLIC {$isPublic=true;})?
         type name=ID
         LPAREN (param (COMMA param)*)? RPAREN
-        LCURLY varDecl* stmt* RCURLY
+        LCURLY varDecl* stmt* (RETURN expr SEMI) RCURLY
     | (PUBLIC {$isPublic=true;})?
         'static' type name='main'
         LPAREN type name=ID RPAREN
@@ -126,7 +126,6 @@ stmt
     | WHILE LPAREN expr RPAREN stmt #WhileStmt
     | expr SEMI #ExprCall
     | expr EQUALS expr SEMI #AssignStmt //
-    | RETURN expr SEMI #ReturnStmt
     ;
 
 expr
