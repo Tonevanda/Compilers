@@ -105,14 +105,14 @@ type
     | name=ID
     ;
 
-methodDecl locals[boolean isPublic=false]
+methodDecl locals[boolean isPublic=false, boolean isStatic=false]
     : (PUBLIC {$isPublic=true;})?
         type name=ID
         LPAREN (param (COMMA param)*)? RPAREN
         LCURLY varDecl* stmt* (RETURN expr SEMI) RCURLY
     | (PUBLIC {$isPublic=true;})?
-        'static' type name=ID
-        LPAREN type name=ID RPAREN
+        'static' {$isStatic=true;} type name=ID
+        LPAREN param RPAREN
         LCURLY varDecl* stmt* RCURLY
     ;
 
