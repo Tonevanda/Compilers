@@ -6,20 +6,20 @@ import pt.up.fe.specs.util.SpecsIo;
 
 public class SemanticAnalysisTest {
 
-    @Test
+    @Test //Works
     public void symbolTable() {
 
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/SymbolTable.jmm"));
         System.out.println("Symbol Table:\n" + result.getSymbolTable().print());
     }
 
-    @Test
+    @Test //Works
     public void varNotDeclared() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/VarNotDeclared.jmm"));
         TestUtils.mustFail(result);
     }
 
-    @Test
+    @Test //Works
     public void classNotImported() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ClassNotImported.jmm"));
         TestUtils.mustFail(result);
@@ -69,13 +69,13 @@ public class SemanticAnalysisTest {
         TestUtils.mustFail(result);
     }
 
-    @Test
+    @Test //Passes but not intended
     public void objectAssignmentPassExtends() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ObjectAssignmentPassExtends.jmm"));
         TestUtils.noErrors(result);
     }
 
-    @Test
+    @Test //Passes but not intended
     public void objectAssignmentPassImports() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ObjectAssignmentPassImports.jmm"));
         TestUtils.noErrors(result);
@@ -93,20 +93,20 @@ public class SemanticAnalysisTest {
         TestUtils.mustFail(result);
     }
 
-    @Test
+    @Test //Works
     public void callToUndeclaredMethod() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/CallToUndeclaredMethod.jmm"));
         TestUtils.mustFail(result);
     }
 
-    @Test
+    @Test //Works
     public void callToMethodAssumedInExtends() {
         var result = TestUtils
                 .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/CallToMethodAssumedInExtends.jmm"));
         TestUtils.noErrors(result);
     }
 
-    @Test
+    @Test //Works
     public void callToMethodAssumedInImport() {
         var result = TestUtils
                 .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/CallToMethodAssumedInImport.jmm"));
@@ -129,7 +129,7 @@ public class SemanticAnalysisTest {
         System.out.println(result.getReports());
     }
 
-    @Test
+    @Test //Passes but not intended
     public void assumeArguments() {
         var result = TestUtils
                 .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/AssumeArguments.jmm"));
@@ -151,7 +151,7 @@ public class SemanticAnalysisTest {
         System.out.println(result.getReports());
     }
 
-    @Test
+    @Test //Passes but not intended
     public void arrayInit() {
         var result = TestUtils
                 .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayInit.jmm"));

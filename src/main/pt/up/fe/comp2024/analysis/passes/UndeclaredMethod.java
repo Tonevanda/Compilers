@@ -1,6 +1,5 @@
 package pt.up.fe.comp2024.analysis.passes;
 
-import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
@@ -28,6 +27,11 @@ public class UndeclaredMethod extends AnalysisVisitor{
     public Void visitFunctionCall(JmmNode functionCall, SymbolTable table){
         SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
 
+        // If class extends another, we assume the extended class has the method
+        if(table.getSuper() != null){
+            return null;
+        }
+
         // Get method name of FunctionCall node
         var methodName = functionCall.get("func");
 
@@ -47,11 +51,6 @@ public class UndeclaredMethod extends AnalysisVisitor{
         // If className is in import list, return
         if(table.getImports().stream()
                 .anyMatch(importName -> importName.equals(varType.get().getName()))){
-            return null;
-        }
-
-        // If className is in extends, return
-        if(table.getSuper().equals(varType.get().getName())){
             return null;
         }
 
