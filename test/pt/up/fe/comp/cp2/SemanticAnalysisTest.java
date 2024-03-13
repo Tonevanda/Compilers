@@ -44,7 +44,7 @@ public class SemanticAnalysisTest {
         TestUtils.mustFail(result);
     }
 
-    @Test
+    @Test //Works
     public void arrayAccessOnInt() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayAccessOnInt.jmm"));
         TestUtils.mustFail(result);

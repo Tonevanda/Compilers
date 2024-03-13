@@ -17,6 +17,7 @@ public enum Kind {
     ASSIGN_STMT,
     RETURN_STMT,
     FUNCTION_CALL,
+    ARR_ACCESS_EXPR,
     BINARY_EXPR,
     INT_LITERAL,
     VAR;
