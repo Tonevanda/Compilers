@@ -109,7 +109,7 @@ methodDecl locals[boolean isPublic=false, boolean isStatic=false]
     : (PUBLIC {$isPublic=true;})?
         type name=ID
         LPAREN (param (COMMA param)*)? RPAREN
-        LCURLY varDecl* stmt* (RETURN expr SEMI) RCURLY
+        LCURLY varDecl* stmt* RCURLY
     | (PUBLIC {$isPublic=true;})?
         'static' {$isStatic=true;} type name=ID
         LPAREN param RPAREN
@@ -126,6 +126,7 @@ stmt
     | WHILE LPAREN expr RPAREN stmt #WhileStmt
     | expr SEMI #ExprCall
     | expr EQUALS expr SEMI #AssignStmt //
+    | RETURN expr SEMI #ReturnStmt
     ;
 
 expr
@@ -137,12 +138,12 @@ expr
     | op=NOT expr #UnaryBexpr
     | NEW INT LBRACK expr RBRACK #NewArray
     | NEW ID LPAREN RPAREN #NewClassObj
-    | expr op=(MUL | DIV) expr #BinaryAExpr
-    | expr op=(ADD | SUB) expr #BinaryAExpr
-    | expr op=(LT | LE | GT | GE) expr #BinaryBExpr
-    | expr op=(EQ | NEQ) expr #BinaryBExpr
-    | expr op=AND expr #BinaryBExpr
-    | expr op=OR expr #BinaryBExpr
+    | expr op=(MUL | DIV) expr #BinaryExpr
+    | expr op=(ADD | SUB) expr #BinaryExpr
+    | expr op=(LT | LE | GT | GE) expr #BinaryExpr
+    | expr op=(EQ | NEQ) expr #BinaryExpr
+    | expr op=AND expr #BinaryExpr
+    | expr op=OR expr #BinaryExpr
     | LBRACK (expr (COMMA expr)*)? RBRACK #ArrayInit
     | value=INTEGER #IntLiteral
     | value=(TRUE | FALSE) #BoolLiteral
