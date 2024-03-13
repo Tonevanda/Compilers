@@ -10,7 +10,8 @@ import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
 /**
- * Checks if the type of the expression in a return statement is compatible with the method return type.
+ * Checks if the variable has been declared previously, either as a class field, method parameter or local variable.
+ * If neither of those, then checks if it's an imported class
  *
  * @author JBispo
  */
@@ -21,7 +22,7 @@ public class UndeclaredVariable extends AnalysisVisitor {
     @Override
     public void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
-        addVisit(Kind.VAR, this::visitVarRefExpr);
+        addVisit(Kind.VAR, this::visitVar);
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
@@ -29,7 +30,7 @@ public class UndeclaredVariable extends AnalysisVisitor {
         return null;
     }
 
-    private Void visitVarRefExpr(JmmNode varRefExpr, SymbolTable table) {
+    private Void visitVar(JmmNode varRefExpr, SymbolTable table) {
         SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
 
         // Check if exists a parameter or variable declaration with the same name as the variable reference
@@ -50,6 +51,12 @@ public class UndeclaredVariable extends AnalysisVisitor {
         // Var is a declared variable, return
         if (table.getLocalVariables(currentMethod).stream()
                 .anyMatch(varDecl -> varDecl.getName().equals(varRefName))) {
+            return null;
+        }
+
+        // Checks if the class with name varName is in the imports list
+        if(table.getImports().stream()
+                .anyMatch(importName -> importName.equals(varRefName))){
             return null;
         }
 
