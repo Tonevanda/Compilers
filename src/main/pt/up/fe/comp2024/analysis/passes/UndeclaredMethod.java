@@ -27,11 +27,6 @@ public class UndeclaredMethod extends AnalysisVisitor{
     public Void visitFunctionCall(JmmNode functionCall, SymbolTable table){
         SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
 
-        // If class extends another, we assume the extended class has the method
-        if(table.getSuper() != null){
-            return null;
-        }
-
         // Get method name of FunctionCall node
         var methodName = functionCall.get("func");
 
@@ -47,6 +42,12 @@ public class UndeclaredMethod extends AnalysisVisitor{
                 .filter(var -> var.getName().equals(varName))
                 .map(type -> type.getType())
                 .findFirst();
+
+        // If variable is of type "this class" and the class extends another, we assume the extended class has the method
+        if(table.getClassName().equals(varType.get().getName())
+                && table.getSuper() != null){
+            return null;
+        }
 
         // If className is in import list, return
         if(table.getImports().stream()
