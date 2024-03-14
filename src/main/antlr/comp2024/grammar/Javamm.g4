@@ -134,6 +134,7 @@ expr
     | LPAREN expr RPAREN #ParenExpr
     | expr DOT func='length' #LengthCall
     | expr DOT func=ID LPAREN (expr (COMMA expr)*)? RPAREN #FunctionCall
+    | func=ID LPAREN (expr (COMMA expr)*)? RPAREN #FunctionCall
     | expr DOT name=ID #FieldCall
     | op=NOT expr #UnaryBexpr
     | NEW INT LBRACK expr RBRACK #NewArray
