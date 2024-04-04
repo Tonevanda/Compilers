@@ -97,10 +97,10 @@ varDecl
     : type name=ID SEMI
     ;
 
-type locals[boolean isArray=false]
-    : name=INT LBRACK RBRACK {$isArray=true;}
-    | name=ID LBRACK RBRACK
-    | name=INT '...' {$isArray=true;}
+type locals[boolean isArray=false, boolean isVarargs=false]
+    : name=INT LBRACK RBRACK {$isArray=true;}   // Int Array
+    | name=ID LBRACK RBRACK  {$isArray=true;}   // Other Array Types
+    | name=INT '...'         {$isVarargs=true;}
     | name=INT
     | name=BOOLEAN
     | name=ID
