@@ -90,16 +90,17 @@ classDecl
     ;
 
 importDecl
-    : IMPORT name=ID (DOT name=ID)* SEMI
+    : IMPORT name+=ID (DOT name+=ID)* SEMI
     ;
 
 varDecl
     : type name=ID SEMI
     ;
 
-type
-    : type '['']'
-    | name=INT '...'
+type locals[boolean isArray=false]
+    : name=INT LBRACK RBRACK {$isArray=true;}
+    | name=ID LBRACK RBRACK
+    | name=INT '...' {$isArray=true;}
     | name=INT
     | name=BOOLEAN
     | name=ID
@@ -124,7 +125,7 @@ stmt
     : LCURLY stmt* RCURLY #MultStmt
     | IF LPAREN expr RPAREN stmt ELSE stmt #IfStmt
     | WHILE LPAREN expr RPAREN stmt #WhileStmt
-    | expr SEMI #ExprCall
+    | expr SEMI #ExprStmt
     | expr EQUALS expr SEMI #AssignStmt //
     | RETURN expr SEMI #ReturnStmt
     ;
