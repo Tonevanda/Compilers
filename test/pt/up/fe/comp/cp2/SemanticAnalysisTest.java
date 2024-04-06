@@ -121,7 +121,7 @@ public class SemanticAnalysisTest {
         System.out.println(result.getReports());
     }
 
-    @Test //Passes but not intended
+    @Test //Works
     public void incompatibleReturn() {
         var result = TestUtils
                 .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/IncompatibleReturn.jmm"));
@@ -129,21 +129,21 @@ public class SemanticAnalysisTest {
         System.out.println(result.getReports());
     }
 
-    @Test //Passes but not intended
+    @Test
     public void assumeArguments() {
         var result = TestUtils
                 .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/AssumeArguments.jmm"));
         TestUtils.noErrors(result);
     }
 
-    @Test //Passes but not intended
+    @Test
     public void varargs() {
         var result = TestUtils
                 .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/Varargs.jmm"));
         TestUtils.noErrors(result);
     }
 
-    @Test
+    @Test //Passes but not intended
     public void varargsWrong() {
         var result = TestUtils
                 .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/VarargsWrong.jmm"));

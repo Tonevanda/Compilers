@@ -44,6 +44,7 @@ public class TypeUtils {
         Type type = switch (kind) {
             case BINARY_EXPR -> getBinExprType(expr);
             case PAREN_EXPR -> getExprType(expr.getChild(0), table);
+            case FUNCTION_CALL -> getFunctionCallType(expr, table);
             case VAR -> getVarExprType(expr, table);
             case INT_LITERAL -> new Type(INT_TYPE_NAME, false);
             case BOOL_LITERAL, UNARY_EXPR -> new Type(BOOLEAN_TYPE_NAME, false);
@@ -63,6 +64,18 @@ public class TypeUtils {
             default ->
                     throw new RuntimeException("Unknown operator '" + operator + "' of expression '" + binaryExpr + "'");
         };
+    }
+
+    private static Type getFunctionCallType(JmmNode functionCall, SymbolTable table){
+        // Get the method name
+        var methodName = functionCall.get("func");
+
+        // Check return type of method
+        if(table.getMethods().stream()
+                .anyMatch(method -> method.equals(methodName))){
+            return table.getReturnType(methodName);
+        }
+        return null;
     }
 
     private static Type getVarExprType(JmmNode varRefExpr, SymbolTable table) {

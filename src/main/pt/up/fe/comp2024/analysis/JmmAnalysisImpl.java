@@ -11,8 +11,9 @@ import pt.up.fe.comp2024.analysis.passes.UndeclaredVariable;
 import pt.up.fe.comp2024.analysis.passes.UndeclaredMethod;
 import pt.up.fe.comp2024.analysis.passes.IndexingNotArray;
 import pt.up.fe.comp2024.analysis.passes.ArrayIndexNotInt;
-import pt.up.fe.comp2024.analysis.passes.IntCondition;
+import pt.up.fe.comp2024.analysis.passes.WrongIfConditionType;
 import pt.up.fe.comp2024.analysis.passes.DifferentTypeOperands;
+import pt.up.fe.comp2024.analysis.passes.IncompatibleReturn;
 import pt.up.fe.comp2024.symboltable.JmmSymbolTableBuilder;
 
 import java.util.ArrayList;
@@ -31,7 +32,8 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                 new DifferentTypeOperands(),
                 new IndexingNotArray(),
                 new ArrayIndexNotInt(),
-                new IntCondition()
+                new WrongIfConditionType(),
+                new IncompatibleReturn()
         );
 
     }

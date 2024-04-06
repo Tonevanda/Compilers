@@ -8,12 +8,11 @@ import pt.up.fe.comp2024.analysis.AnalysisVisitor;
 import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
-import pt.up.fe.specs.util.SpecsCheck;
 
 /**
  * Checks if the array index is of type int
  */
-public class IntCondition extends AnalysisVisitor{
+public class WrongIfConditionType extends AnalysisVisitor{
 
     private String currentMethod;
 
@@ -28,7 +27,7 @@ public class IntCondition extends AnalysisVisitor{
         if(exprType.getName().equals(TypeUtils.getBooleanTypeName())) return null;
 
         // Create error report
-        var message = "If condition must be of type int.";
+        var message = "If condition must be of type boolean.";
         addReport(Report.newError(
                 Stage.SEMANTIC,
                 NodeUtils.getLine(ifStmt),

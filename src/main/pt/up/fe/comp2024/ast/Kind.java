@@ -29,7 +29,7 @@ public enum Kind {
     VAR;
 
     private static final Set<Kind> STATEMENTS = Set.of(ASSIGN_STMT, RETURN_STMT, IF_STMT, WHILE_STMT, EXPR_STMT);
-    private static final Set<Kind> EXPRESSIONS = Set.of(BINARY_EXPR, UNARY_EXPR, INT_LITERAL, BOOL_LITERAL, VAR);
+    private static final Set<Kind> EXPRESSIONS = Set.of(BINARY_EXPR, UNARY_EXPR, INT_LITERAL, BOOL_LITERAL, VAR, FUNCTION_CALL, ARR_ACCESS_EXPR, PAREN_EXPR);
 
     private final String name;
 
