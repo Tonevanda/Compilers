@@ -56,7 +56,7 @@ public class SemanticAnalysisTest {
         TestUtils.mustFail(result);
     }
 
-    @Test
+    @Test //Works
     public void assignIntToBool() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/AssignIntToBool.jmm"));
         TestUtils.mustFail(result);
@@ -87,7 +87,7 @@ public class SemanticAnalysisTest {
         TestUtils.mustFail(result);
     }
 
-    @Test
+    @Test // Works
     public void arrayInWhileCondition() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayInWhileCondition.jmm"));
         TestUtils.mustFail(result);
