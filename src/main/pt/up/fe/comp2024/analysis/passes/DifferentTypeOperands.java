@@ -28,13 +28,21 @@ public class DifferentTypeOperands extends AnalysisVisitor{
     }
     private Void visitBinaryExpr(JmmNode binaryExpr, SymbolTable table){
 
+        // Get each operand
         var operand1 = binaryExpr.getChild(0);
         var operand2 = binaryExpr.getChild(1);
 
+        // Get the type of each operand
         var operand1_type = TypeUtils.getExprType(operand1, table);
         var operand2_type = TypeUtils.getExprType(operand2, table);
 
-        if(operand1_type.getName().equals(operand2_type.getName())) return null;
+        // If they are the same type
+        if(operand1_type.getName().equals(operand2_type.getName())){
+            // If none of them are arrays, return
+            if (!operand1_type.isArray() && !operand2_type.isArray()) {
+                return null;
+            }
+        }
 
         // Create error report
         var message = String.format("'%s' and '%s' are of different types.", operand1.getKind(), operand2.getKind());
