@@ -62,20 +62,20 @@ public class SemanticAnalysisTest {
         TestUtils.mustFail(result);
     }
 
-    @Test
+    @Test // Passes but not intended
     public void objectAssignmentFail() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ObjectAssignmentFail.jmm"));
         System.out.println(result.getReports());
         TestUtils.mustFail(result);
     }
 
-    @Test //Passes but not intended
+    @Test // TODO: Change IncompatibleAssignment to check if the assigned variable extends the assignee
     public void objectAssignmentPassExtends() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ObjectAssignmentPassExtends.jmm"));
         TestUtils.noErrors(result);
     }
 
-    @Test //Passes but not intended
+    @Test // TODO: Change IncompatibleAssignment to check if types are imported if so we can assume they are correct
     public void objectAssignmentPassImports() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ObjectAssignmentPassImports.jmm"));
         TestUtils.noErrors(result);
@@ -113,7 +113,7 @@ public class SemanticAnalysisTest {
         TestUtils.noErrors(result);
     }
 
-    @Test //Passes but not intended
+    @Test
     public void incompatibleArguments() {
         var result = TestUtils
                 .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/IncompatibleArguments.jmm"));
@@ -158,7 +158,7 @@ public class SemanticAnalysisTest {
         TestUtils.noErrors(result);
     }
 
-    @Test
+    @Test // Passes but not intended
     public void arrayInitWrong1() {
         var result = TestUtils
                 .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayInitWrong1.jmm"));
@@ -166,7 +166,7 @@ public class SemanticAnalysisTest {
         System.out.println(result.getReports());
     }
 
-    @Test
+    @Test // Passes but not intended
     public void arrayInitWrong2() {
         var result = TestUtils
                 .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayInitWrong2.jmm"));

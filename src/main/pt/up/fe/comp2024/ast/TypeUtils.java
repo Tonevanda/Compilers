@@ -46,6 +46,7 @@ public class TypeUtils {
             case PAREN_EXPR -> getExprType(expr.getChild(0), table);
             case FUNCTION_CALL -> getFunctionCallType(expr, table);
             case VAR -> getVarExprType(expr, table);
+            case NEW_CLASS_OBJ -> getNewClassObjType(expr);
             case INT_LITERAL -> new Type(INT_TYPE_NAME, false);
             case BOOL_LITERAL, UNARY_EXPR -> new Type(BOOLEAN_TYPE_NAME, false);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
@@ -64,6 +65,13 @@ public class TypeUtils {
             default ->
                     throw new RuntimeException("Unknown operator '" + operator + "' of expression '" + binaryExpr + "'");
         };
+    }
+
+    private static Type getNewClassObjType(JmmNode newClassObj){
+        // Get the class name
+        var className = newClassObj.get("name");
+
+        return new Type(className, false);
     }
 
     private static Type getFunctionCallType(JmmNode functionCall, SymbolTable table){

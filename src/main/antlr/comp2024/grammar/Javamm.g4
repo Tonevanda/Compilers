@@ -139,7 +139,7 @@ expr
     | expr DOT name=ID #FieldCall
     | op=NOT expr #UnaryExpr
     | NEW INT LBRACK expr RBRACK #NewArray
-    | NEW ID LPAREN RPAREN #NewClassObj
+    | NEW name=ID LPAREN RPAREN #NewClassObj
     | expr op=(MUL | DIV) expr #BinaryExpr
     | expr op=(ADD | SUB) expr #BinaryExpr
     | expr op=(LT | LE | GT | GE) expr #BinaryExpr

@@ -36,15 +36,18 @@ public class IncompatibleAssignment extends AnalysisVisitor{
         var assignee = returnStmt.getChild(1);
 
         // Get the type of the assigned variable and the assignee
-        var assignedVarType = TypeUtils.getExprType(assignedVar, table);
-        var assigneeType = TypeUtils.getExprType(assignee, table);
+        var assignedVarType = TypeUtils.getExprType(assignedVar, table).getName();
+        var assigneeType = TypeUtils.getExprType(assignee, table).getName();
 
+
+        // TODO: I think we need to check if the assigned variable extends the assignee,
+        //  but in this case we are only checking if they are the same
         // If they are the same, return
-        if (assignedVarType.getName().equals(assigneeType.getName())) return null;
+        if (assignedVarType.equals(assigneeType)) return null;
 
         // Create error report
         var message = String.format("Incompatible assignment. Expected '%s' but got '%s'.",
-                assignedVarType.getName(), assigneeType.getName());
+                assignedVarType, assignedVarType);
         addReport(Report.newError(
                 Stage.SEMANTIC,
                 NodeUtils.getLine(returnStmt),

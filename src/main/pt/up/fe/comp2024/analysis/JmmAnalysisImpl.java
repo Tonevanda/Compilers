@@ -34,7 +34,7 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                 new IndexingNotArray(),
                 new ArrayIndexNotInt(),
                 new WrongIfConditionType(),
-                //new IncompatibleAssignment(),
+                new IncompatibleAssignment(),
                 new IncompatibleReturn()
         );
 
