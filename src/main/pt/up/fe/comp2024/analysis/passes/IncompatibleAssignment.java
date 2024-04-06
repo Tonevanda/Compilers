@@ -28,30 +28,55 @@ public class IncompatibleAssignment extends AnalysisVisitor{
         return null;
     }
 
-    private Void visitAssignStmt(JmmNode returnStmt, SymbolTable table){
+    private Void visitAssignStmt(JmmNode assigntStmt, SymbolTable table){
         SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
 
         // Get the assigned variable and the assignee
-        var assignedVar = returnStmt.getChild(0);
-        var assignee = returnStmt.getChild(1);
+        var assignedVar = assigntStmt.getChild(0);
+        var assignee = assigntStmt.getChild(1);
+
+        System.out.println("Assigned var: " + assignedVar);
+        System.out.println("Assignee: " + assignee);
+
+        // If assignee is an array initializer
+        if(assignee.getKind().equals(Kind.ARRAY_INIT.toString())){
+            // If assigned variable is an array, return
+            if(TypeUtils.getExprType(assignedVar, table).isArray())
+                return null;
+            else {
+                // Create error report
+                var message = String.format("Variable '%s' is not an array and cannot be assigned an array.",
+                        assignedVar.get("name"));
+                addReport(Report.newError(
+                        Stage.SEMANTIC,
+                        NodeUtils.getLine(assigntStmt),
+                        NodeUtils.getColumn(assigntStmt),
+                        message,
+                        null)
+                );
+                return null;
+            }
+        }
 
         // Get the type of the assigned variable and the assignee
-        var assignedVarType = TypeUtils.getExprType(assignedVar, table).getName();
-        var assigneeType = TypeUtils.getExprType(assignee, table).getName();
+        var assignedVarType = TypeUtils.getExprType(assignedVar, table);
+        var assigneeType = TypeUtils.getExprType(assignee, table);
 
+        System.out.println("Assigned var type: " + assignedVarType);
+        System.out.println("Assignee type: " + assigneeType);
 
         // TODO: I think we need to check if the assigned variable extends the assignee,
         //  but in this case we are only checking if they are the same
         // If they are the same, return
-        if (assignedVarType.equals(assigneeType)) return null;
+        if (assignedVarType.getName().equals(assigneeType.getName())) return null;
 
         // Create error report
         var message = String.format("Incompatible assignment. Expected '%s' but got '%s'.",
-                assignedVarType, assignedVarType);
+                assignedVarType.getName(), assignedVarType.getName());
         addReport(Report.newError(
                 Stage.SEMANTIC,
-                NodeUtils.getLine(returnStmt),
-                NodeUtils.getColumn(returnStmt),
+                NodeUtils.getLine(assigntStmt),
+                NodeUtils.getColumn(assigntStmt),
                 message,
                 null)
         );
