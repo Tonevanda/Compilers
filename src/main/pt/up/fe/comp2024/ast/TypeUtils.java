@@ -14,11 +14,13 @@ public class TypeUtils {
         return INT_TYPE_NAME;
     }
 
+    public static String getBooleanTypeName(){return BOOLEAN_TYPE_NAME;}
+
+    public static String getStringTypeName(){return STRING_TYPE_NAME;}
+
     public static Type getType(JmmNode type_node) {
         String type_name = type_node.get("name");
         boolean isArray = Boolean.parseBoolean(type_node.get("isArray")); // Receives a string and turns it into a boolean
-        boolean isVarargs = Boolean.parseBoolean(type_node.get("isVarargs"));
-        if(isVarargs) isArray = true;
 
         return switch (type_name) {
             case INT_TYPE_NAME -> new Type(INT_TYPE_NAME, isArray);
@@ -44,6 +46,7 @@ public class TypeUtils {
             case BINARY_EXPR -> getBinExprType(expr);
             case VAR -> getVarExprType(expr, table);
             case INT_LITERAL -> new Type(INT_TYPE_NAME, false);
+            case BOOL_LITERAL, UNARY_EXPR -> new Type(BOOLEAN_TYPE_NAME, false);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
 
@@ -56,7 +59,8 @@ public class TypeUtils {
         String operator = binaryExpr.get("op");
 
         return switch (operator) {
-            case "+", "*" -> new Type(INT_TYPE_NAME, false);
+            case "+", "*", "/", "-" -> new Type(INT_TYPE_NAME, false);
+            case "<", ">", "<=", ">=", "&&", "||" -> new Type(BOOLEAN_TYPE_NAME, false);
             default ->
                     throw new RuntimeException("Unknown operator '" + operator + "' of expression '" + binaryExpr + "'");
         };

@@ -100,7 +100,7 @@ varDecl
 type locals[boolean isArray=false, boolean isVarargs=false]
     : name=INT LBRACK RBRACK {$isArray=true;}   // Int Array
     | name=ID LBRACK RBRACK  {$isArray=true;}   // Other Array Types
-    | name=INT '...'         {$isVarargs=true;}
+    | name=INT '...'         {$isVarargs=true; $isArray=true;}
     | name=INT
     | name=BOOLEAN
     | name=ID
@@ -137,13 +137,12 @@ expr
     | expr DOT func=ID LPAREN (expr (COMMA expr)*)? RPAREN #FunctionCall
     | func=ID LPAREN (expr (COMMA expr)*)? RPAREN #FunctionCall
     | expr DOT name=ID #FieldCall
-    | op=NOT expr #UnaryBexpr
+    | op=NOT expr #UnaryExpr
     | NEW INT LBRACK expr RBRACK #NewArray
     | NEW ID LPAREN RPAREN #NewClassObj
     | expr op=(MUL | DIV) expr #BinaryExpr
     | expr op=(ADD | SUB) expr #BinaryExpr
     | expr op=(LT | LE | GT | GE) expr #BinaryExpr
-    | expr op=(EQ | NEQ) expr #BinaryExpr
     | expr op=AND expr #BinaryExpr
     | expr op=OR expr #BinaryExpr
     | LBRACK (expr (COMMA expr)*)? RBRACK #ArrayInit

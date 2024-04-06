@@ -19,7 +19,9 @@ public enum Kind {
     FUNCTION_CALL,
     ARR_ACCESS_EXPR,
     BINARY_EXPR,
+    UNARY_EXPR,
     INT_LITERAL,
+    BOOL_LITERAL,
     VAR;
 
     private static final Set<Kind> STATEMENTS = Set.of(ASSIGN_STMT, RETURN_STMT);
