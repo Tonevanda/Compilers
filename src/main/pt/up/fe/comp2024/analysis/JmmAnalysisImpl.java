@@ -12,6 +12,7 @@ import pt.up.fe.comp2024.analysis.passes.UndeclaredMethod;
 import pt.up.fe.comp2024.analysis.passes.IndexingNotArray;
 import pt.up.fe.comp2024.analysis.passes.ArrayIndexNotInt;
 import pt.up.fe.comp2024.analysis.passes.IntCondition;
+import pt.up.fe.comp2024.analysis.passes.DifferentTypeOperands;
 import pt.up.fe.comp2024.symboltable.JmmSymbolTableBuilder;
 
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                 new IndexingNotArray(),
                 // Still needs to implement getVarRefType, but i don't know how to get access to the current method
                 // Maybe change the getExprType to receive the current method as a parameter
+                new DifferentTypeOperands(),
                 new ArrayIndexNotInt(),
                 new IntCondition()
         );
