@@ -9,6 +9,9 @@ import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
+/**
+ * Checks if the type trying to be indexed is an array
+ */
 public class IndexingNotArray extends AnalysisVisitor{
 
     private String currentMethod;

@@ -10,6 +10,8 @@ import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2024.analysis.passes.UndeclaredVariable;
 import pt.up.fe.comp2024.analysis.passes.UndeclaredMethod;
 import pt.up.fe.comp2024.analysis.passes.IndexingNotArray;
+import pt.up.fe.comp2024.analysis.passes.ArrayIndexNotInt;
+import pt.up.fe.comp2024.analysis.passes.IntCondition;
 import pt.up.fe.comp2024.symboltable.JmmSymbolTableBuilder;
 
 import java.util.ArrayList;
@@ -22,7 +24,15 @@ public class JmmAnalysisImpl implements JmmAnalysis {
 
     public JmmAnalysisImpl() {
 
-        this.analysisPasses = List.of(new UndeclaredVariable(), new UndeclaredMethod(), new IndexingNotArray());
+        this.analysisPasses = List.of(
+                new UndeclaredVariable(),
+                new UndeclaredMethod(),
+                new IndexingNotArray(),
+                // Still needs to implement getVarRefType, but i don't know how to get access to the current method
+                // Maybe change the getExprType to receive the current method as a parameter
+                new ArrayIndexNotInt(),
+                new IntCondition()
+        );
 
     }
 
