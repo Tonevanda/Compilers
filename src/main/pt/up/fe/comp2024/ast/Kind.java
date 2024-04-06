@@ -21,6 +21,7 @@ public enum Kind {
     RETURN_STMT,
     FUNCTION_CALL,
     ARR_ACCESS_EXPR,
+    PAREN_EXPR,
     BINARY_EXPR,
     UNARY_EXPR,
     INT_LITERAL,

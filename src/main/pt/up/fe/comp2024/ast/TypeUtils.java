@@ -43,6 +43,7 @@ public class TypeUtils {
 
         Type type = switch (kind) {
             case BINARY_EXPR -> getBinExprType(expr);
+            case PAREN_EXPR -> getExprType(expr.getChild(0), table);
             case VAR -> getVarExprType(expr, table);
             case INT_LITERAL -> new Type(INT_TYPE_NAME, false);
             case BOOL_LITERAL, UNARY_EXPR -> new Type(BOOLEAN_TYPE_NAME, false);
