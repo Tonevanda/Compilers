@@ -10,6 +10,8 @@ import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
+import java.util.Arrays;
+
 /**
  * Checks if the array index is of type int
  */
@@ -65,8 +67,23 @@ public class IncompatibleAssignment extends AnalysisVisitor{
         System.out.println("Assigned var type: " + assignedVarType);
         System.out.println("Assignee type: " + assigneeType);
 
-        // TODO: I think we need to check if the assigned variable extends the assignee,
-        //  but in this case we are only checking if they are the same
+        // Check if the assigned variable type is in the imports
+        if(table.getImports().stream()
+                .flatMap(importName -> Arrays.stream(importName.substring(1, importName.length() - 1).split(","))) // Remove the square brackets and split by comma
+                .anyMatch(importName -> importName.trim().equals(assignedVarType.getName()))){
+            // If the assignee is the class object and extends the assigned variable type class, return
+            if(table.getClassName().equals(assigneeType.getName())
+                    && table.getSuper().contains(assignedVarType.getName())){
+                return null;
+            }
+            // If both are in the imports, return
+            if(table.getImports().stream()
+                    .flatMap(importName -> Arrays.stream(importName.substring(1, importName.length() - 1).split(","))) // Remove the square brackets and split by comma
+                    .anyMatch(importName -> importName.trim().equals(assigneeType.getName()))){
+                return null;
+            }
+        }
+
         // If they are the same, return
         if (assignedVarType.getName().equals(assigneeType.getName())) return null;
 

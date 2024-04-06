@@ -62,20 +62,20 @@ public class SemanticAnalysisTest {
         TestUtils.mustFail(result);
     }
 
-    @Test // Passes but not intended
+    @Test // Works
     public void objectAssignmentFail() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ObjectAssignmentFail.jmm"));
         System.out.println(result.getReports());
         TestUtils.mustFail(result);
     }
 
-    @Test // TODO: Change IncompatibleAssignment to check if the assigned variable extends the assignee
+    @Test // Works
     public void objectAssignmentPassExtends() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ObjectAssignmentPassExtends.jmm"));
         TestUtils.noErrors(result);
     }
 
-    @Test // TODO: Change IncompatibleAssignment to check if types are imported if so we can assume they are correct
+    @Test // Works
     public void objectAssignmentPassImports() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ObjectAssignmentPassImports.jmm"));
         TestUtils.noErrors(result);
