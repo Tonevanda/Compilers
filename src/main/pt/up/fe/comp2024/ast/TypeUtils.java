@@ -38,7 +38,6 @@ public class TypeUtils {
      * @return
      */
     public static Type getExprType(JmmNode expr, SymbolTable table) {
-        // TODO: Simple implementation that needs to be expanded
 
         var kind = Kind.fromString(expr.getKind());
 
@@ -54,7 +53,6 @@ public class TypeUtils {
     }
 
     private static Type getBinExprType(JmmNode binaryExpr) {
-        // TODO: Simple implementation that needs to be expanded
 
         String operator = binaryExpr.get("op");
 

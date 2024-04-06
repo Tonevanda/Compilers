@@ -44,13 +44,13 @@ public class SemanticAnalysisTest {
         TestUtils.mustFail(result);
     }
 
-    @Test //Works
+    @Test //Works but needs to check if it's varargs
     public void arrayAccessOnInt() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayAccessOnInt.jmm"));
         TestUtils.mustFail(result);
     }
 
-    @Test
+    @Test //Just needs to be able to check the type of a variable
     public void arrayIndexNotInt() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayIndexNotInt.jmm"));
         TestUtils.mustFail(result);
