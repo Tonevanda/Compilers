@@ -8,6 +8,7 @@ import pt.up.fe.comp2024.analysis.AnalysisVisitor;
 import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
+import java.util.Arrays;
 
 public class UndeclaredMethod extends AnalysisVisitor{
 
@@ -51,7 +52,8 @@ public class UndeclaredMethod extends AnalysisVisitor{
 
         // If className is in import list, return
         if(table.getImports().stream()
-                .anyMatch(importName -> importName.equals(varType.get().getName()))){
+                .flatMap(importName -> Arrays.stream(importName.substring(1, importName.length() - 1).split(","))) // Remove the square brackets and split by comma
+                .anyMatch(importName -> importName.trim().equals(varType.get().getName()))){
             return null;
         }
 

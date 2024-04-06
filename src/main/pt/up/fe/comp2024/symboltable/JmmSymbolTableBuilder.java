@@ -37,7 +37,7 @@ public class JmmSymbolTableBuilder {
     private static List<String> buildImports(JmmNode root) {
 
         return root.getChildren(IMPORT_DECL).stream()
-                .map(method -> method.get("name"))
+                .map(importNode -> importNode.get("name"))
                 .toList();
     }
 
