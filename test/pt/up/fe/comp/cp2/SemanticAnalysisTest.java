@@ -26,19 +26,19 @@ public class SemanticAnalysisTest {
         System.out.println(result.getReports());
     }
 
-    @Test
+    @Test //Works
     public void intPlusObject() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/IntPlusObject.jmm"));
         TestUtils.mustFail(result);
     }
 
-    @Test
+    @Test //Works
     public void boolTimesInt() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/BoolTimesInt.jmm"));
         TestUtils.mustFail(result);
     }
 
-    @Test
+    @Test //Works
     public void arrayPlusInt() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayPlusInt.jmm"));
         TestUtils.mustFail(result);
@@ -50,7 +50,7 @@ public class SemanticAnalysisTest {
         TestUtils.mustFail(result);
     }
 
-    @Test //Just needs to be able to check the type of a variable
+    @Test //Works
     public void arrayIndexNotInt() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayIndexNotInt.jmm"));
         TestUtils.mustFail(result);
@@ -81,7 +81,7 @@ public class SemanticAnalysisTest {
         TestUtils.noErrors(result);
     }
 
-    @Test
+    @Test // Works
     public void intInIfCondition() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/IntInIfCondition.jmm"));
         TestUtils.mustFail(result);
@@ -113,7 +113,7 @@ public class SemanticAnalysisTest {
         TestUtils.noErrors(result);
     }
 
-    @Test
+    @Test //Passes but not intended
     public void incompatibleArguments() {
         var result = TestUtils
                 .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/IncompatibleArguments.jmm"));
@@ -121,7 +121,7 @@ public class SemanticAnalysisTest {
         System.out.println(result.getReports());
     }
 
-    @Test
+    @Test //Passes but not intended
     public void incompatibleReturn() {
         var result = TestUtils
                 .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/IncompatibleReturn.jmm"));
@@ -136,7 +136,7 @@ public class SemanticAnalysisTest {
         TestUtils.noErrors(result);
     }
 
-    @Test
+    @Test //Passes but not intended
     public void varargs() {
         var result = TestUtils
                 .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/Varargs.jmm"));

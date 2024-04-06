@@ -65,12 +65,48 @@ public class TypeUtils {
         };
     }
 
-
     private static Type getVarExprType(JmmNode varRefExpr, SymbolTable table) {
-        // TODO: Simple implementation that needs to be expanded
-        return new Type(INT_TYPE_NAME, false);
-    }
+        Type type = null;
 
+        // Get the method where the variable is being used
+        JmmNode method = varRefExpr.getAncestor(Kind.METHOD_DECL).get();
+        var methodName = method.get("name");
+
+        // If the variable is a local variable
+        if(table.getLocalVariables(methodName).stream()
+                .anyMatch(localVar -> localVar.getName().equals(varRefExpr))){
+            type = table.getLocalVariables(methodName).stream()
+                    .filter(varDecl -> varDecl.getName().equals(varRefExpr))
+                    .findFirst()
+                    .get()
+                    .getType();
+            return type;
+        }
+
+        // If the variable is a parameter
+        if(table.getParameters(methodName).stream()
+                .anyMatch(param -> param.getName().equals(varRefExpr))){
+            type = table.getParameters(methodName).stream()
+                    .filter(param -> param.getName().equals(varRefExpr))
+                    .findFirst()
+                    .get()
+                    .getType();
+            return type;
+        }
+
+        // If the variable is a field
+        if(table.getFields().stream()
+                .anyMatch(field -> field.getName().equals(varRefExpr))){
+            type = table.getFields().stream()
+                    .filter(field -> field.getName().equals(varRefExpr))
+                    .findFirst()
+                    .get()
+                    .getType();
+            return type;
+        }
+
+        return type;
+    }
 
     /**
      * @param sourceType
