@@ -151,14 +151,14 @@ public class SemanticAnalysisTest {
         System.out.println(result.getReports());
     }
 
-    @Test //Passes but not intended
+    @Test // Works
     public void arrayInit() {
         var result = TestUtils
                 .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayInit.jmm"));
         TestUtils.noErrors(result);
     }
 
-    @Test // Passes but not intended
+    @Test // Works
     public void arrayInitWrong1() {
         var result = TestUtils
                 .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayInitWrong1.jmm"));
@@ -166,7 +166,7 @@ public class SemanticAnalysisTest {
         System.out.println(result.getReports());
     }
 
-    @Test // Passes but not intended
+    @Test // Works
     public void arrayInitWrong2() {
         var result = TestUtils
                 .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayInitWrong2.jmm"));
