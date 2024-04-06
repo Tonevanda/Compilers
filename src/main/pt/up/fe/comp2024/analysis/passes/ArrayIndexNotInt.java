@@ -31,13 +31,14 @@ public class ArrayIndexNotInt extends AnalysisVisitor{
     private Void visitArrAccessExpr(JmmNode arrAccessExpr, SymbolTable table){
         SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
 
+        // Get the variable name and index of the array access expression
         var varName = arrAccessExpr.getChild(0).get("name");
-
         var index = arrAccessExpr.getChild(1);
 
-        // TODO: Need to implement the getVarRefType method
+        // Get the type of the index
         var index_type = TypeUtils.getExprType(index, table);
 
+        // If the index is an integer, return
         if (index_type.getName().equals(TypeUtils.getIntTypeName())) return null;
 
         // Create error report

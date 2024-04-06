@@ -44,7 +44,7 @@ public class SemanticAnalysisTest {
         TestUtils.mustFail(result);
     }
 
-    @Test //Works but needs to check if it's varargs
+    @Test //Works but needs to check if it's varargs maybe
     public void arrayAccessOnInt() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayAccessOnInt.jmm"));
         TestUtils.mustFail(result);

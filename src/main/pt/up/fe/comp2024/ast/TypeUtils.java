@@ -68,15 +68,18 @@ public class TypeUtils {
     private static Type getVarExprType(JmmNode varRefExpr, SymbolTable table) {
         Type type = null;
 
+        // Get the variable name
+        var varName = varRefExpr.get("name");
+
         // Get the method where the variable is being used
         JmmNode method = varRefExpr.getAncestor(Kind.METHOD_DECL).get();
         var methodName = method.get("name");
 
         // If the variable is a local variable
         if(table.getLocalVariables(methodName).stream()
-                .anyMatch(localVar -> localVar.getName().equals(varRefExpr))){
+                .anyMatch(localVar -> localVar.getName().equals(varName))){
             type = table.getLocalVariables(methodName).stream()
-                    .filter(varDecl -> varDecl.getName().equals(varRefExpr))
+                    .filter(varDecl -> varDecl.getName().equals(varName))
                     .findFirst()
                     .get()
                     .getType();
@@ -85,9 +88,9 @@ public class TypeUtils {
 
         // If the variable is a parameter
         if(table.getParameters(methodName).stream()
-                .anyMatch(param -> param.getName().equals(varRefExpr))){
+                .anyMatch(param -> param.getName().equals(varName))){
             type = table.getParameters(methodName).stream()
-                    .filter(param -> param.getName().equals(varRefExpr))
+                    .filter(param -> param.getName().equals(varName))
                     .findFirst()
                     .get()
                     .getType();
@@ -96,9 +99,9 @@ public class TypeUtils {
 
         // If the variable is a field
         if(table.getFields().stream()
-                .anyMatch(field -> field.getName().equals(varRefExpr))){
+                .anyMatch(field -> field.getName().equals(varName))){
             type = table.getFields().stream()
-                    .filter(field -> field.getName().equals(varRefExpr))
+                    .filter(field -> field.getName().equals(varName))
                     .findFirst()
                     .get()
                     .getType();

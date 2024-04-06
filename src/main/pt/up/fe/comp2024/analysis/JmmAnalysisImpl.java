@@ -28,10 +28,8 @@ public class JmmAnalysisImpl implements JmmAnalysis {
         this.analysisPasses = List.of(
                 new UndeclaredVariable(),
                 new UndeclaredMethod(),
-                new IndexingNotArray(),
-                // Still needs to implement getVarRefType, but i don't know how to get access to the current method
-                // Maybe change the getExprType to receive the current method as a parameter
                 new DifferentTypeOperands(),
+                new IndexingNotArray(),
                 new ArrayIndexNotInt(),
                 new IntCondition()
         );

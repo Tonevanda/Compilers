@@ -7,6 +7,7 @@ import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2024.analysis.AnalysisVisitor;
 import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
+import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
 /**
@@ -31,42 +32,14 @@ public class IndexingNotArray extends AnalysisVisitor{
         SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
 
         // Get variable name of arrAccessExpr
-        var varName = arrAccessExpr.getChild(0).get("name");
+        var varName = arrAccessExpr.getChild(0);
 
-        // Check if variable is in local variables
-        if(table.getLocalVariables(currentMethod).stream().anyMatch(var -> var.getName().equals(varName))){
-            var varType = table.getLocalVariables(currentMethod).stream()
-                .filter(var -> var.getName().equals(varName))
-                .map(type -> type.getType())
-                .findFirst();
+        // Get type of variable
+        var varType = TypeUtils.getExprType(varName, table);
 
-            if(varType.get().isArray()){
-                return null;
-            }
-        }
-
-        // Check if variable is in method parameters
-        if(table.getParameters(currentMethod).stream().anyMatch(var -> var.getName().equals(varName))){
-            var varType = table.getParameters(currentMethod).stream()
-                    .filter(var -> var.getName().equals(varName))
-                    .map(type -> type.getType())
-                    .findFirst();
-
-            if(varType.get().isArray()){
-                return null;
-            }
-        }
-
-        // Check if variable is in class fields
-        if(table.getFields().stream().anyMatch(var -> var.getName().equals(varName))){
-            var varType = table.getFields().stream()
-                    .filter(var -> var.getName().equals(varName))
-                    .map(type -> type.getType())
-                    .findFirst();
-
-            if(varType.get().isArray()){
-                return null;
-            }
+        // If it's an array, return
+        if (varType.isArray()) {
+            return null;
         }
 
         // Create error report
