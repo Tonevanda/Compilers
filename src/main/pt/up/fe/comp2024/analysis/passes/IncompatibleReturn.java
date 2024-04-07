@@ -49,7 +49,6 @@ public class IncompatibleReturn extends AnalysisVisitor{
         if (methodReturnType.getName().equals(returnExprType.getName())) return null;
 
         // Create error report
-
         var message = String.format("Incompatible return type. Expected '%s' but got '%s'.",
                 methodReturnType.getName(), returnExprType.getName());
 

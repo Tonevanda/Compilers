@@ -14,8 +14,6 @@ import pt.up.fe.comp2024.ast.TypeUtils;
  */
 public class IncompatibleArrayInit extends AnalysisVisitor{
 
-    private String currentMethod;
-
     @Override
     public void buildVisitor(){
         addVisit(Kind.ARRAY_INIT, this::visitArrayInit);

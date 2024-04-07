@@ -14,8 +14,6 @@ import pt.up.fe.comp2024.ast.TypeUtils;
  */
 public class WrongIfConditionType extends AnalysisVisitor{
 
-    private String currentMethod;
-
     @Override
     public void buildVisitor(){
         addVisit(Kind.IF_STMT, this::visitIfStmt);

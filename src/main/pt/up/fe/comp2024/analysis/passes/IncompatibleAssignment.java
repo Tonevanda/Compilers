@@ -17,21 +17,12 @@ import java.util.Arrays;
  */
 public class IncompatibleAssignment extends AnalysisVisitor{
 
-    private String currentMethod;
-
     @Override
     public void buildVisitor(){
-        addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
         addVisit(Kind.ASSIGN_STMT, this::visitAssignStmt);
     }
 
-    private Void visitMethodDecl(JmmNode method, SymbolTable table) {
-        currentMethod = method.get("name");
-        return null;
-    }
-
     private Void visitAssignStmt(JmmNode assigntStmt, SymbolTable table){
-        SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
 
         // Get the assigned variable and the assignee
         var assignedVar = assigntStmt.getChild(0);

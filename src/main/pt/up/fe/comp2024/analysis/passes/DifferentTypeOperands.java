@@ -14,18 +14,11 @@ import pt.up.fe.comp2024.ast.TypeUtils;
  */
 public class DifferentTypeOperands extends AnalysisVisitor{
 
-    private String currentMethod;
-
     @Override
     public void buildVisitor(){
-        addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
         addVisit(Kind.BINARY_EXPR, this::visitBinaryExpr);
     }
 
-    private Void visitMethodDecl(JmmNode method, SymbolTable table) {
-        currentMethod = method.get("name");
-        return null;
-    }
     private Void visitBinaryExpr(JmmNode binaryExpr, SymbolTable table){
 
         // Get each operand

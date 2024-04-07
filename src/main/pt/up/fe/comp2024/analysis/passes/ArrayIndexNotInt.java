@@ -15,21 +15,12 @@ import pt.up.fe.specs.util.SpecsCheck;
  */
 public class ArrayIndexNotInt extends AnalysisVisitor{
 
-    private String currentMethod;
-
     @Override
     public void buildVisitor(){
-        addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
         addVisit(Kind.ARR_ACCESS_EXPR, this::visitArrAccessExpr);
     }
 
-    private Void visitMethodDecl(JmmNode method, SymbolTable table) {
-        currentMethod = method.get("name");
-        return null;
-    }
-
     private Void visitArrAccessExpr(JmmNode arrAccessExpr, SymbolTable table){
-        SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
 
         // Get the variable name and index of the array access expression
         var varName = arrAccessExpr.getChild(0).get("name");
