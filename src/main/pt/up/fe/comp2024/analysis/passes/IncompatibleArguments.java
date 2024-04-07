@@ -77,22 +77,43 @@ public class IncompatibleArguments extends AnalysisVisitor{
             }
         }
 
-        // TODO: Still need to check one by one the arguments and their types
-        //  No idea how i'll handle varargs, maybe when i encounter a varargs argument i immediately return null
-        //  since another pass will check if the varargs is the last parameter
-        //  I could probably see if the function is a varargs function by checking the last parameter of the function
-        //  Then i could check if the size of the arguments is the same as the number of parameters
-        //  If they're the same, i could check if the types are the same one by one
+        // If correct number of arguments
+        if(parameters.size() == arguments.size()){
+            // Check if the arguments are of the correct type
+            for(int i = 0; i < parameters.size(); i++){
+                var parameter = parameters.get(i);
+                var argument = TypeUtils.getExprType(arguments.get(i), table).getName();
+                System.out.println("Index: " + i);
+                System.out.println(parameter + " " + argument);
 
-        // Create error report
-        var message = String.format("Incompatible arguments. Expected '%s' but got '%s'.", parameters, arguments);
-        addReport(Report.newError(
-                Stage.SEMANTIC,
-                NodeUtils.getLine(functionCall),
-                NodeUtils.getColumn(functionCall),
-                message,
-                null)
-        );
+                if(!parameter.equals(argument)){
+                    // Create error report
+                    var message = String.format("Incompatible arguments. Expected '%s' but got '%s'.", parameter, argument);
+                    addReport(Report.newError(
+                            Stage.SEMANTIC,
+                            NodeUtils.getLine(functionCall),
+                            NodeUtils.getColumn(functionCall),
+                            message,
+                            null)
+                    );
+                    return null;
+                }
+            }
+            return null;
+        }
+        // If incorrect number of arguments
+        else{
+            // Create error report
+            var message = String.format("Incompatible arguments. Expected %d arguments but got %d.", parameters.size(), arguments.size());
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(functionCall),
+                    NodeUtils.getColumn(functionCall),
+                    message,
+                    null)
+            );
+        }
+
 
         return null;
     }
