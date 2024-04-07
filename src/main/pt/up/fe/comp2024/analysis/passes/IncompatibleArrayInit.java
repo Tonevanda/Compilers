@@ -30,22 +30,16 @@ public class IncompatibleArrayInit extends AnalysisVisitor{
 
         // For every element, if it is a var, check if the type is int
         boolean allInt = true;
-        int i = 0;
         for(var child : arrayInit.getChildren()){
-            System.out.println("Element " + i++);
-            System.out.println(child.getKind());
-            if(child.getKind().equals(Kind.VAR.toString())){
-                var varType = TypeUtils.getExprType(child, table).getName();
-                System.out.println(varType);
-                if (!varType.equals(TypeUtils.getIntTypeName())) {
-                    allInt = false;
-                    break;
-                }
+            var varType = TypeUtils.getExprType(child, table).getName();
+            if (!varType.equals(TypeUtils.getIntTypeName())) {
+                allInt = false;
+                break;
             }
         }
 
         // If all elements are int literals, return
-        if(!allInt){
+        if(allInt){
             return null;
         }
 
