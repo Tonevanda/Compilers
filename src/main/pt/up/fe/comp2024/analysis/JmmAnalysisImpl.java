@@ -17,6 +17,7 @@ import pt.up.fe.comp2024.analysis.passes.IncompatibleReturn;
 import pt.up.fe.comp2024.analysis.passes.IncompatibleAssignment;
 import pt.up.fe.comp2024.analysis.passes.IncompatibleArguments;
 import pt.up.fe.comp2024.analysis.passes.IncompatibleArrayInit;
+import pt.up.fe.comp2024.analysis.passes.IncorrectVarargs;
 import pt.up.fe.comp2024.symboltable.JmmSymbolTableBuilder;
 
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                 new WrongIfConditionType(),
                 new IncompatibleArrayInit(),
                 new IncompatibleAssignment(),
+                new IncorrectVarargs(),
                 new IncompatibleArguments(),
                 new IncompatibleReturn()
         );
