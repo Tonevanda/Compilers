@@ -45,6 +45,7 @@ public class TypeUtils {
             case BINARY_EXPR -> getBinExprType(expr);
             case PAREN_EXPR -> getExprType(expr.getChild(0), table);
             case FUNCTION_CALL -> getFunctionCallType(expr, table);
+            case ARR_ACCESS_EXPR -> getExprType(expr.getChild(0), table);
             case VAR -> getVarExprType(expr, table);
             case NEW_CLASS_OBJ -> getNewClassObjType(expr);
             case INT_LITERAL -> new Type(INT_TYPE_NAME, false);

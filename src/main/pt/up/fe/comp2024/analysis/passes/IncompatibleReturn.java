@@ -40,6 +40,11 @@ public class IncompatibleReturn extends AnalysisVisitor{
         // Get the type of the return expression
         var returnExprType = TypeUtils.getExprType(returnExpr, table);
 
+        // If it returnExprType is null, it means there are no methods with the name methodName
+        // We already check this in UndeclaredMethod.java
+        // If UndeclaredMethod.java doesn't throw an error, it means we can assume this method exists, so we return
+        if(returnExprType == null) return null;
+
         // If they are the same, return
         if (methodReturnType.getName().equals(returnExprType.getName())) return null;
 

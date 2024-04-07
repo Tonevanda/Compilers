@@ -37,9 +37,6 @@ public class IncompatibleAssignment extends AnalysisVisitor{
         var assignedVar = assigntStmt.getChild(0);
         var assignee = assigntStmt.getChild(1);
 
-        System.out.println("Assigned var: " + assignedVar);
-        System.out.println("Assignee: " + assignee);
-
         // If assignee is an array initializer
         if(assignee.getKind().equals(Kind.ARRAY_INIT.toString())){
             // If assigned variable is an array, return
@@ -63,9 +60,6 @@ public class IncompatibleAssignment extends AnalysisVisitor{
         // Get the type of the assigned variable and the assignee
         var assignedVarType = TypeUtils.getExprType(assignedVar, table);
         var assigneeType = TypeUtils.getExprType(assignee, table);
-
-        System.out.println("Assigned var type: " + assignedVarType);
-        System.out.println("Assignee type: " + assigneeType);
 
         // Check if the assigned variable type is in the imports
         if(table.getImports().stream()

@@ -44,8 +44,22 @@ public class IncompatibleArguments extends AnalysisVisitor{
             return null;
         }
 
+        // If variable is of type current class, and the class extends another, we assume the function
+        // is being called from the parent class and therefore the arguments are correct
+        if(varType.getName().equals(table.getClassName()) && table.getSuper() != null){
+            return null;
+        }
+
+        // TODO: Still need to check one by one the arguments and their types
+        //  No idea how i'll handle varargs, maybe when i encounter a varargs argument i immediately return null
+        //  since another pass will check if the varargs is the last parameter
+        //  I could probably see if the function is a varargs function by checking the last parameter of the function
+        //  Then i could check if the size of the arguments is the same as the number of parameters
+        //  If they're the same, i could check if the types are the same one by one
+
         // Create error report
-        var message = "";
+        var message = String.format("Incompatible arguments. Expected '%s' but got '%s'.",
+                table.getReturnType(currentMethod).getName(), varType.getName());
         addReport(Report.newError(
                 Stage.SEMANTIC,
                 NodeUtils.getLine(functionCall),

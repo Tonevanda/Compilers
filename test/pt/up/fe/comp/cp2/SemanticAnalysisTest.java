@@ -113,7 +113,7 @@ public class SemanticAnalysisTest {
         TestUtils.noErrors(result);
     }
 
-    @Test
+    @Test // Works
     public void incompatibleArguments() {
         var result = TestUtils
                 .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/IncompatibleArguments.jmm"));
@@ -129,7 +129,7 @@ public class SemanticAnalysisTest {
         System.out.println(result.getReports());
     }
 
-    @Test
+    @Test // Works
     public void assumeArguments() {
         var result = TestUtils
                 .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/AssumeArguments.jmm"));
