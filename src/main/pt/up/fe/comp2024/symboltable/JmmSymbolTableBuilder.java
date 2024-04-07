@@ -59,11 +59,14 @@ public class JmmSymbolTableBuilder {
     }
 
     private static Map<String, List<Symbol>> buildParams(JmmNode classDecl) {
-
         Map<String, List<Symbol>> map = new HashMap<>();
 
         classDecl.getChildren(METHOD_DECL).stream()
-                .forEach(method -> map.put(method.get("name"), method.getChildren(PARAM).stream().map(param -> new Symbol(TypeUtils.getType(param.getChild(0)), param.get("name"))).toList()));
+                .forEach(method -> map.put(method.get("name"), method.getChildren(PARAM).stream().map(param -> {
+                    Type type = TypeUtils.getType(param.getChild(0));
+                    type.putObject("isVarargs", param.getChild(0).get("isVarargs").equals("true"));
+                    return new Symbol(type, param.get("name"));
+                }).toList()));
 
         return map;
     }
