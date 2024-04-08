@@ -56,11 +56,13 @@ public class IncompatibleAssignment extends AnalysisVisitor{
         if(table.getImports().stream()
                 .flatMap(importName -> Arrays.stream(importName.substring(1, importName.length() - 1).split(","))) // Remove the square brackets and split by comma
                 .anyMatch(importName -> importName.trim().equals(assignedVarType.getName()))){
+
             // If the assignee is the class object and extends the assigned variable type class, return
             if(table.getClassName().equals(assigneeType.getName())
-                    && table.getSuper().contains(assignedVarType.getName())){
+                    && table.getSuper() != null && table.getSuper().contains(assignedVarType.getName())){
                 return null;
             }
+
             // If both are in the imports, return
             if(table.getImports().stream()
                     .flatMap(importName -> Arrays.stream(importName.substring(1, importName.length() - 1).split(","))) // Remove the square brackets and split by comma
@@ -74,7 +76,7 @@ public class IncompatibleAssignment extends AnalysisVisitor{
 
         // Create error report
         var message = String.format("Incompatible assignment. Expected '%s' but got '%s'.",
-                assignedVarType.getName(), assignedVarType.getName());
+                assignedVarType.getName(), assigneeType.getName());
         addReport(Report.newError(
                 Stage.SEMANTIC,
                 NodeUtils.getLine(assigntStmt),

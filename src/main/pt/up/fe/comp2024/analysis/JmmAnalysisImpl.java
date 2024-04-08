@@ -12,6 +12,7 @@ import pt.up.fe.comp2024.analysis.passes.UndeclaredMethod;
 import pt.up.fe.comp2024.analysis.passes.IndexingNotArray;
 import pt.up.fe.comp2024.analysis.passes.ArrayIndexNotInt;
 import pt.up.fe.comp2024.analysis.passes.WrongIfConditionType;
+import pt.up.fe.comp2024.analysis.passes.WrongWhileConditionType;
 import pt.up.fe.comp2024.analysis.passes.DifferentTypeOperands;
 import pt.up.fe.comp2024.analysis.passes.IncompatibleReturn;
 import pt.up.fe.comp2024.analysis.passes.IncompatibleAssignment;
@@ -37,6 +38,7 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                 new IndexingNotArray(),
                 new ArrayIndexNotInt(),
                 new WrongIfConditionType(),
+                new WrongWhileConditionType(),
                 new IncompatibleArrayInit(),
                 new IncompatibleAssignment(),
                 new IncorrectVarargs(),

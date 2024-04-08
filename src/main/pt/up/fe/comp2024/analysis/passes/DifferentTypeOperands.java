@@ -30,15 +30,25 @@ public class DifferentTypeOperands extends AnalysisVisitor{
         var operand2_type = TypeUtils.getExprType(operand2, table);
 
         // If they are the same type
+        boolean arrayPresent = false;
         if(operand1_type.getName().equals(operand2_type.getName())){
             // If none of them are arrays, return
             if (!operand1_type.isArray() && !operand2_type.isArray()) {
                 return null;
             }
+            else {
+                arrayPresent = true;
+            }
         }
 
         // Create error report
-        var message = String.format("'%s' and '%s' are of different types.", operand1.getKind(), operand2.getKind());
+        String message;
+        if(arrayPresent){
+            message = "Can't operate between array and non-array";
+        }
+        else{
+            message = String.format("Can't operate on '%s' and '%s'. They are different types", operand1_type.getName(), operand2_type.getName());
+        }
         addReport(Report.newError(
                 Stage.SEMANTIC,
                 NodeUtils.getLine(binaryExpr),

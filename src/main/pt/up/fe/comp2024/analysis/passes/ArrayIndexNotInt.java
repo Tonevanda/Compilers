@@ -33,7 +33,7 @@ public class ArrayIndexNotInt extends AnalysisVisitor{
         if (index_type.getName().equals(TypeUtils.getIntTypeName())) return null;
 
         // Create error report
-        var message = String.format("Variable '%s' has non integer index.", varName);
+        var message = String.format("Array '%s' has non-integer index.", varName);
         addReport(Report.newError(
                 Stage.SEMANTIC,
                 NodeUtils.getLine(arrAccessExpr),

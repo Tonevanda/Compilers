@@ -34,7 +34,7 @@ public class IndexingNotArray extends AnalysisVisitor{
         }
 
         // Create error report
-        var message = String.format("Variable '%s' is not an array.", varName);
+        var message = String.format("Variable '%s' is not an array.", varName.get("name"));
         addReport(Report.newError(
                 Stage.SEMANTIC,
                 NodeUtils.getLine(arrAccessExpr),
