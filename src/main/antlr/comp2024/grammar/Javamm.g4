@@ -106,14 +106,14 @@ type locals[boolean isArray=false, boolean isVarargs=false]
     | name=ID
     ;
 
-methodDecl locals[boolean isPublic=false, boolean isStatic=false]
+methodDecl locals[boolean isPublic=false, boolean isStatic=false, int numParams=0]
     : (PUBLIC {$isPublic=true;})?
         type name=ID
-        LPAREN (param (COMMA param)*)? RPAREN
+        LPAREN (param {$numParams+=1;} (COMMA param {$numParams+=1;})*)? RPAREN
         LCURLY varDecl* stmt* RCURLY
     | (PUBLIC {$isPublic=true;})?
         'static' {$isStatic=true;} type name=ID
-        LPAREN param RPAREN
+        LPAREN param {$numParams+=1;} RPAREN
         LCURLY varDecl* stmt* RCURLY
     ;
 
