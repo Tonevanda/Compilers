@@ -1,5 +1,6 @@
 package pt.up.fe.comp2024.optimization;
 
+import org.w3c.dom.Node;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
@@ -23,6 +24,9 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private final String L_BRACKET = " {\n";
     private final String R_BRACKET = "}\n";
 
+    private boolean methodIsStatic;
+
+    private boolean methodIsPublic;
 
     private final SymbolTable table;
 
@@ -37,12 +41,14 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     @Override
     protected void buildVisitor() {
 
+        // TODO: PERGUNTAR AO STOR SE É PRECISO PARA ESTE CHECKPOINT CENAS TIPO B = new B();
         addVisit(PROGRAM, this::visitProgram);
         addVisit(IMPORT_DECL, this::visitImportDecl);
         addVisit(CLASS_DECL, this::visitClass);
         addVisit(METHOD_DECL, this::visitMethodDecl);
         addVisit(PARAM, this::visitParam);
         addVisit(RETURN_STMT, this::visitReturn);
+        addVisit(FUNCTION_CALL, this::visitFunctionCall);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
 
         setDefaultVisit(this::defaultVisit);
@@ -80,6 +86,67 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         return code.toString();
     }
 
+
+    // TODO: Implement the visitFunctionCall method
+    //  invokevirtual: used for instance methods
+    //  invokestatic: used for static methods
+    //  invokespecial: used for constructors, private methods and methods of the super class
+    //  NOTE: In cases like this.foo(), the first argument of the invokevirtual this + the name of the class
+    //  NOTE: The way the visitor is implemented now, functionCalls only get visited if they are direct
+    //  children of a method declaration, so I kinda need to change the visitAssignStmt to visit the functionCall children
+    private String visitFunctionCall(JmmNode node, Void unused) {
+
+        StringBuilder code = new StringBuilder();
+
+        var methodName = node.get("func");
+        var numArgs = NodeUtils.getIntegerAttribute(node, "numArgs", "0");
+
+
+        // TODO: I need to get the OLLIRExprResult of every argument in the function call
+        //  because this.foo(1+2) is actually t0= 1 + 2; invoke(this, "foo", t0);
+        // if method is static or has not been declared (assume it exists in imported or extended class)
+        if(!table.getMethods().contains(methodName)){
+            code.append("invokestatic(");
+            code.append(TypeUtils.getExprType(node.getChild(0), table));
+            code.append(", ");
+            code.append("""
+                    "%s"
+                    """.formatted(methodName));
+            System.out.println(node.getChild(0));
+            for(int i = 1; i <= numArgs; i++){
+                code.append(", ");
+                code.append(exprVisitor.visit(node.getJmmChild(i)).getCode());
+            }
+        } else {
+            methodIsStatic = false;
+        }
+
+        // check what type of invoke to use
+        if(methodIsStatic){
+            code.append("invokestatic(");
+        } else {
+            code.append("invokevirtual(");
+        }
+
+        // visit every parameter
+        for (int i = 1; i <= numArgs; i++) {
+            if (i != 1) {
+                code.append(", ");
+            }
+            var param = node.getJmmChild(i);
+            var paramCode = exprVisitor.visit(param);
+            code.append(paramCode.getCode());
+        }
+
+        code.append(")");
+        code.append(SPACE);
+        code.append(methodName);
+        code.append(L_BRACKET);
+        code.append(R_BRACKET);
+        code.append(END_STMT);
+
+        return code.toString();
+    }
 
     private String visitReturn(JmmNode node, Void unused) {
 
@@ -122,14 +189,15 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         StringBuilder code = new StringBuilder(".method ");
 
-        boolean isPublic = NodeUtils.getBooleanAttribute(node, "isPublic", "false");
-        boolean isStatic = NodeUtils.getBooleanAttribute(node, "isStatic", "false");
+        // these are class fields, so I can use them in the visitFunctionCall
+        this.methodIsPublic = NodeUtils.getBooleanAttribute(node, "isPublic", "false");
+        this.methodIsStatic = NodeUtils.getBooleanAttribute(node, "isStatic", "false");
 
-        if (isPublic) {
+        if (methodIsPublic) {
             code.append("public ");
         }
 
-        if (isStatic){
+        if (methodIsStatic){
             code.append("static ");
         }
 

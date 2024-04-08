@@ -22,6 +22,9 @@ public class IncompatibleAssignment extends AnalysisVisitor{
         addVisit(Kind.ASSIGN_STMT, this::visitAssignStmt);
     }
 
+    // TODO: Just realized there's a TypeUtils function called areTypesAssignable
+    //  it just clicked now to me what that function was for
+    //  if there is time, refactor this bih so it uses that function
     private Void visitAssignStmt(JmmNode assigntStmt, SymbolTable table){
 
         // Get the assigned variable and the assignee
