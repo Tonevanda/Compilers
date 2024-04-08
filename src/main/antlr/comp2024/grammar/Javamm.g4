@@ -130,12 +130,12 @@ stmt
     | RETURN expr SEMI #ReturnStmt
     ;
 
-expr
+expr locals[int numArgs=0]
     : expr LBRACK expr RBRACK #ArrAccessExpr
     | LPAREN expr RPAREN #ParenExpr
     | expr dot=DOT func='length' #LengthCall
-    | expr dot=DOT func=ID LPAREN (expr (COMMA expr)*)? RPAREN #FunctionCall
-    | func=ID LPAREN (expr (COMMA expr)*)? RPAREN #FunctionCall
+    | expr dot=DOT func=ID LPAREN (expr {$numArgs+=1;} (COMMA expr {$numArgs+=1;})*)? RPAREN #FunctionCall
+    //| func=ID LPAREN (expr {$numArgs+=1;} (COMMA expr {$numArgs+=1;})*)? RPAREN #FunctionCall
     | expr DOT name=ID #FieldCall
     | op=NOT expr #UnaryExpr
     | NEW INT LBRACK expr RBRACK #NewArray
