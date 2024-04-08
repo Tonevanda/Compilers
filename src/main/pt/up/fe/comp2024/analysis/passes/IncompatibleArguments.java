@@ -83,9 +83,6 @@ public class IncompatibleArguments extends AnalysisVisitor{
             for(int i = 0; i < parameters.size(); i++){
                 var parameter = parameters.get(i);
                 var argument = TypeUtils.getExprType(arguments.get(i), table).getName();
-                System.out.println("Index: " + i);
-                System.out.println(parameter + " " + argument);
-
                 if(!parameter.equals(argument)){
                     // Create error report
                     var message = String.format("Incompatible arguments. Expected '%s' but got '%s'.", parameter, argument);

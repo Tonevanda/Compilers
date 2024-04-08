@@ -17,6 +17,7 @@ public class SemanticAnalysisTest {
     public void varNotDeclared() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/VarNotDeclared.jmm"));
         TestUtils.mustFail(result);
+        System.out.println(result.getReports());
     }
 
     @Test //Works
@@ -30,43 +31,49 @@ public class SemanticAnalysisTest {
     public void intPlusObject() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/IntPlusObject.jmm"));
         TestUtils.mustFail(result);
+        System.out.println(result.getReports());
     }
 
     @Test //Works
     public void boolTimesInt() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/BoolTimesInt.jmm"));
         TestUtils.mustFail(result);
+        System.out.println(result.getReports());
     }
 
     @Test //Works
     public void arrayPlusInt() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayPlusInt.jmm"));
         TestUtils.mustFail(result);
+        System.out.println(result.getReports());
     }
 
     @Test //Works but needs to check if it's varargs maybe
     public void arrayAccessOnInt() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayAccessOnInt.jmm"));
         TestUtils.mustFail(result);
+        System.out.println(result.getReports());
     }
 
     @Test //Works
     public void arrayIndexNotInt() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayIndexNotInt.jmm"));
         TestUtils.mustFail(result);
+        System.out.println(result.getReports());
     }
 
     @Test //Works
     public void assignIntToBool() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/AssignIntToBool.jmm"));
         TestUtils.mustFail(result);
+        System.out.println(result.getReports());
     }
 
     @Test // Works
     public void objectAssignmentFail() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ObjectAssignmentFail.jmm"));
-        System.out.println(result.getReports());
         TestUtils.mustFail(result);
+        System.out.println(result.getReports());
     }
 
     @Test // Works
@@ -85,18 +92,21 @@ public class SemanticAnalysisTest {
     public void intInIfCondition() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/IntInIfCondition.jmm"));
         TestUtils.mustFail(result);
+        System.out.println(result.getReports());
     }
 
     @Test // Works
     public void arrayInWhileCondition() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayInWhileCondition.jmm"));
         TestUtils.mustFail(result);
+        System.out.println(result.getReports());
     }
 
     @Test //Works
     public void callToUndeclaredMethod() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/CallToUndeclaredMethod.jmm"));
         TestUtils.mustFail(result);
+        System.out.println(result.getReports());
     }
 
     @Test //Works

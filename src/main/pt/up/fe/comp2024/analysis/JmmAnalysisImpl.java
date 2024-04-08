@@ -60,6 +60,9 @@ public class JmmAnalysisImpl implements JmmAnalysis {
             try {
                 var passReports = analysisPass.analyze(rootNode, table);
                 reports.addAll(passReports);
+                if(hasErrors(reports)){
+                    break;
+                }
             } catch (Exception e) {
                 reports.add(Report.newError(Stage.SEMANTIC,
                         -1,
@@ -72,5 +75,10 @@ public class JmmAnalysisImpl implements JmmAnalysis {
         }
 
         return new JmmSemanticsResult(parserResult, table, reports);
+    }
+
+    // Checks if there are any errors in the reports
+    private boolean hasErrors(List<Report> reports) {
+        return reports.stream().anyMatch(report -> report.getStage() == Stage.SEMANTIC);
     }
 }
