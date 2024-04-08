@@ -48,12 +48,13 @@ public class IncompatibleArguments extends AnalysisVisitor{
         // Get parameters of the function
         var parameters = table.getParameters(functionName).stream().map(p -> p.getType().getName()).toList();
 
-        // Get the arguments that are being passed to the function
-        // TODO: This only works for object function cals like a.foo()
-        //  for normal function calls like foo() it should start at 0 however i need to figure out
-        //  how to differentiate each case
-        //  maybe check for dots in the function call, if there are dots then it's an object function call
-        var arguments = functionCall.getChildren().subList(1, functionCall.getNumChildren());
+        // Check if it's an object call
+        // This is needed because the index of the first argument child changes if the call is an object call or not
+        // By object call I mean stuff like a.foo() where a would be an object
+        boolean isObjectCall = functionCall.getAttributes().contains("dot");
+
+        int start = isObjectCall ? 1 : 0;
+        var arguments = functionCall.getChildren().subList(start, functionCall.getNumChildren());
 
         // If the method being called has varargs as parameter
         if(table.getParameters(functionName).stream().

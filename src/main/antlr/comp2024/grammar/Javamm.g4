@@ -133,8 +133,8 @@ stmt
 expr
     : expr LBRACK expr RBRACK #ArrAccessExpr
     | LPAREN expr RPAREN #ParenExpr
-    | expr DOT func='length' #LengthCall
-    | expr DOT func=ID LPAREN (expr (COMMA expr)*)? RPAREN #FunctionCall
+    | expr dot=DOT func='length' #LengthCall
+    | expr dot=DOT func=ID LPAREN (expr (COMMA expr)*)? RPAREN #FunctionCall
     | func=ID LPAREN (expr (COMMA expr)*)? RPAREN #FunctionCall
     | expr DOT name=ID #FieldCall
     | op=NOT expr #UnaryExpr
