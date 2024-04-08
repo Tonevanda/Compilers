@@ -4,6 +4,10 @@ import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class TypeUtils {
 
     private static final String INT_TYPE_NAME = "int";
@@ -132,6 +136,19 @@ public class TypeUtils {
         }
 
         return type;
+    }
+
+    /**
+     * Get the names of the imports from a node
+     * @param node
+     * @return
+     */
+    public static List<String> getImportNames(JmmNode node) {
+        String name = node.get("name");
+        name = name.substring(1, name.length() - 1); // Remove the brackets
+        return Arrays.stream(name.split(","))
+                .map(String::trim)
+                .collect(Collectors.toList());
     }
 
     /**

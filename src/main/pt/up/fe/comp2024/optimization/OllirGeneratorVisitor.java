@@ -7,6 +7,8 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
+import java.util.List;
+
 import static pt.up.fe.comp2024.ast.Kind.*;
 
 /**
@@ -36,6 +38,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     protected void buildVisitor() {
 
         addVisit(PROGRAM, this::visitProgram);
+        addVisit(IMPORT_DECL, this::visitImportDecl);
         addVisit(CLASS_DECL, this::visitClass);
         addVisit(METHOD_DECL, this::visitMethodDecl);
         addVisit(PARAM, this::visitParam);
@@ -120,9 +123,14 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         StringBuilder code = new StringBuilder(".method ");
 
         boolean isPublic = NodeUtils.getBooleanAttribute(node, "isPublic", "false");
+        boolean isStatic = NodeUtils.getBooleanAttribute(node, "isStatic", "false");
 
         if (isPublic) {
             code.append("public ");
+        }
+
+        if (isStatic){
+            code.append("static ");
         }
 
         // name
@@ -188,6 +196,19 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 "}\n";
     }
 
+    private String visitImportDecl(JmmNode node, Void unused) {
+        List<String> importNames = TypeUtils.getImportNames(node);
+        StringBuilder importString = new StringBuilder();
+
+        for (String name : importNames) {
+            if (!importString.isEmpty()) {
+                importString.append(".");
+            }
+            importString.append(name);
+        }
+
+        return "import " + importString.toString() + ";\n";
+    }
 
     private String visitProgram(JmmNode node, Void unused) {
 
