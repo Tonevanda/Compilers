@@ -155,6 +155,11 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             code.append(childCode);
         }
 
+        // the main method does not have a return statement but its ollir representation should have one
+        // kinda hard coded, but it's fine since it'll always be ret.V
+        if(name.equals("main")){
+            code.append("ret.V;\n");
+        }
         code.append(R_BRACKET);
         code.append(NL);
 
