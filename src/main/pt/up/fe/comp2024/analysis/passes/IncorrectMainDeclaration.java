@@ -24,6 +24,18 @@ public class IncorrectMainDeclaration extends AnalysisVisitor{
 
     public Void visitMethodDecl(JmmNode methodDecl, SymbolTable table){
 
+        if(!table.getMethods().contains("main")){
+            // Create error report
+            var message = "Main method not found.";
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    0, // don't know what to put here
+                    0, // here neither
+                    message,
+                    null)
+            );
+        }
+
         // Get name of method
         var methodName = methodDecl.get("name");
 
