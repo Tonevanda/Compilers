@@ -7,7 +7,6 @@ import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
-
 import java.util.List;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
@@ -48,8 +47,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(METHOD_DECL, this::visitMethodDecl);
         addVisit(PARAM, this::visitParam);
         addVisit(RETURN_STMT, this::visitReturn);
-        addVisit(FUNCTION_CALL, this::visitFunctionCall);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
+        addVisit(FUNCTION_CALL, this::visitFunctionCall);
 
         setDefaultVisit(this::defaultVisit);
     }
@@ -70,7 +69,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         // statement has type of lhs
         Type thisType = TypeUtils.getExprType(node.getJmmChild(0), table);
         String typeString = OptUtils.toOllirType(thisType);
-
 
         code.append(lhs.getCode());
         code.append(SPACE);
@@ -97,53 +95,58 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private String visitFunctionCall(JmmNode node, Void unused) {
 
         StringBuilder code = new StringBuilder();
-
         var methodName = node.get("func");
         var numArgs = NodeUtils.getIntegerAttribute(node, "numArgs", "0");
 
+        // get the function call arguments
+        var arguments = node.getChildren().subList(1, node.getNumChildren());
 
-        // TODO: I need to get the OLLIRExprResult of every argument in the function call
-        //  because this.foo(1+2) is actually t0= 1 + 2; invoke(this, "foo", t0);
+        // for every argument, get the computation and append to code
+        for (var argument : arguments) {
+            var argumentCode = exprVisitor.visit(argument).getComputation();
+            code.append(argumentCode);
+        }
+
         // if method is static or has not been declared (assume it exists in imported or extended class)
+        // TODO: expand upon this later
+        boolean isStatic = false;
         if(!table.getMethods().contains(methodName)){
             code.append("invokestatic(");
-            code.append(TypeUtils.getExprType(node.getChild(0), table));
-            code.append(", ");
-            code.append("""
-                    "%s"
-                    """.formatted(methodName));
-            System.out.println(node.getChild(0));
-            for(int i = 1; i <= numArgs; i++){
-                code.append(", ");
-                code.append(exprVisitor.visit(node.getJmmChild(i)).getCode());
-            }
-        } else {
-            methodIsStatic = false;
-        }
-
-        // check what type of invoke to use
-        if(methodIsStatic){
-            code.append("invokestatic(");
+            code.append(node.getChild(0).get("name"));
+            isStatic = true;
+        } else if (methodName.equals(table.getClassName())){
+            code.append("invokespecial(this");
         } else {
             code.append("invokevirtual(");
+            code.append(node.getChild(0).get("name"));
         }
 
-        // visit every parameter
-        for (int i = 1; i <= numArgs; i++) {
-            if (i != 1) {
-                code.append(", ");
-            }
+        if(!isStatic){
+            code.append(".");
+            code.append(TypeUtils.getExprType(node.getChild(0), table).getName());
+        }
+
+        code.append(", ");
+        code.append(String.format("\"%s\"", methodName));
+        for(int i = 1; i <= numArgs; i++){
+            code.append(", ");
             var param = node.getJmmChild(i);
             var paramCode = exprVisitor.visit(param);
             code.append(paramCode.getCode());
         }
 
         code.append(")");
-        code.append(SPACE);
-        code.append(methodName);
-        code.append(L_BRACKET);
-        code.append(R_BRACKET);
+
+        // Get the method's return type
+        var retType = table.getReturnType(methodName);
+        if(retType != null){
+            code.append(OptUtils.toOllirType(retType));
+        } else {
+            code.append(".V");
+        }
+
         code.append(END_STMT);
+        System.out.println("Final code: " + code);
 
         return code.toString();
     }
@@ -184,7 +187,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         return code;
     }
 
-
     private String visitMethodDecl(JmmNode node, Void unused) {
 
         StringBuilder code = new StringBuilder(".method ");
@@ -209,6 +211,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var numParams = NodeUtils.getIntegerAttribute(node, "numParams", "0");
 
         // visit every parameter
+        // TODO: if parameter is array, need to append .array between the name and the type
         code.append("(");
         for(int i = 1; i <= numParams; i++){
             if(i != 1){
@@ -230,7 +233,9 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var afterParam = numParams + 1;
         for (int i = afterParam; i < node.getNumChildren(); i++) {
             var child = node.getJmmChild(i);
+            //System.out.println("Child: " + child);
             var childCode = visit(child);
+            System.out.println("Child code: " + childCode);
             code.append(childCode);
         }
 
@@ -304,7 +309,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             importString.append(name);
         }
 
-        return "import " + importString.toString() + ";\n";
+        return "import " + importString + ";\n";
     }
 
     private String visitProgram(JmmNode node, Void unused) {
