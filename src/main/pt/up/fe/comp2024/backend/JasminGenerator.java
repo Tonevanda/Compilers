@@ -34,11 +34,12 @@ public class JasminGenerator {
 
     public JasminGenerator(OllirResult ollirResult) {
         this.ollirResult = ollirResult;
-
+        
         reports = new ArrayList<>();
         code = null;
         currentMethod = null;
 
+        System.out.println("JasminGenerator created");
         this.generators = new FunctionClassMap<>();
         generators.put(ClassUnit.class, this::generateClassUnit);
         generators.put(Method.class, this::generateMethod);
@@ -51,11 +52,12 @@ public class JasminGenerator {
     }
 
     public List<Report> getReports() {
+        System.out.println("JasminGenerator created");
         return reports;
     }
 
     public String build() {
-
+        System.out.println("JasminGenerator created");
         // This way, build is idempotent
         if (code == null) {
             code = generators.apply(ollirResult.getOllirClass());
@@ -66,6 +68,7 @@ public class JasminGenerator {
 
 
     private String generateClassUnit(ClassUnit classUnit) {
+        System.out.println("JasminGenerator created");
 
         var code = new StringBuilder();
 
@@ -82,7 +85,7 @@ public class JasminGenerator {
                 .method public <init>()V
                     aload_0
                     invokespecial java/lang/Object/<init>()V
-                    return
+                    ireturn
                 .end method
                 """;
         code.append(defaultConstructor);
@@ -105,6 +108,7 @@ public class JasminGenerator {
 
 
     private String generateMethod(Method method) {
+        System.out.println("JasminGenerator created");
 
         // set method
         currentMethod = method;
@@ -141,6 +145,7 @@ public class JasminGenerator {
     }
 
     private String generateAssign(AssignInstruction assign) {
+        System.out.println("JasminGenerator created");
         var code = new StringBuilder();
 
         // generate code for loading what's on the right
@@ -165,14 +170,17 @@ public class JasminGenerator {
     }
 
     private String generateSingleOp(SingleOpInstruction singleOp) {
+        System.out.println("JasminGenerator created");
         return generators.apply(singleOp.getSingleOperand());
     }
 
     private String generateLiteral(LiteralElement literal) {
+        System.out.println("JasminGenerator created");
         return "ldc " + literal.getLiteral() + NL;
     }
 
     private String generateOperand(Operand operand) {
+        System.out.println("JasminGenerator created");
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
         return "iload " + reg + NL;
@@ -198,11 +206,12 @@ public class JasminGenerator {
     }
 
     private String generateReturn(ReturnInstruction returnInst) {
+        System.out.println("JasminGenerator created");
         var code = new StringBuilder();
 
         // TODO: Hardcoded to int return type, needs to be expanded
-
-        code.append(generators.apply(returnInst.getOperand()));
+        if (returnInst.getOperand() != null)
+            code.append(generators.apply(returnInst.getOperand()));
         code.append("ireturn").append(NL);
 
         return code.toString();
