@@ -7,6 +7,8 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
+import java.util.ArrayList;
+import java.util.List;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
 
@@ -43,6 +45,15 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         return new OllirExprResult(code);
     }
 
+    // TODO: Implement the visitFunctionCall method
+    //  invokevirtual: used for instance methods
+    //  invokestatic: used for static methods
+    //  invokespecial: used for constructors and methods of the super class
+    //  NOTE: In cases like this.foo(), the first argument of the invokevirtual this + the name of the class
+    //  NOTE: The way the visitor is implemented now, functionCalls only get visited if they are direct
+    //  children of a method declaration, so I kinda need to change the visitAssignStmt to visit the functionCall children
+
+    // TODO: Computation register numbers are incrementing incorrectly
     private OllirExprResult visitFunctionCall(JmmNode node, Void unused) {
 
         StringBuilder code = new StringBuilder();
@@ -54,10 +65,12 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
         StringBuilder computation = new StringBuilder();
 
-        // for every argument, get the computation and append to code
+        // for every argument, get the computation and the code
+        List<String> codeArguments = new ArrayList<>();
         for (var argument : arguments) {
-            var argumentCode = visit(argument).getComputation();
-            computation.append(argumentCode);
+            var argumentCode = visit(argument);
+            codeArguments.add(argumentCode.getCode());
+            computation.append(argumentCode.getComputation());
         }
 
         // if method is static or has not been declared (assume it exists in imported or extended class)
@@ -83,9 +96,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         code.append(String.format("\"%s\"", methodName));
         for(int i = 1; i <= numArgs; i++){
             code.append(", ");
-            var param = node.getJmmChild(i);
-            var paramCode = visit(param);
-            code.append(paramCode.getCode());
+            code.append(codeArguments.get(i-1));
         }
 
         code.append(")");
@@ -97,8 +108,6 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         } else {
             code.append(".V");
         }
-
-        code.append(END_STMT);
 
         return new OllirExprResult(code.toString(), computation.toString());
     }

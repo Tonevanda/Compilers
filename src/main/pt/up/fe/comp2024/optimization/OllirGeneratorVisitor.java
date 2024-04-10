@@ -62,6 +62,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(expr.getComputation());
         code.append(expr.getCode());
 
+        code.append(END_STMT);
+
         return code.toString();
     }
 
@@ -94,16 +96,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         return code.toString();
     }
-
-
-    // TODO: Implement the visitFunctionCall method
-    //  invokevirtual: used for instance methods
-    //  invokestatic: used for static methods
-    //  invokespecial: used for constructors and methods of the super class
-    //  NOTE: In cases like this.foo(), the first argument of the invokevirtual this + the name of the class
-    //  NOTE: The way the visitor is implemented now, functionCalls only get visited if they are direct
-    //  children of a method declaration, so I kinda need to change the visitAssignStmt to visit the functionCall children
-
 
     private String visitReturn(JmmNode node, Void unused) {
 
@@ -188,9 +180,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var afterParam = numParams + 1;
         for (int i = afterParam; i < node.getNumChildren(); i++) {
             var child = node.getJmmChild(i);
-            //System.out.println("Child: " + child);
             var childCode = visit(child);
-            System.out.println("Child code: " + childCode);
             code.append(childCode);
         }
 
