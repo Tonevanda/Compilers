@@ -88,7 +88,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     // TODO: Implement the visitFunctionCall method
     //  invokevirtual: used for instance methods
     //  invokestatic: used for static methods
-    //  invokespecial: used for constructors, private methods and methods of the super class
+    //  invokespecial: used for constructors and methods of the super class
     //  NOTE: In cases like this.foo(), the first argument of the invokevirtual this + the name of the class
     //  NOTE: The way the visitor is implemented now, functionCalls only get visited if they are direct
     //  children of a method declaration, so I kinda need to change the visitAssignStmt to visit the functionCall children
