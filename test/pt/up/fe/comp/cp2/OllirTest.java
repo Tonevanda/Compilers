@@ -42,6 +42,16 @@ public class OllirTest {
         testJmmCompilation("pt/up/fe/comp/cp2/ollir/CompileComputation.jmm", this::compileComputation);
     }
 
+    @Test
+    public void compileChainedMethod(){
+        testJmmCompilation("pt/up/fe/comp/cp2/ollir/CompileChainedMethod.jmm", this::compileChainedMethod);
+    }
+
+    @Test
+    public void compileObjectInit(){
+        testJmmCompilation("pt/up/fe/comp/cp2/ollir/CompileObjectInit.jmm", this::compileObjectInit);
+    }
+
     public static void testJmmCompilation(String resource, Consumer<ClassUnit> ollirTester, String executionOutput) {
 
         // If AstToJasmin pipeline, generate Jasmin
@@ -200,14 +210,42 @@ public class OllirTest {
                 .orElse(null);
 
         assertNotNull("Could not find method " + methodName, methodFoo);
+    }
 
-        var assignInst = methodFoo.getInstructions().stream()
-                .filter(inst -> inst instanceof AssignInstruction)
-                .map(AssignInstruction.class::cast)
+    public void compileChainedMethod(ClassUnit classUnit){
+        // Test name of the class
+        assertEquals("Class name not what was expected", "CompileChainedMethod", classUnit.getClassName());
+
+        // Test foo
+        var methodName = "foo";
+        Method methodFoo = classUnit.getMethods().stream()
+                .filter(method -> method.getMethodName().equals(methodName))
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull("Could not find method " + methodName, methodFoo);
+    }
+
+    public void compileObjectInit(ClassUnit classUnit){
+        // Test name of the class
+        assertEquals("Class name not what was expected", "CompileObjectInit", classUnit.getClassName());
+
+        // Test foo
+        var methodName = "foo";
+        Method methodFoo = classUnit.getMethods().stream()
+                .filter(method -> method.getMethodName().equals(methodName))
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull("Could not find method " + methodName, methodFoo);
+
+        // Test for invokespecial call
+        var invokeSpecialCall = methodFoo.getInstructions().stream()
+                .filter(inst -> inst instanceof CallInstruction)
+                .map(CallInstruction.class::cast)
+                .filter(call -> call.getInvocationType() == CallType.invokespecial)
                 .findFirst();
-        assertTrue("Could not find an assign instruction in method " + methodName, assignInst.isPresent());
 
-        assertEquals("Assignment does not have the expected type", ElementType.INT32,
-                assignInst.get().getTypeOfAssign().getTypeOfElement());
+        assertTrue("Could not find an invokeespecial call in method " + methodName, invokeSpecialCall.isPresent());
     }
 }

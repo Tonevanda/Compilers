@@ -1,0 +1,8 @@
+import B;
+
+class CompileObjectInit{
+    public void foo(){
+        B b;
+        b = new B();
+    }
+}

@@ -1,0 +1,26 @@
+import io;
+
+class CompileChainedMethod {
+
+    public static void main(String[] args) {
+
+    }
+
+
+    public int foo(int x, int z) {
+        int a;
+
+        a = 1+2;
+
+
+        return 0;
+    }
+
+    public int bar() {
+        int b;
+
+        this.foo(1,b).bar();
+
+        return 1+2;
+    }
+}

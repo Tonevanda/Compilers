@@ -49,7 +49,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(RETURN_STMT, this::visitReturn);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
         addVisit(EXPR_STMT, this::visitExprStmt);
-        //addVisit(FUNCTION_CALL, this::visitFunctionCall);
 
         setDefaultVisit(this::defaultVisit);
     }
@@ -158,7 +157,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var numParams = NodeUtils.getIntegerAttribute(node, "numParams", "0");
 
         // visit every parameter
-        // TODO: if parameter is array, need to append .array between the name and the type
         code.append("(");
         for(int i = 1; i <= numParams; i++){
             if(i != 1){
