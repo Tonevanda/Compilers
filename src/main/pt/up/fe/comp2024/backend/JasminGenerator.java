@@ -85,7 +85,7 @@ public class JasminGenerator {
                 .method public <init>()V
                     aload_0
                     invokespecial java/lang/Object/<init>()V
-                    ireturn
+                    return
                 .end method
                 """;
         code.append(defaultConstructor);
@@ -121,9 +121,34 @@ public class JasminGenerator {
                 "";
 
         var methodName = method.getMethodName();
+        code.append("\n.method ").append(modifier);
+        if(methodName.equals("main")){
+            code.append("static ").append(methodName).append("([Ljava/lang/String;)V").append(NL);
+        }
+        else {
+            code.append(methodName).append("(");
+            for (Element param : method.getParams()){
+                if(param.getType().toString()=="INT32"){
+                    code.append("I");
+                }
+                else if (param.getType().toString()=="BOOLEAN") {
+                    code.append("I");
+                }
+                else if (param.getType().toString() == "STRING") {
+                    code.append("Ljava/lang/String;");
+                }
+                //adw
+            }
+            if(method.getReturnType().toString()=="BOOLEAN"){
+                code.append(")I").append(NL);
+            }
+            else {
+                // TODO: Hardcoded param types and return type, needs to be expanded
+                code.append(")I").append(NL);
+            }
+        }
+        //.method public methodname(...
 
-        // TODO: Hardcoded param types and return type, needs to be expanded
-        code.append("\n.method ").append(modifier).append(methodName).append("(I)I").append(NL);
 
         // Add limits
         code.append(TAB).append(".limit stack 99").append(NL);
@@ -210,9 +235,12 @@ public class JasminGenerator {
         var code = new StringBuilder();
 
         // TODO: Hardcoded to int return type, needs to be expanded
-        if (returnInst.getOperand() != null)
+        if (returnInst.getOperand() != null) {
             code.append(generators.apply(returnInst.getOperand()));
-        code.append("ireturn").append(NL);
+            code.append("ireturn").append(NL);
+        }
+        else
+            code.append("return").append(NL);
 
         return code.toString();
     }
