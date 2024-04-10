@@ -1,0 +1,30 @@
+.class Test
+
+.super java/lang/Object
+;default constructor
+.method public <init>()V
+    aload_0
+    invokespecial java/lang/Object/<init>()V
+    ireturn
+.end method
+
+.method public main(I)I
+   .limit stack 99
+   .limit locals 99
+   ireturn
+.end method
+
+.method public foo(I)I
+   .limit stack 99
+   .limit locals 99
+   ldc 1
+   istore 1
+   ldc 2
+   istore 2
+   iload 1
+   iload 2
+   iadd
+   istore 3
+   iload 3
+   ireturn
+.end method
