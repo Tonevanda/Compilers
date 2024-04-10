@@ -1,0 +1,27 @@
+import io;
+
+class CompileComputation {
+
+    public static void main(String[] args) {
+
+    }
+
+
+    public int foo(int x, int z) {
+        int a;
+
+        a = 1+2;
+
+
+        return 0;
+    }
+
+    public int bar() {
+        int b;
+
+        this.foo(1+1,2+b);
+        this.bar();
+
+        return 1+2;
+    }
+}
