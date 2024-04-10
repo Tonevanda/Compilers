@@ -25,7 +25,6 @@ public class TypeUtils {
     public static Type getType(JmmNode type_node) {
         String type_name = type_node.get("name");
         boolean isArray = Boolean.parseBoolean(type_node.get("isArray")); // Receives a string and turns it into a boolean
-
         return switch (type_name) {
             case INT_TYPE_NAME -> new Type(INT_TYPE_NAME, isArray);
             case BOOLEAN_TYPE_NAME -> new Type(BOOLEAN_TYPE_NAME, isArray);
@@ -98,6 +97,12 @@ public class TypeUtils {
         // Get the variable name
         var varName = varRefExpr.get("name");
 
+        if(table.getImports().stream().anyMatch(imported -> imported.contains(varName))){
+            var importedType = new Type(varName, false);
+            importedType.putObject("isImported", true);
+            return importedType;
+        }
+
         // Get the method where the variable is being used
         JmmNode method = varRefExpr.getAncestor(Kind.METHOD_DECL).get();
         var methodName = method.get("name");
@@ -134,6 +139,7 @@ public class TypeUtils {
                     .getType();
             return type;
         }
+
 
         return type;
     }

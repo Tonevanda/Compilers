@@ -48,11 +48,22 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(PARAM, this::visitParam);
         addVisit(RETURN_STMT, this::visitReturn);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
-        addVisit(FUNCTION_CALL, this::visitFunctionCall);
+        addVisit(EXPR_STMT, this::visitExprStmt);
+        //addVisit(FUNCTION_CALL, this::visitFunctionCall);
 
         setDefaultVisit(this::defaultVisit);
     }
 
+    private String visitExprStmt(JmmNode node, Void unused) {
+
+        var expr = exprVisitor.visit(node.getJmmChild(0));
+        StringBuilder code = new StringBuilder();
+
+        code.append(expr.getComputation());
+        code.append(expr.getCode());
+
+        return code.toString();
+    }
 
     private String visitAssignStmt(JmmNode node, Void unused) {
 
@@ -92,64 +103,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     //  NOTE: In cases like this.foo(), the first argument of the invokevirtual this + the name of the class
     //  NOTE: The way the visitor is implemented now, functionCalls only get visited if they are direct
     //  children of a method declaration, so I kinda need to change the visitAssignStmt to visit the functionCall children
-    private String visitFunctionCall(JmmNode node, Void unused) {
 
-        StringBuilder code = new StringBuilder();
-        var methodName = node.get("func");
-        var numArgs = NodeUtils.getIntegerAttribute(node, "numArgs", "0");
-
-        // get the function call arguments
-        var arguments = node.getChildren().subList(1, node.getNumChildren());
-
-        // for every argument, get the computation and append to code
-        for (var argument : arguments) {
-            var argumentCode = exprVisitor.visit(argument).getComputation();
-            code.append(argumentCode);
-        }
-
-        // if method is static or has not been declared (assume it exists in imported or extended class)
-        // TODO: expand upon this later
-        boolean isStatic = false;
-        if(!table.getMethods().contains(methodName)){
-            code.append("invokestatic(");
-            code.append(node.getChild(0).get("name"));
-            isStatic = true;
-        } else if (methodName.equals(table.getClassName())){
-            code.append("invokespecial(this");
-        } else {
-            code.append("invokevirtual(");
-            code.append(node.getChild(0).get("name"));
-        }
-
-        if(!isStatic){
-            code.append(".");
-            code.append(TypeUtils.getExprType(node.getChild(0), table).getName());
-        }
-
-        code.append(", ");
-        code.append(String.format("\"%s\"", methodName));
-        for(int i = 1; i <= numArgs; i++){
-            code.append(", ");
-            var param = node.getJmmChild(i);
-            var paramCode = exprVisitor.visit(param);
-            code.append(paramCode.getCode());
-        }
-
-        code.append(")");
-
-        // Get the method's return type
-        var retType = table.getReturnType(methodName);
-        if(retType != null){
-            code.append(OptUtils.toOllirType(retType));
-        } else {
-            code.append(".V");
-        }
-
-        code.append(END_STMT);
-        System.out.println("Final code: " + code);
-
-        return code.toString();
-    }
 
     private String visitReturn(JmmNode node, Void unused) {
 

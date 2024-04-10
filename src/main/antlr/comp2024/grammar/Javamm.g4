@@ -126,7 +126,7 @@ stmt
     | IF LPAREN expr RPAREN stmt ELSE stmt #IfStmt
     | WHILE LPAREN expr RPAREN stmt #WhileStmt
     | expr SEMI #ExprStmt
-    | expr EQUALS expr SEMI #AssignStmt //
+    | expr EQUALS expr SEMI #AssignStmt
     | RETURN expr SEMI #ReturnStmt
     ;
 
