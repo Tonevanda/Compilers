@@ -91,6 +91,7 @@ public class TypeUtils {
         return null;
     }
 
+    // TODO: need to refactor this in regards to imported classes
     private static Type getVarExprType(JmmNode varRefExpr, SymbolTable table) {
         Type type = null;
 
@@ -115,6 +116,10 @@ public class TypeUtils {
                     .findFirst()
                     .get()
                     .getType();
+            var type_name = type.getName();
+            if(table.getImports().stream().anyMatch(imported -> imported.contains(type_name))){
+                type.putObject("isImported", true);
+            }
             return type;
         }
 

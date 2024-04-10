@@ -50,7 +50,7 @@ public class OptUtils {
             case "boolean" -> "bool";
             case "String" -> "String";
             case "void" -> "V";
-            default -> throw new NotImplementedException(typeName);
+            default -> typeName;
         };
 
         return type;

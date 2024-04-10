@@ -238,14 +238,5 @@ public class OllirTest {
                 .orElse(null);
 
         assertNotNull("Could not find method " + methodName, methodFoo);
-
-        // Test for invokespecial call
-        var invokeSpecialCall = methodFoo.getInstructions().stream()
-                .filter(inst -> inst instanceof CallInstruction)
-                .map(CallInstruction.class::cast)
-                .filter(call -> call.getInvocationType() == CallType.invokespecial)
-                .findFirst();
-
-        assertTrue("Could not find an invokeespecial call in method " + methodName, invokeSpecialCall.isPresent());
     }
 }

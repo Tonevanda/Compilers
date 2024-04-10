@@ -33,6 +33,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         addVisit(BINARY_EXPR, this::visitBinExpr);
         addVisit(INT_LITERAL, this::visitInteger);
         addVisit(FUNCTION_CALL, this::visitFunctionCall);
+        addVisit(NEW_CLASS_OBJ, this::visitNewClassObj);
 
         setDefaultVisit(this::defaultVisit);
     }
@@ -43,6 +44,21 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         String ollirIntType = OptUtils.toOllirType(intType);
         String code = node.get("value") + ollirIntType;
         return new OllirExprResult(code);
+    }
+
+    private OllirExprResult visitNewClassObj(JmmNode node, Void unused) {
+        StringBuilder code = new StringBuilder();
+
+        var classType = TypeUtils.getExprType(node, table).getName();
+
+        // this assumes that a new object init is always in an assign statement
+        var assignNode = node.getParent();
+        var varName = assignNode.getChild(0).get("name");
+
+        code.append("invokespecial(").append(varName)
+                .append(".").append(classType).append(", \"<init>\").V");
+
+        return new OllirExprResult(code.toString());
     }
 
     // TODO: Implement the visitFunctionCall method
@@ -144,11 +160,11 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
         var id = node.get("name");
         Type type = TypeUtils.getExprType(node, table);
-        if(type.getAttributes().contains("isImported")){
+        /*if(type.getAttributes().contains("isImported")){
             if(type.getObject("isImported").equals(true)){
                 return new OllirExprResult(id);
             }
-        }
+        }*/
 
         String ollirType = OptUtils.toOllirType(type);
 
