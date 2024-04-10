@@ -47,29 +47,33 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     }
 
     private OllirExprResult visitNewClassObj(JmmNode node, Void unused) {
-        StringBuilder code = new StringBuilder();
 
-        var classType = TypeUtils.getExprType(node, table).getName();
+        StringBuilder computation = new StringBuilder();
+        var classType = TypeUtils.getExprType(node, table);
+        var ollirType = OptUtils.toOllirType(classType);
+
+        String code = OptUtils.getTemp() + ollirType;
+
+        computation.append(code).append(SPACE).append(ASSIGN).append(ollirType).append(SPACE)
+                .append("new").append("(").append(classType.getName()).append(")").append(ollirType).append(END_STMT);
+
 
         // this assumes that a new object init is always in an assign statement
-        var assignNode = node.getParent();
-        var varName = assignNode.getChild(0).get("name");
 
-        code.append("invokespecial(").append(varName)
-                .append(".").append(classType).append(", \"<init>\").V");
+        computation.append("invokespecial(").append(code).append(", \"<init>\").V").append(END_STMT);
 
-        return new OllirExprResult(code.toString());
+        return new OllirExprResult(code, computation);
     }
 
     // TODO: Implement the visitFunctionCall method
     //  invokevirtual: used for instance methods
     //  invokestatic: used for static methods
     //  invokespecial: used for constructors and methods of the super class
-    //  NOTE: In cases like this.foo(), the first argument of the invokevirtual this + the name of the class
-    //  NOTE: The way the visitor is implemented now, functionCalls only get visited if they are direct
-    //  children of a method declaration, so I kinda need to change the visitAssignStmt to visit the functionCall children
-
-    // TODO: Computation register numbers are incrementing incorrectly
+    //  This currently does not work if the function call is being used in an assignment
+    //  Code should just be the temp value at the end of the computation
+    //  Computation includes calculating the parameter, i.e 1+2 is t0 := 1 + 2
+    //  Computation also includes assigning the invoke code to a temp value
+    //  a = this.bar() is t0 := invokevirtual(this, "bar");
     private OllirExprResult visitFunctionCall(JmmNode node, Void unused) {
 
         StringBuilder code = new StringBuilder();
