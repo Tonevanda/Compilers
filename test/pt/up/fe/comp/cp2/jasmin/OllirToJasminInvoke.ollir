@@ -2,6 +2,8 @@ import io;
 
 Test {
 
+
+
 	.construct Test().V {
 		invokespecial(this, "<init>").V;
 	}

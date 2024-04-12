@@ -1,6 +1,6 @@
-.class SymbolTable
-
+ .class Test
 .super java/lang/Object
+
 ;default constructor
 .method public <init>()V
     aload_0
@@ -8,26 +8,15 @@
     return
 .end method
 
-.method public method1(I)I
-   .limit stack 99
-   .limit locals 99
-   ldc 0
-   istore 1
-   ldc 1
-   istore 2
-   ldc 0
-   ireturn
-.end method
-
-.method public method2(I)I
-   .limit stack 99
-   .limit locals 99
-   iload 2
-   ireturn
-.end method
-
 .method public static main([Ljava/lang/String;)V
    .limit stack 99
    .limit locals 99
+   new Test
+   dup
+   invokespecial Test/<init>()V
+   istore 1
+   new Test
+   dup
+   invokespecial Test/<init>()V
    return
 .end method
