@@ -56,7 +56,7 @@ public class UndeclaredVariable extends AnalysisVisitor {
 
         // Checks if the class with name varName is in the imports list
         if(table.getImports().stream()
-                .anyMatch(importName -> importName.equals(varRefName))){
+                .anyMatch(importName -> importName.contains(varRefName))){
             return null;
         }
 
