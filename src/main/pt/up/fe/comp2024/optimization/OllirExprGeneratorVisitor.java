@@ -65,21 +65,14 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         return new OllirExprResult(code, computation);
     }
 
-    //  invokevirtual: used for instance methods
-    //  invokestatic: used for static methods
-    //  invokespecial: used for constructors and methods of the super class
-    //  This currently does not work if the function call is being used in an assignment
-    //  Code should just be the temp value at the end of the computation
-    //  Computation includes calculating the parameter, i.e 1+2 is t0 := 1 + 2
-    //  Computation also includes assigning the invoke code to a temp value
-    //  a = this.bar() is t0 := invokevirtual(this, "bar");
-    // TODO: Function Calls outside assignments should not be assigned to a temp value
     private OllirExprResult visitFunctionCall(JmmNode node, Void unused) {
 
         var lhs = visit(node.getJmmChild(0));
         var methodName = node.get("func");
 
         StringBuilder computation = new StringBuilder();
+
+        // Get the computation of the left function call
         computation.append(lhs.getComputation());
 
         var type = table.getReturnType(methodName);
@@ -92,34 +85,38 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         if(type == null){
             type = new Type("void", false);
         }
+        // TODO: Check if it's also a parameter inside a function call
         String code = isPartOfAssignment ? OptUtils.getTemp() + OptUtils.toOllirType(type) : "";
 
         var numArgs = NodeUtils.getIntegerAttribute(node, "numArgs", "0");
-
         var arguments = node.getChildren().subList(1, node.getNumChildren());
 
         List<String> codeArguments = new ArrayList<>();
         for (var argument : arguments) {
             var argumentCode = visit(argument);
+            System.out.println(argumentCode.getCode());
             computation.append(argumentCode.getComputation());
             codeArguments.add(argumentCode.getCode());
         }
 
+        // TODO: Check if it's also a parameter inside a function call
         if(isPartOfAssignment){
             computation.append(code).append(SPACE).append(ASSIGN)
                     .append(OptUtils.toOllirType(type)).append(SPACE);
         }
 
         boolean isStatic = false;
-        if(!table.getMethods().contains(methodName) || methodName.equals("main")){
-            computation.append("invokestatic(");
-            computation.append(node.getChild(0).get("name"));
-            isStatic = true;
-        } else if (methodName.equals(table.getClassName())){
-            computation.append("invokespecial(this");
-        } else {
-            computation.append("invokevirtual(");
-            computation.append(node.getChild(0).get("name"));
+        if(!node.getChild(0).isInstance(FUNCTION_CALL)){
+            if(!table.getMethods().contains(methodName) || methodName.equals("main")){
+                computation.append("invokestatic(");
+                computation.append(node.getChild(0).get("name"));
+                isStatic = true;
+            } else if (methodName.equals(table.getClassName())){
+                computation.append("invokespecial(this");
+            } else {
+                computation.append("invokevirtual(");
+                computation.append(node.getChild(0).get("name"));
+            }
         }
 
         if(!isStatic){
@@ -136,7 +133,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
         computation.append(")").append(OptUtils.toOllirType(type)).append(END_STMT);
 
-        System.out.println(computation);
+        //System.out.println(computation);
 
         return new OllirExprResult(code, computation.toString());
     }
