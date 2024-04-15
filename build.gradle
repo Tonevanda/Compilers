@@ -66,8 +66,12 @@ sourceSets {
 
 application {
     mainClass = 'pt.up.fe.comp2024.Launcher'
+    applicationDefaultJvmArgs = ["-Dapple.awt.UIElement=true"]
 }
 
+test {
+    jvmArgs "-Dapple.awt.UIElement=true"
+}
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
