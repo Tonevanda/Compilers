@@ -44,16 +44,25 @@ public class UndeclaredMethod extends AnalysisVisitor{
                 .map(type -> type.getType())
                 .findFirst();
 
-        // If variable is of type "this class" and the class extends another, we assume the extended class has the method
-        if(table.getClassName().equals(varType.get().getName())
-                && table.getSuper() != null){
+        // If className is in import list, return
+        // This is for static function calls
+        if(table.getImports().stream()
+                .flatMap(importName -> Arrays.stream(importName.substring(1, importName.length() - 1).split(","))) // Remove the square brackets and split by comma
+                .anyMatch(importName -> importName.trim().equals(varName))){
             return null;
         }
 
-        // If className is in import list, return
+        // If the type of the variable is in the import list, return
+        // This is for object function calls
         if(table.getImports().stream()
                 .flatMap(importName -> Arrays.stream(importName.substring(1, importName.length() - 1).split(","))) // Remove the square brackets and split by comma
                 .anyMatch(importName -> importName.trim().equals(varType.get().getName()))){
+            return null;
+        }
+
+        // If variable is of type "this class" and the class extends another, we assume the extended class has the method
+        if(table.getClassName().equals(varType.get().getName())
+                && table.getSuper() != null){
             return null;
         }
 

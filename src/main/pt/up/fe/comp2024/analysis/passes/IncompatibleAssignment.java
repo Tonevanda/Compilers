@@ -55,6 +55,14 @@ public class IncompatibleAssignment extends AnalysisVisitor{
         var assignedVarType = TypeUtils.getExprType(assignedVar, table);
         var assigneeType = TypeUtils.getExprType(assignee, table);
 
+        // If assigneeType is null (method does not exist in this class)
+        // and the kind of assigneeType is FunctionCall, then we assume the types are correct
+        // No need to check if the object that called the function exists, the UndeclaredVariable pass should
+        // have already caught that
+        if(assigneeType == null && assignee.getKind().equals(Kind.FUNCTION_CALL.toString())){
+            return null;
+        }
+
         // Check if the assigned variable type is in the imports
         if(table.getImports().stream()
                 .flatMap(importName -> Arrays.stream(importName.substring(1, importName.length() - 1).split(","))) // Remove the square brackets and split by comma

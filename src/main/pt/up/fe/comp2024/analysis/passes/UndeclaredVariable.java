@@ -9,6 +9,8 @@ import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
+import java.util.Arrays;
+
 /**
  * Checks if the variable has been declared previously, either as a class field, method parameter or local variable.
  * If neither of those, then checks if it's an imported class
@@ -56,7 +58,8 @@ public class UndeclaredVariable extends AnalysisVisitor {
 
         // Checks if the class with name varName is in the imports list
         if(table.getImports().stream()
-                .anyMatch(importName -> importName.contains(varRefName))){
+                .flatMap(importName -> Arrays.stream(importName.substring(1, importName.length() - 1).split(","))) // Remove the square brackets and split by comma
+                .anyMatch(importName -> importName.trim().equals(varRefName))){
             return null;
         }
 
