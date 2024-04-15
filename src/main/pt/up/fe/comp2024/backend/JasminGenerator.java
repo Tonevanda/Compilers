@@ -39,7 +39,6 @@ public class JasminGenerator {
         code = null;
         currentMethod = null;
 
-        System.out.println("JasminGenerator created");
         this.generators = new FunctionClassMap<>();
         generators.put(ClassUnit.class, this::generateClassUnit);
         generators.put(Method.class, this::generateMethod);
@@ -56,27 +55,21 @@ public class JasminGenerator {
 
     public String callMethod(CallInstruction instruction) {
         StringBuilder ret = new StringBuilder();
-        String className = "Test"; //hardcoded figure it out later
-        if(className.equals(this.ollirResult.getOllirClass().getClassName())){
-            ret.append("new ").append(className).append(NL).append("dup").append(NL).append("invokespecial ").append(className).append("/<init>()V").append(NL);
-        }
-        //ret.append("invokestatic ").append(className).append("/").append("(");
-        /*for (Element param : instruction.getParams()) {
-            if (param.getType().toString().equals("INT32")) {
-                ret.append("I");
-            } else if (param.getType().toString().equals("BOOLEAN")) {
-                ret.append("I");
-            } else if (param.getType().toString().equals("STRING")) {
-                ret.append("Ljava/lang/String;");
+        String className = ((Operand) instruction.getCaller()).getName(); //hardcoded figure it out later
+        switch (instruction.getInvocationType().toString()){
+            case "invokevirtual" :{
+                ret.append("aload_0").append(NL).append("iconst_1").append(NL).append("invokevirtual ").append(className).append("/").append(((LiteralElement) instruction.getMethodName()).getLiteral().replace("\"", "")).append("(I)I").append(NL);
+                break;
             }
-            //adw
+            case "invokestatic" :{
+                ret.append("invokestatic ").append(className).append("/").append(((LiteralElement) instruction.getMethodName()).getLiteral().replace("\"", "")).append("()V").append(NL);
+                break;
+            }
+            case "NEW" :{
+                ret.append("new ").append(className).append(NL).append("dup").append(NL).append("invokespecial ").append(className).append("/<init>()V").append(NL);
+                break;
+            }
         }
-        if (instruction.getReturnType().toString().equals("BOOLEAN")) {
-            ret.append(")I").append(NL);
-        }
-        if (instruction.getReturnType().toString().equals("VOID")) {
-            ret.append(")V").append(NL);
-        }*/
         return ret.toString();
     }
 
@@ -110,12 +103,10 @@ public class JasminGenerator {
         return ret.toString();
     }
     public List<Report> getReports() {
-        System.out.println("JasminGenerator created");
         return reports;
     }
 
     public String build() {
-        System.out.println("JasminGenerator created");
         // This way, build is idempotent
         if (code == null) {
             code = generators.apply(ollirResult.getOllirClass());
@@ -125,7 +116,6 @@ public class JasminGenerator {
     }
 
     private String translateType(Type type) {
-        System.out.println("JasminGenerator created");
         return switch (type.toString()) {
             case "INT32", "BOOLEAN" -> "I";
             case "STRING" -> "Ljava/lang/String;";
@@ -135,7 +125,6 @@ public class JasminGenerator {
     }
 
     private String generateClassUnit(ClassUnit classUnit) {
-        System.out.println("JasminGenerator created");
 
         var code = new StringBuilder();
 
@@ -181,7 +170,6 @@ public class JasminGenerator {
 
 
     private String generateMethod(Method method) {
-        System.out.println("JasminGenerator created");
 
         // set method
         currentMethod = method;
@@ -228,7 +216,6 @@ public class JasminGenerator {
     }
 
     private String generateAssign(AssignInstruction assign) {
-        System.out.println("JasminGenerator created");
         var code = new StringBuilder();
 
         // generate code for loading what's on the right
@@ -258,20 +245,28 @@ public class JasminGenerator {
     }
 
     private String generateSingleOp(SingleOpInstruction singleOp) {
-        System.out.println("JasminGenerator created");
         return generators.apply(singleOp.getSingleOperand());
     }
 
     private String generateLiteral(LiteralElement literal) {
-        System.out.println("JasminGenerator created");
         return "ldc " + literal.getLiteral() + NL;
     }
 
     private String generateOperand(Operand operand) {
-        System.out.println("JasminGenerator created");
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-        return "iload " + reg + NL;
+        switch (operand.getType().toString()) {
+            case "INT32", "BOOLEAN" -> {
+                return "iload " + reg + NL;
+            }
+            case "STRING" -> {
+                return "aload " + reg + NL;
+            }
+            default -> {
+                return "aload " + reg + NL;
+            }
+        }
+        //return "iload " + reg + NL;
     }
 
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
@@ -294,7 +289,6 @@ public class JasminGenerator {
     }
 
     private String generateReturn(ReturnInstruction returnInst) {
-        System.out.println("JasminGenerator created");
         var code = new StringBuilder();
 
         // TODO: Hardcoded to int return type, needs to be expanded
