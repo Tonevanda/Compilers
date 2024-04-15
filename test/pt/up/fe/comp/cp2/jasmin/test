@@ -1,4 +1,5 @@
- .class Test
+Simple.ollir:
+.class Simple
 .super java/lang/Object
 
 ;default constructor
@@ -8,15 +9,68 @@
     return
 .end method
 
+.method public add(II)I
+   .limit stack 99
+   .limit locals 99
+   aload_0
+   iconst_1
+   invokevirtual this/constInstr(I)I
+   istore 3
+   iload 1
+   iload 3
+   iadd
+   istore 4
+   iload 4
+   istore 5
+   iload 5
+   ireturn
+.end method
+
 .method public static main([Ljava/lang/String;)V
    .limit stack 99
    .limit locals 99
-   new Test
-   dup
-   invokespecial Test/<init>()V
+   ldc 20
    istore 1
-   new Test
+   ldc 10
+   istore 2
+   new Simple
    dup
-   invokespecial Test/<init>()V
+   invokespecial Simple/<init>()V
+   astore 3
+
+   aload 3
+   astore 4
+   aload_0
+   iconst_1
+   invokevirtual s/add(I)V
+   istore 5
+   iload 5
+   istore 6
+   invokestatic io/println()V
    return
+.end method
+
+.method public constInstr()I
+   .limit stack 99
+   .limit locals 99
+   ldc 0
+   istore 1
+   ldc 4
+   istore 1
+   ldc 8
+   istore 1
+   ldc 14
+   istore 1
+   ldc 250
+   istore 1
+   ldc 400
+   istore 1
+   ldc 1000
+   istore 1
+   ldc 100474650
+   istore 1
+   ldc 10
+   istore 1
+   iload 1
+   ireturn
 .end method
