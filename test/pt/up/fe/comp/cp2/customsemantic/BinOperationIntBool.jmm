@@ -1,0 +1,14 @@
+class BinOperationIntBool {
+    public int foo() {
+        int a;
+        boolean b;
+        int c;
+
+        a = 1;
+        b = true;
+
+        c = a + b;
+
+        return 0;
+    }
+}

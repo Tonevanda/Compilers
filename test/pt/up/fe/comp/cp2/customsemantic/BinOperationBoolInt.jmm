@@ -1,0 +1,13 @@
+class BinOperationBoolInt {
+    public int foo() {
+        int a;
+        boolean b;
+        boolean c;
+
+        a = 2;
+        b = true;
+        c = a && b;
+
+        return 0;
+    }
+}

@@ -1,0 +1,13 @@
+class ArrayAccessWithBool {
+    public int foo() {
+        boolean a;
+        int[] b;
+        int c;
+
+        a = true;
+        b = [1, 2, 3];
+        c = b[a];
+
+        return c;
+    }
+}

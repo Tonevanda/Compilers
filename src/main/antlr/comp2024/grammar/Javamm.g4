@@ -133,6 +133,7 @@ stmt
 expr locals[int numArgs=0]
     : expr LBRACK expr RBRACK #ArrAccessExpr
     | LPAREN expr RPAREN #ParenExpr
+    // TODO: need to change this length to ID or else can't create variable length
     | expr DOT func='length' #LengthCall
     | expr DOT func=ID LPAREN (expr {$numArgs+=1;} (COMMA expr {$numArgs+=1;})*)? RPAREN #FunctionCall
     | expr DOT name=ID #FieldCall

@@ -1,0 +1,6 @@
+class varargsInFieldInvalid {
+    public int... foo() {
+        int[] a;
+        return a;
+    }
+}

@@ -1,0 +1,9 @@
+class miscDuplicatedFieldInvalid {
+    int a;
+    int a;
+
+    public int foo() {
+        a = 1;
+        return a;
+    }
+}

@@ -1,0 +1,11 @@
+import Array;
+
+class ArrayInitOnCall3Ok extends Array{
+    public int foo(){
+        int b;
+        ArrayInitOnCall3Ok c;
+
+        b = c.bar([1,2,3,4]);
+        return b;
+    }
+}
