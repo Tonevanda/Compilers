@@ -76,36 +76,28 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     // TODO: Function Calls outside assignments should not be assigned to a temp value
     private OllirExprResult visitFunctionCall(JmmNode node, Void unused) {
 
-        //System.out.println(node.getJmmChild(0));
         var lhs = visit(node.getJmmChild(0));
-        //System.out.println(lhs.getCode());
-        //System.out.println(lhs.getComputation());
-
         var methodName = node.get("func");
 
         StringBuilder computation = new StringBuilder();
         computation.append(lhs.getComputation());
 
-        // By default, assume the return type is method's return type
-        // If the function call is being used in an assignment, get the type of the assignment
         var type = table.getReturnType(methodName);
         var assignStmt = node.getAncestor(ASSIGN_STMT);
-        if(assignStmt.isPresent()){
+        boolean isPartOfAssignment = assignStmt.isPresent();
+        if(isPartOfAssignment){
             var assignLHS = assignStmt.get().getJmmChild(0);
             type = TypeUtils.getExprType(assignLHS, table);
-
         }
         if(type == null){
             type = new Type("void", false);
         }
-        String code = OptUtils.getTemp() + OptUtils.toOllirType(type);
+        String code = isPartOfAssignment ? OptUtils.getTemp() + OptUtils.toOllirType(type) : "";
 
         var numArgs = NodeUtils.getIntegerAttribute(node, "numArgs", "0");
 
-        // get the function call arguments
         var arguments = node.getChildren().subList(1, node.getNumChildren());
 
-        // for every argument, get the computation and the code
         List<String> codeArguments = new ArrayList<>();
         for (var argument : arguments) {
             var argumentCode = visit(argument);
@@ -113,19 +105,18 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             codeArguments.add(argumentCode.getCode());
         }
 
-        computation.append(code).append(SPACE).append(ASSIGN)
-                .append(OptUtils.toOllirType(type)).append(SPACE);
+        if(isPartOfAssignment){
+            computation.append(code).append(SPACE).append(ASSIGN)
+                    .append(OptUtils.toOllirType(type)).append(SPACE);
+        }
 
         boolean isStatic = false;
-        // if the method is main or does not exist in the class, it is static
         if(!table.getMethods().contains(methodName) || methodName.equals("main")){
             computation.append("invokestatic(");
             computation.append(node.getChild(0).get("name"));
             isStatic = true;
-            // if the method is the same as the class name, it is a constructor
         } else if (methodName.equals(table.getClassName())){
             computation.append("invokespecial(this");
-            // otherwise use virtual
         } else {
             computation.append("invokevirtual(");
             computation.append(node.getChild(0).get("name"));
