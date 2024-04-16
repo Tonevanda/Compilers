@@ -48,7 +48,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         return new OllirExprResult(code);
     }
 
-    // TODO: Currently does not support constructors with arguments
     private OllirExprResult visitNewClassObj(JmmNode node, Void unused) {
 
         StringBuilder computation = new StringBuilder();

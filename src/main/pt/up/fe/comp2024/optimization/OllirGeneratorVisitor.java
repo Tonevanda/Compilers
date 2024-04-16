@@ -67,6 +67,24 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     private String visitAssignStmt(JmmNode node, Void unused) {
 
+        // If LHS is a field, we want to use putfield instead of the default assignment
+        System.out.println(node.getJmmChild(0).get("name"));
+        System.out.println(isField(node.getJmmChild(0)));
+        if(isField(node.getJmmChild(0))){
+            StringBuilder computation = new StringBuilder();
+
+            var ollirType = OptUtils.toOllirType(TypeUtils.getExprType(node.getJmmChild(0), table));
+            var ollirCode = node.getJmmChild(0).get("name") + ollirType;
+
+            var rhs = exprVisitor.visit(node.getJmmChild(1));
+            String tempCode = rhs.getCode();
+
+            computation.append(rhs.getComputation());
+            computation.append("putfield(").append("this").append(", ").append(ollirCode).append(", ").append(tempCode).append(")").append(".V").append(END_STMT);
+
+            return computation.toString();
+        }
+
         var lhs = exprVisitor.visit(node.getJmmChild(0));
         var rhs = exprVisitor.visit(node.getJmmChild(1));
 
@@ -280,5 +298,22 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         }
 
         return "";
+    }
+
+    // Returns true if the node is a field, not a local or parameter
+    private boolean isField(JmmNode node){
+        var methodParentName = node.getAncestor(METHOD_DECL).get().get("name");
+        System.out.println(methodParentName);
+        System.out.println(table.getLocalVariables(methodParentName));
+        if(table.getLocalVariables(methodParentName).stream().anyMatch(var -> var.getName().equals(node.get("name")))){
+            return false;
+        }
+        if(table.getParameters(methodParentName).stream().anyMatch(var -> var.getName().equals(node.get("name")))){
+            return false;
+        }
+        if(table.getFields().stream().anyMatch(var -> var.getName().equals(node.get("name")))){
+            return true;
+        }
+        return false;
     }
 }
