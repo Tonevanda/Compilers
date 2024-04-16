@@ -94,7 +94,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         List<String> codeArguments = new ArrayList<>();
         for (var argument : arguments) {
             var argumentCode = visit(argument);
-            System.out.println(argumentCode.getCode());
+
             computation.append(argumentCode.getComputation());
             codeArguments.add(argumentCode.getCode());
         }
@@ -180,7 +180,16 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
         String code = id + ollirType;
 
-        return new OllirExprResult(code);
+        StringBuilder computation = new StringBuilder();
+        // If var is a field, we want to use getfield instead of the default variable reference
+        if(isField(node)){
+            var tempCode = OptUtils.getTemp() + ollirType;
+            computation.append(tempCode).append(SPACE).append(ASSIGN).append(ollirType).append(SPACE)
+                    .append("getfield(").append("this").append(", ").append(code).append(")").append(ollirType).append(END_STMT);
+            code = tempCode;
+        }
+
+        return new OllirExprResult(code, computation);
     }
 
     /**
@@ -197,6 +206,20 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         }
 
         return OllirExprResult.EMPTY;
+    }
+
+    public boolean isField(JmmNode node){
+        var methodParentName = node.getAncestor(METHOD_DECL).get().get("name");
+        if(table.getLocalVariables(methodParentName).stream().anyMatch(var -> var.getName().equals(node.get("name")))){
+            return false;
+        }
+        if(table.getParameters(methodParentName).stream().anyMatch(var -> var.getName().equals(node.get("name")))){
+            return false;
+        }
+        if(table.getFields().stream().anyMatch(var -> var.getName().equals(node.get("name")))){
+            return true;
+        }
+        return false;
     }
 
 }

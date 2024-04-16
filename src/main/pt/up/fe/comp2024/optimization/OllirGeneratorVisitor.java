@@ -68,8 +68,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private String visitAssignStmt(JmmNode node, Void unused) {
 
         // If LHS is a field, we want to use putfield instead of the default assignment
-        System.out.println(node.getJmmChild(0).get("name"));
-        System.out.println(isField(node.getJmmChild(0)));
         if(isField(node.getJmmChild(0))){
             StringBuilder computation = new StringBuilder();
 
@@ -280,7 +278,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 .map(this::visit)
                 .forEach(code::append);
 
-        System.out.println(code.toString());
+        System.out.println(code);
         return code.toString();
     }
 
@@ -301,10 +299,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
     // Returns true if the node is a field, not a local or parameter
-    private boolean isField(JmmNode node){
+    public boolean isField(JmmNode node){
         var methodParentName = node.getAncestor(METHOD_DECL).get().get("name");
-        System.out.println(methodParentName);
-        System.out.println(table.getLocalVariables(methodParentName));
         if(table.getLocalVariables(methodParentName).stream().anyMatch(var -> var.getName().equals(node.get("name")))){
             return false;
         }
