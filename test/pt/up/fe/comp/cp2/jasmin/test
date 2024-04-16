@@ -1,76 +1,37 @@
-Simple.ollir:
-.class Simple
-.super java/lang/Object
 
-;default constructor
-.method public <init>()V
-    aload_0
-    invokespecial java/lang/Object/<init>()V
-    return
-.end method
 
-.method public add(II)I
-   .limit stack 99
-   .limit locals 99
-   aload_0
-   iconst_1
-   invokevirtual this/constInstr(I)I
-   istore 3
-   iload 1
-   iload 3
-   iadd
-   istore 4
-   iload 4
-   istore 5
-   iload 5
-   ireturn
-.end method
 
-.method public static main([Ljava/lang/String;)V
-   .limit stack 99
-   .limit locals 99
-   ldc 20
-   istore 1
-   ldc 10
-   istore 2
+
+
+
+; tmp2.Simple :=.Simple new(Simple).Simple;
    new Simple
    dup
-   invokespecial Simple/<init>()V
    astore 3
+   aload 3
+   invokespecial Simple/<init>()V
 
+; s.Simple :=.Simple tmp2.Simple;
    aload 3
    astore 4
-   aload_0
-   iconst_1
-   invokevirtual s/add(I)V
+
+; tmp3.i32 :=.i32 invokevirtual(s.Simple, "add", a.i32, b.i32).i32;
+   aload 4
+   iload 1
+   iload 2
+   invokevirtual Simple/add(II)I
    istore 5
+
+; c.i32 :=.i32 tmp3.i32;
    iload 5
    istore 6
-   invokestatic io/println()V
+
+; invokestatic(io, "println", c.i32).V;
+
+   iload 6
+   invokestatic Simple/println(I)V
    return
 .end method
 
-.method public constInstr()I
-   .limit stack 99
-   .limit locals 99
-   ldc 0
-   istore 1
-   ldc 4
-   istore 1
-   ldc 8
-   istore 1
-   ldc 14
-   istore 1
-   ldc 250
-   istore 1
-   ldc 400
-   istore 1
-   ldc 1000
-   istore 1
-   ldc 100474650
-   istore 1
-   ldc 10
-   istore 1
-   iload 1
-   ireturn
-.end method
+
+

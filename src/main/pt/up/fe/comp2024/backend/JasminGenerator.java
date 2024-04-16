@@ -1,5 +1,6 @@
 package pt.up.fe.comp2024.backend;
 
+import org.hamcrest.core.AnyOf;
 import org.specs.comp.ollir.*;
 import org.specs.comp.ollir.tree.TreeNode;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
@@ -8,10 +9,13 @@ import pt.up.fe.specs.util.classmap.FunctionClassMap;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 import pt.up.fe.specs.util.utilities.StringLines;
 
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
-
+import java.util.Optional;
+import java.util.Map;
 /**
  * Generates Jasmin code from an OllirResult.
  * <p>
@@ -55,21 +59,60 @@ public class JasminGenerator {
 
     public String callMethod(CallInstruction instruction) {
         StringBuilder ret = new StringBuilder();
-        String className = ((Operand) instruction.getCaller()).getName(); //hardcoded figure it out later
-        switch (instruction.getInvocationType().toString()){
-            case "invokevirtual" :{
-                ret.append("aload_0").append(NL).append("iconst_1").append(NL).append("invokevirtual ").append(className).append("/").append(((LiteralElement) instruction.getMethodName()).getLiteral().replace("\"", "")).append("(I)I").append(NL);
+        String className = ((ClassType) instruction.getCaller().getType()).getName();
+        Operand caller = (Operand) instruction.getCaller();
+        if(this.currentMethod.getVarTable().get(caller.getName()) != null){
+            ret.append(generators.apply((Operand) instruction.getCaller()));
+        }
+        switch (instruction.getInvocationType().toString()) {
+            case "invokevirtual": {
+                String arguments = "";
+                if (instruction.getArguments().size()!=0) {
+                    for (Element argument : instruction.getArguments()) {
+                        ret.append(generators.apply(argument));
+                        arguments += translateType(argument.getType());
+                    }
+                }
+                ret.append("invokevirtual ").append(className).append("/").append(((LiteralElement) instruction.getMethodName()).getLiteral().replace("\"", "")).append("(").append(arguments).append(")I").append(NL);
                 break;
             }
-            case "invokestatic" :{
-                ret.append("invokestatic ").append(className).append("/").append(((LiteralElement) instruction.getMethodName()).getLiteral().replace("\"", "")).append("()V").append(NL);
+            case "invokestatic": {
+                String arguments = "";
+                if (instruction.getArguments().size()!=0) {
+                    for (Element argument : instruction.getArguments()) {
+                        ret.append(generators.apply(argument));
+                        arguments += translateType(argument.getType());
+                    }
+                }
+                ret.append("invokestatic ").append(((Operand) instruction.getCaller()).getName()).append("/").append(((LiteralElement) instruction.getMethodName()).getLiteral().replace("\"", "")).append("(").append(arguments).append(")V").append(NL);
                 break;
             }
-            case "NEW" :{
-                ret.append("new ").append(className).append(NL).append("dup").append(NL).append("invokespecial ").append(className).append("/<init>()V").append(NL);
+            case "invokespecial":{
+                ret.append("invokespecial ").append(className).append("/<init>()V").append(NL);
+                break;
+            }
+            case "NEW": {
+                ret.append("new ").append(className).append(NL).append("dup").append(NL);
                 break;
             }
         }
+        /*
+                case "invokevirtual": {
+                    if (currentMethod.isStaticMethod()) {
+                        ret.append("new ").append(this.ollirResult.getOllirClass().getClassName()).append(NL).append("dup").append(NL).append("invokespecial ").append(this.ollirResult.getOllirClass().getClassName()).append("/<init>()V").append(NL).append("astore_0").append(NL);
+                    }
+                    ret.append("aload_0").append(NL).append("iconst_1").append(NL).append("invokevirtual ").append(className).append("/").append(((LiteralElement) instruction.getMethodName()).getLiteral().replace("\"", "")).append("(I)I").append(NL);
+                    break;
+                }
+            //if it exists already then i just load, if it doesn't then i create it
+            HashMap<String, Descriptor> map = currentMethod.getVarTable();
+
+            Optional<String> keyWithSearchString = map.entrySet().stream()
+                    .filter(entry -> entry.getValue().getVarType() instanceof ClassType)
+                    .filter(entry -> entry.getKey().toString().equals(className))
+                    .map(Map.Entry::getKey)
+                    .findFirst();
+        }*/
         return ret.toString();
     }
 
