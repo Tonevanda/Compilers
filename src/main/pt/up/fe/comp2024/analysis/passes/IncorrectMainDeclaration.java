@@ -22,7 +22,6 @@ public class IncorrectMainDeclaration extends AnalysisVisitor{
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
     }
 
-    // TODO:
     public Void visitMethodDecl(JmmNode methodDecl, SymbolTable table){
 
         // Get name of method
