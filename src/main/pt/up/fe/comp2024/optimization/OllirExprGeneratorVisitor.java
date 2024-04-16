@@ -78,6 +78,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         var type = table.getReturnType(methodName);
         var assignStmt = node.getAncestor(ASSIGN_STMT);
         boolean isPartOfAssignment = assignStmt.isPresent();
+        boolean isExprStmt = node.getParent().getKind().equals(EXPR_STMT.toString());
         if(isPartOfAssignment){
             var assignLHS = assignStmt.get().getJmmChild(0);
             type = TypeUtils.getExprType(assignLHS, table);
@@ -86,7 +87,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             type = new Type("void", false);
         }
         // TODO: Check if it's also a parameter inside a function call
-        String code = isPartOfAssignment ? OptUtils.getTemp() + OptUtils.toOllirType(type) : "";
+        String code = !isExprStmt ? OptUtils.getTemp() + OptUtils.toOllirType(type) : "";
 
         var numArgs = NodeUtils.getIntegerAttribute(node, "numArgs", "0");
         var arguments = node.getChildren().subList(1, node.getNumChildren());
@@ -100,7 +101,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         }
 
         // TODO: Check if it's also a parameter inside a function call
-        if(isPartOfAssignment){
+        if(!isExprStmt){
             computation.append(code).append(SPACE).append(ASSIGN)
                     .append(OptUtils.toOllirType(type)).append(SPACE);
         }
