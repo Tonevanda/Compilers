@@ -160,7 +160,8 @@ public class JasminGenerator {
 
     private String translateType(Type type) {
         return switch (type.toString()) {
-            case "INT32", "BOOLEAN" -> "I";
+            case "INT32" -> "I";
+            case "BOOLEAN" -> "Z";
             case "STRING" -> "Ljava/lang/String;";
             case "VOID" -> "V";
             default -> throw new NotImplementedException(type);
