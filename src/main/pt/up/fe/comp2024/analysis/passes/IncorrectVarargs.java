@@ -64,6 +64,21 @@ public class IncorrectVarargs extends AnalysisVisitor{
             return null;
         }
 
+        // Count how many varargs there are
+        if(parameters.stream()
+                .filter(parameter -> parameter.getType().getObject("isVarargs").toString().equals("true"))
+                .count() > 1) {
+            // Create error report
+            var message = String.format("Method %s has more than one varargs parameter", methodName);
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(methodDecl),
+                    NodeUtils.getColumn(methodDecl),
+                    message,
+                    null)
+            );
+        }
+
         // If method only has one parameter, and it's varargs, return
         if(parameters.size() == 1 && parameters.get(0).getType().getObject("isVarargs").toString().equals("true")){
             return null;

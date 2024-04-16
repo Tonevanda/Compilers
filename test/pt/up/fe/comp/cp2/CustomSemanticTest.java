@@ -254,4 +254,11 @@ public class CustomSemanticTest {
         TestUtils.mustFail(result);
     }
 
+    @Test
+    public void varargsTooManyInvalid(){
+        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/customsemantic/varargsTooManyInvalid.jmm"));
+        System.out.println(result.getReports());
+        TestUtils.mustFail(result);
+    }
+
 }
