@@ -133,9 +133,8 @@ stmt
 expr locals[int numArgs=0]
     : expr LBRACK expr RBRACK #ArrAccessExpr
     | LPAREN expr RPAREN #ParenExpr
-    | expr DOT func='length' #LengthCall
+    | expr DOT func=ID #LengthCall
     | expr DOT func=ID LPAREN (expr {$numArgs+=1;} (COMMA expr {$numArgs+=1;})*)? RPAREN #FunctionCall
-    | expr DOT name=ID #FieldCall
     | op=NOT expr #UnaryExpr
     | NEW INT LBRACK expr RBRACK #NewArray
     | NEW name=ID LPAREN RPAREN #NewClassObj
