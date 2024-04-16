@@ -10,6 +10,8 @@ import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
+import java.util.Arrays;
+
 /**
  * Checks if the array index is of type int
  */
@@ -45,6 +47,13 @@ public class IncorrectStatic extends AnalysisVisitor{
 
         if(table.getParameters(currentMethod).stream()
                 .anyMatch(param -> param.getName().equals(varName))){
+            return null;
+        }
+
+        // Checks if the class with name varName is in the imports list
+        if(table.getImports().stream()
+                .flatMap(importName -> Arrays.stream(importName.substring(1, importName.length() - 1).split(","))) // Remove the square brackets and split by comma
+                .anyMatch(importName -> importName.trim().equals(varName))){
             return null;
         }
 
