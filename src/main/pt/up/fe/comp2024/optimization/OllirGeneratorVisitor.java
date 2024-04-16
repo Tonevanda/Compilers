@@ -207,7 +207,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(NL);
 
         table.getFields().forEach(field -> {
-            code.append(".field private ");
+            code.append(".field public ");
             code.append(field.getName());
             code.append(OptUtils.toOllirType(field.getType()));
             code.append(END_STMT);
