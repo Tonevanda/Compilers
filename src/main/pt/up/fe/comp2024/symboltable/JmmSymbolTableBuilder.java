@@ -89,13 +89,12 @@ public class JmmSymbolTableBuilder {
                 .toList();
     }
 
-
     private static List<Symbol> getLocalsList(JmmNode methodDecl) {
-        // TODO: Simple implementation that needs to be expanded
-
         return methodDecl.getChildren(VAR_DECL).stream()
-                .map(local -> new Symbol(TypeUtils.getType(local.getChild(0)), local.get("name")))
-                .toList();
+                .map(local -> {
+                    Type type = TypeUtils.getType(local.getChild(0));
+                    type.putObject("isVarargs", local.getChild(0).get("isVarargs").equals("true"));
+                    return new Symbol(type, local.get("name"));
+                }).toList();
     }
-
 }
