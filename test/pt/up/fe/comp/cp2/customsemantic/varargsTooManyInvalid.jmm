@@ -1,5 +1,6 @@
 class varargsTooManyInvalid{
-    public int foo(int... a, int... b){
+    public int foo(){
+        int void;
         return 0;
     }
 }
