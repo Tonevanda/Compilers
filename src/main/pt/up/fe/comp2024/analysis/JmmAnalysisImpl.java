@@ -10,6 +10,7 @@ import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2024.analysis.passes.UndeclaredVariable;
 import pt.up.fe.comp2024.analysis.passes.DuplicatedMisc;
 import pt.up.fe.comp2024.analysis.passes.UndeclaredMethod;
+import pt.up.fe.comp2024.analysis.passes.IncorrectFieldCall;
 import pt.up.fe.comp2024.analysis.passes.IndexingNotArray;
 import pt.up.fe.comp2024.analysis.passes.ArrayIndexNotInt;
 import pt.up.fe.comp2024.analysis.passes.WrongIfConditionType;
@@ -38,6 +39,7 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                 new DuplicatedMisc(),
                 new UndeclaredVariable(),
                 new UndeclaredMethod(),
+                new IncorrectFieldCall(),
                 new DifferentTypeOperands(),
                 new IndexingNotArray(),
                 new ArrayIndexNotInt(),

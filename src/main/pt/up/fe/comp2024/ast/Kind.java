@@ -24,6 +24,7 @@ public enum Kind {
     PAREN_EXPR,
     BINARY_EXPR,
     ARRAY_INIT,
+    LENGTH_CALL,
     UNARY_EXPR,
     INT_LITERAL,
     BOOL_LITERAL,
@@ -33,7 +34,7 @@ public enum Kind {
 
     private static final Set<Kind> STATEMENTS = Set.of(ASSIGN_STMT, RETURN_STMT, IF_STMT, WHILE_STMT, EXPR_STMT);
     private static final Set<Kind> EXPRESSIONS = Set.of(BINARY_EXPR, UNARY_EXPR, INT_LITERAL, BOOL_LITERAL, VAR,
-            NEW_CLASS_OBJ, FUNCTION_CALL, ARR_ACCESS_EXPR, ARRAY_INIT, PAREN_EXPR, THIS);
+            NEW_CLASS_OBJ, FUNCTION_CALL, ARR_ACCESS_EXPR, ARRAY_INIT, PAREN_EXPR, THIS, LENGTH_CALL);
 
     private final String name;
 
