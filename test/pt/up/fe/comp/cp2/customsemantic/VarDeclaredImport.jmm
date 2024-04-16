@@ -1,0 +1,12 @@
+import x;
+
+class VarDeclaredClassField {
+
+    public static void main(String[] args) {
+
+    }
+
+    public x foo() {
+        return x;
+    }
+}

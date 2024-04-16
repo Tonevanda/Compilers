@@ -1,5 +1,6 @@
 package pt.up.fe.comp2024.backend;
 
+import org.hamcrest.core.AnyOf;
 import org.specs.comp.ollir.*;
 import org.specs.comp.ollir.tree.TreeNode;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
@@ -8,10 +9,13 @@ import pt.up.fe.specs.util.classmap.FunctionClassMap;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 import pt.up.fe.specs.util.utilities.StringLines;
 
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
-
+import java.util.Optional;
+import java.util.Map;
 /**
  * Generates Jasmin code from an OllirResult.
  * <p>
@@ -39,7 +43,6 @@ public class JasminGenerator {
         code = null;
         currentMethod = null;
 
-        System.out.println("JasminGenerator created");
         this.generators = new FunctionClassMap<>();
         generators.put(ClassUnit.class, this::generateClassUnit);
         generators.put(Method.class, this::generateMethod);
@@ -56,26 +59,59 @@ public class JasminGenerator {
 
     public String callMethod(CallInstruction instruction) {
         StringBuilder ret = new StringBuilder();
-        String className = "Test"; //hardcoded figure it out later
-        if(className.equals(this.ollirResult.getOllirClass().getClassName())){
-            ret.append("new ").append(className).append(NL).append("dup").append(NL).append("invokespecial ").append(className).append("/<init>()V").append(NL);
+        String className = ((ClassType) instruction.getCaller().getType()).getName();
+        Operand caller = (Operand) instruction.getCaller();
+        if(this.currentMethod.getVarTable().get(caller.getName()) != null){
+            ret.append(generators.apply((Operand) instruction.getCaller()));
         }
-        //ret.append("invokestatic ").append(className).append("/").append("(");
-        /*for (Element param : instruction.getParams()) {
-            if (param.getType().toString().equals("INT32")) {
-                ret.append("I");
-            } else if (param.getType().toString().equals("BOOLEAN")) {
-                ret.append("I");
-            } else if (param.getType().toString().equals("STRING")) {
-                ret.append("Ljava/lang/String;");
+        switch (instruction.getInvocationType().toString()) {
+            case "invokevirtual": {
+                String arguments = "";
+                if (instruction.getArguments().size()!=0) {
+                    for (Element argument : instruction.getArguments()) {
+                        ret.append(generators.apply(argument));
+                        arguments += translateType(argument.getType());
+                    }
+                }
+                ret.append("invokevirtual ").append(className).append("/").append(((LiteralElement) instruction.getMethodName()).getLiteral().replace("\"", "")).append("(").append(arguments).append(")I").append(NL);
+                break;
             }
-            //adw
+            case "invokestatic": {
+                String arguments = "";
+                if (instruction.getArguments().size()!=0) {
+                    for (Element argument : instruction.getArguments()) {
+                        ret.append(generators.apply(argument));
+                        arguments += translateType(argument.getType());
+                    }
+                }
+                ret.append("invokestatic ").append(((Operand) instruction.getCaller()).getName()).append("/").append(((LiteralElement) instruction.getMethodName()).getLiteral().replace("\"", "")).append("(").append(arguments).append(")V").append(NL);
+                break;
+            }
+            case "invokespecial":{
+                ret.append("invokespecial ").append(className).append("/<init>()V").append(NL);
+                break;
+            }
+            case "NEW": {
+                ret.append("new ").append(className).append(NL).append("dup").append(NL);
+                break;
+            }
         }
-        if (instruction.getReturnType().toString().equals("BOOLEAN")) {
-            ret.append(")I").append(NL);
-        }
-        if (instruction.getReturnType().toString().equals("VOID")) {
-            ret.append(")V").append(NL);
+        /*
+                case "invokevirtual": {
+                    if (currentMethod.isStaticMethod()) {
+                        ret.append("new ").append(this.ollirResult.getOllirClass().getClassName()).append(NL).append("dup").append(NL).append("invokespecial ").append(this.ollirResult.getOllirClass().getClassName()).append("/<init>()V").append(NL).append("astore_0").append(NL);
+                    }
+                    ret.append("aload_0").append(NL).append("iconst_1").append(NL).append("invokevirtual ").append(className).append("/").append(((LiteralElement) instruction.getMethodName()).getLiteral().replace("\"", "")).append("(I)I").append(NL);
+                    break;
+                }
+            //if it exists already then i just load, if it doesn't then i create it
+            HashMap<String, Descriptor> map = currentMethod.getVarTable();
+
+            Optional<String> keyWithSearchString = map.entrySet().stream()
+                    .filter(entry -> entry.getValue().getVarType() instanceof ClassType)
+                    .filter(entry -> entry.getKey().toString().equals(className))
+                    .map(Map.Entry::getKey)
+                    .findFirst();
         }*/
         return ret.toString();
     }
@@ -110,12 +146,10 @@ public class JasminGenerator {
         return ret.toString();
     }
     public List<Report> getReports() {
-        System.out.println("JasminGenerator created");
         return reports;
     }
 
     public String build() {
-        System.out.println("JasminGenerator created");
         // This way, build is idempotent
         if (code == null) {
             code = generators.apply(ollirResult.getOllirClass());
@@ -125,7 +159,6 @@ public class JasminGenerator {
     }
 
     private String translateType(Type type) {
-        System.out.println("JasminGenerator created");
         return switch (type.toString()) {
             case "INT32", "BOOLEAN" -> "I";
             case "STRING" -> "Ljava/lang/String;";
@@ -135,7 +168,6 @@ public class JasminGenerator {
     }
 
     private String generateClassUnit(ClassUnit classUnit) {
-        System.out.println("JasminGenerator created");
 
         var code = new StringBuilder();
 
@@ -181,7 +213,6 @@ public class JasminGenerator {
 
 
     private String generateMethod(Method method) {
-        System.out.println("JasminGenerator created");
 
         // set method
         currentMethod = method;
@@ -228,7 +259,6 @@ public class JasminGenerator {
     }
 
     private String generateAssign(AssignInstruction assign) {
-        System.out.println("JasminGenerator created");
         var code = new StringBuilder();
 
         // generate code for loading what's on the right
@@ -258,20 +288,28 @@ public class JasminGenerator {
     }
 
     private String generateSingleOp(SingleOpInstruction singleOp) {
-        System.out.println("JasminGenerator created");
         return generators.apply(singleOp.getSingleOperand());
     }
 
     private String generateLiteral(LiteralElement literal) {
-        System.out.println("JasminGenerator created");
         return "ldc " + literal.getLiteral() + NL;
     }
 
     private String generateOperand(Operand operand) {
-        System.out.println("JasminGenerator created");
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-        return "iload " + reg + NL;
+        switch (operand.getType().toString()) {
+            case "INT32", "BOOLEAN" -> {
+                return "iload " + reg + NL;
+            }
+            case "STRING" -> {
+                return "aload " + reg + NL;
+            }
+            default -> {
+                return "aload " + reg + NL;
+            }
+        }
+        //return "iload " + reg + NL;
     }
 
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
@@ -294,7 +332,6 @@ public class JasminGenerator {
     }
 
     private String generateReturn(ReturnInstruction returnInst) {
-        System.out.println("JasminGenerator created");
         var code = new StringBuilder();
 
         // TODO: Hardcoded to int return type, needs to be expanded

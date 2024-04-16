@@ -1,0 +1,7 @@
+class ValidThis {
+    public ValidThis foo() {
+        ValidThis v;
+        v = this;
+        return this;
+    }
+}

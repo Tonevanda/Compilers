@@ -1,22 +1,37 @@
- .class Test
-.super java/lang/Object
 
-;default constructor
-.method public <init>()V
-    aload_0
-    invokespecial java/lang/Object/<init>()V
-    return
-.end method
 
-.method public static main([Ljava/lang/String;)V
-   .limit stack 99
-   .limit locals 99
-   new Test
+
+
+
+
+; tmp2.Simple :=.Simple new(Simple).Simple;
+   new Simple
    dup
-   invokespecial Test/<init>()V
-   istore 1
-   new Test
-   dup
-   invokespecial Test/<init>()V
+   astore 3
+   aload 3
+   invokespecial Simple/<init>()V
+
+; s.Simple :=.Simple tmp2.Simple;
+   aload 3
+   astore 4
+
+; tmp3.i32 :=.i32 invokevirtual(s.Simple, "add", a.i32, b.i32).i32;
+   aload 4
+   iload 1
+   iload 2
+   invokevirtual Simple/add(II)I
+   istore 5
+
+; c.i32 :=.i32 tmp3.i32;
+   iload 5
+   istore 6
+
+; invokestatic(io, "println", c.i32).V;
+
+   iload 6
+   invokestatic Simple/println(I)V
    return
 .end method
+
+
+

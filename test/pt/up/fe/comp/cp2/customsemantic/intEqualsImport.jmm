@@ -1,0 +1,13 @@
+import A;
+
+class intEqualsImport {
+
+    public int bar() {
+        A a;
+        int b;
+
+        b = a.foo(1);
+
+        return b;
+    }
+}

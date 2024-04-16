@@ -1,0 +1,13 @@
+class VarDeclaredClassField {
+
+
+    public boolean foo() {
+        int[] x;
+        int[] y;
+        int[] z;
+
+        x = [1, 2, 3];
+        y = [1, 2, 3];
+        z = x + y;
+    }
+}

@@ -40,7 +40,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     @Override
     protected void buildVisitor() {
 
-        // TODO: PERGUNTAR AO STOR SE É PRECISO PARA ESTE CHECKPOINT CENAS TIPO B = new B();
         addVisit(PROGRAM, this::visitProgram);
         addVisit(IMPORT_DECL, this::visitImportDecl);
         addVisit(CLASS_DECL, this::visitClass);
@@ -61,7 +60,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(expr.getComputation());
         code.append(expr.getCode());
 
-        code.append(END_STMT);
+        //code.append(END_STMT);
 
         return code.toString();
     }
@@ -263,6 +262,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 .map(this::visit)
                 .forEach(code::append);
 
+        System.out.println(code.toString());
         return code.toString();
     }
 
