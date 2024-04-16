@@ -25,6 +25,21 @@ public class DuplicatedMisc extends AnalysisVisitor{
     }
 
     private Void visitMethodDecl(JmmNode methodDecl, SymbolTable table){
+        // Check if more than 1 return statement
+        var returnStatements = methodDecl.getChildren(Kind.RETURN_STMT);
+        if(returnStatements.size() > 1){
+            // Create error report
+            var message = String.format("Method %s has more than one return statement.", methodDecl.get("name"));
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(methodDecl),
+                    NodeUtils.getColumn(methodDecl),
+                    message,
+                    null)
+            );
+            return null;
+        }
+
         // Check duplicated parameters
 
         var methodName = methodDecl.get("name");
