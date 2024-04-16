@@ -59,6 +59,7 @@ public class IncompatibleReturn extends AnalysisVisitor{
         return null;
     }
 
+    // TODO: se calhar funçoes que retornam array têm de ser int[] e não só int
     private Void visitReturnStmt(JmmNode returnStmt, SymbolTable table){
         SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
 
@@ -77,7 +78,11 @@ public class IncompatibleReturn extends AnalysisVisitor{
         if(returnExprType == null) return null;
 
         // If they are the same, return
-        if (methodReturnType.getName().equals(returnExprType.getName())) return null;
+        if (methodReturnType.getName().equals(returnExprType.getName())){
+            if(methodReturnType.isArray() && returnExprType.isArray() || !methodReturnType.isArray() && !returnExprType.isArray()){
+                return null;
+            }
+        }
 
         // Create error report
         var message = String.format("Incompatible return type. Expected '%s' but got '%s'.",
