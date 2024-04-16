@@ -49,11 +49,14 @@ public class JmmSymbolTableBuilder {
     }
 
     private static Map<String, Type> buildReturnTypes(JmmNode classDecl) {
-
         Map<String, Type> map = new HashMap<>();
 
         classDecl.getChildren(METHOD_DECL).stream()
-                .forEach(method -> map.put(method.get("name"), TypeUtils.getType(method.getChild(0))));
+                .forEach(method -> {
+                    Type type = TypeUtils.getType(method.getChild(0));
+                    type.putObject("isVarargs", method.getChild(0).get("isVarargs").equals("true"));
+                    map.put(method.get("name"), type);
+                });
 
         return map;
     }

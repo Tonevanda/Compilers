@@ -16,13 +16,44 @@ public class IncorrectVarargs extends AnalysisVisitor{
 
     @Override
     public void buildVisitor(){
+        addVisit(Kind.VAR_DECL, this::visitVarDecl);
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
+    }
+
+    private Void visitVarDecl(JmmNode varDecl, SymbolTable table){
+        // Check if variable is varargs
+        if(varDecl.getChild(0).get("isVarargs").equals("true")){
+            // Create error report
+            var message = String.format("Incorrect varargs usage. Variable '%s' was declared as varargs", varDecl.get("name"));
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(varDecl),
+                    NodeUtils.getColumn(varDecl),
+                    message,
+                    null)
+            );
+        }
+        return null;
     }
 
     private Void visitMethodDecl(JmmNode methodDecl, SymbolTable table){
 
         // Get the method name
         var methodName = methodDecl.get("name");
+
+        // Check if return type is varargs
+        if(table.getReturnType(methodName).getObject("isVarargs").toString().equals("true")){
+            // Create error report
+            var message = String.format("Method '%s' has return type varargs", methodName);
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(methodDecl),
+                    NodeUtils.getColumn(methodDecl),
+                    message,
+                    null)
+            );
+            return null;
+        }
 
         // Get the parameters of the method
         var parameters = table.getParameters(methodName);

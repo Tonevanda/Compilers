@@ -52,7 +52,7 @@ public class TypeUtils {
             case VAR -> getVarExprType(expr, table);
             case THIS -> new Type(table.getClassName(), false);
             case NEW_CLASS_OBJ -> getNewClassObjType(expr);
-            case INT_LITERAL -> new Type(INT_TYPE_NAME, false);
+            case INT_LITERAL, LENGTH_CALL -> new Type(INT_TYPE_NAME, false);
             case BOOL_LITERAL, UNARY_EXPR -> new Type(BOOLEAN_TYPE_NAME, false);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
