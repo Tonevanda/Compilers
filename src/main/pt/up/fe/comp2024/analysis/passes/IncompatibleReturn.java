@@ -26,18 +26,36 @@ public class IncompatibleReturn extends AnalysisVisitor{
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
         currentMethod = method.get("name");
         var methodReturnType = table.getReturnType(currentMethod);
-        if(!methodReturnType.getName().equals("void") && method.getChildren(Kind.RETURN_STMT).isEmpty()){
-            // Create error report
-            var message = String.format("Missing return statement in method '%s'. Expected return type '%s'.",
-                    currentMethod, methodReturnType.getName());
-            addReport(Report.newError(
-                    Stage.SEMANTIC,
-                    NodeUtils.getLine(method),
-                    NodeUtils.getColumn(method),
-                    message,
-                    null)
-            );
+        if(!methodReturnType.getName().equals("void")){
+            if(method.getChildren(Kind.RETURN_STMT).isEmpty()){
+                // Create error report
+                var message = String.format("Missing return statement in method '%s'. Expected return type '%s'.",
+                        currentMethod, methodReturnType.getName());
+                addReport(Report.newError(
+                        Stage.SEMANTIC,
+                        NodeUtils.getLine(method),
+                        NodeUtils.getColumn(method),
+                        message,
+                        null)
+                );
+                return null;
+            }
+            var children = method.getChildren();
+            var lastChild = children.get(children.size() - 1);
+            if(!lastChild.getKind().equals(Kind.RETURN_STMT.toString())){
+                // Create error report
+                var message = String.format("Last statement in method '%s' is not return", currentMethod);
+                addReport(Report.newError(
+                        Stage.SEMANTIC,
+                        NodeUtils.getLine(method),
+                        NodeUtils.getColumn(method),
+                        message,
+                        null)
+                );
+            }
+
         }
+
         return null;
     }
 
