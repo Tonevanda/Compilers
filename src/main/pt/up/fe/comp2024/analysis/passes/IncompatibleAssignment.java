@@ -29,6 +29,21 @@ public class IncompatibleAssignment extends AnalysisVisitor{
 
         // Get the assigned variable and the assignee
         var assignedVar = assigntStmt.getChild(0);
+        if(assignedVar.getKind().equals(Kind.INT_LITERAL.toString()) ||
+                assignedVar.getKind().equals(Kind.BOOL_LITERAL.toString()) ||
+                assignedVar.getKind().equals(Kind.THIS.toString()) ||
+                assignedVar.getKind().equals(Kind.FUNCTION_CALL.toString())){
+            // Create error report
+            var message = String.format("Cannot assign to '%s'.", assignedVar.getKind());
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(assigntStmt),
+                    NodeUtils.getColumn(assigntStmt),
+                    message,
+                    null)
+            );
+            return null;
+        }
         var assignee = assigntStmt.getChild(1);
 
         // If assignee is an array initializer
