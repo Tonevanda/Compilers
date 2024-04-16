@@ -73,7 +73,7 @@ public class JasminGenerator {
                         arguments += translateType(argument.getType());
                     }
                 }
-                ret.append("invokevirtual ").append(className).append("/").append(((LiteralElement) instruction.getMethodName()).getLiteral().replace("\"", "")).append("(").append(arguments).append(")I").append(NL);
+                ret.append("invokevirtual ").append(className).append("/").append(((LiteralElement) instruction.getMethodName()).getLiteral().replace("\"", "")).append("(").append(arguments).append(")").append(translateType(instruction.getReturnType())).append(NL);
                 break;
             }
             case "invokestatic": {
@@ -84,7 +84,7 @@ public class JasminGenerator {
                         arguments += translateType(argument.getType());
                     }
                 }
-                ret.append("invokestatic ").append(((Operand) instruction.getCaller()).getName()).append("/").append(((LiteralElement) instruction.getMethodName()).getLiteral().replace("\"", "")).append("(").append(arguments).append(")V").append(NL);
+                ret.append("invokestatic ").append(((Operand) instruction.getCaller()).getName()).append("/").append(((LiteralElement) instruction.getMethodName()).getLiteral().replace("\"", "")).append("(").append(arguments).append(")").append(translateType(instruction.getReturnType())).append(NL);
                 break;
             }
             case "invokespecial":{
