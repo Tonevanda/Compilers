@@ -23,6 +23,21 @@ public class ArrayIndexNotInt extends AnalysisVisitor{
     private Void visitArrAccessExpr(JmmNode arrAccessExpr, SymbolTable table){
 
         // Get the variable name and index of the array access expression
+        if(arrAccessExpr.getChild(0).getKind().equals(Kind.ARRAY_INIT.toString())){
+            var indexType = TypeUtils.getExprType(arrAccessExpr.getChild(1), table);
+            if(indexType.getName().equals(TypeUtils.getIntTypeName())) return null;
+            else {
+                // Create error report
+                var message = String.format("Array has non-integer index.");
+                addReport(Report.newError(
+                        Stage.SEMANTIC,
+                        NodeUtils.getLine(arrAccessExpr),
+                        NodeUtils.getColumn(arrAccessExpr),
+                        message,
+                        null)
+                );
+            }
+        }
         var varName = arrAccessExpr.getChild(0).get("name");
         var index = arrAccessExpr.getChild(1);
 
@@ -30,7 +45,7 @@ public class ArrayIndexNotInt extends AnalysisVisitor{
         var index_type = TypeUtils.getExprType(index, table);
 
         // If the index is an integer, return
-        if (index_type.getName().equals(TypeUtils.getIntTypeName())) return null;
+        if (index_type.getName().equals(TypeUtils.getIntTypeName()) && !index_type.isArray()) return null;
 
         // Create error report
         var message = String.format("Array '%s' has non-integer index.", varName);

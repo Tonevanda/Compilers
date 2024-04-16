@@ -48,11 +48,11 @@ public class TypeUtils {
             case BINARY_EXPR -> getBinExprType(expr);
             case PAREN_EXPR -> getExprType(expr.getChild(0), table);
             case FUNCTION_CALL -> getFunctionCallType(expr, table);
-            case ARR_ACCESS_EXPR -> getExprType(expr.getChild(0), table);
             case VAR -> getVarExprType(expr, table);
             case THIS -> new Type(table.getClassName(), false);
             case NEW_CLASS_OBJ -> getNewClassObjType(expr);
-            case INT_LITERAL, LENGTH_CALL -> new Type(INT_TYPE_NAME, false);
+            case ARRAY_INIT, NEW_ARRAY -> new Type(INT_TYPE_NAME, true);
+            case INT_LITERAL, LENGTH_CALL, ARR_ACCESS_EXPR -> new Type(INT_TYPE_NAME, false);
             case BOOL_LITERAL, UNARY_EXPR -> new Type(BOOLEAN_TYPE_NAME, false);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
