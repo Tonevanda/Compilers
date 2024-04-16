@@ -30,6 +30,17 @@ public class IncorrectStatic extends AnalysisVisitor{
     private Void visitMethodDecl(JmmNode methodDecl, SymbolTable table){
         currentMethod = methodDecl.get("name");
         isStatic = methodDecl.get("isStatic").equals("true");
+        if(!currentMethod.equals("name") && isStatic){
+            // Create error report
+            var message = String.format("Method '%s' cannot be declared static", currentMethod);
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(methodDecl),
+                    NodeUtils.getColumn(methodDecl),
+                    message,
+                    null)
+            );
+        }
         return null;
     }
 
