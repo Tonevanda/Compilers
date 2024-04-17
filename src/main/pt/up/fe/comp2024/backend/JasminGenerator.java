@@ -170,7 +170,8 @@ public class JasminGenerator {
 
     private String translateAccessModifier(AccessModifier accessModifier) {
         return switch (accessModifier) {
-            case DEFAULT,PUBLIC -> "public";
+            case DEFAULT -> "";
+            case PUBLIC -> "public";
             case PRIVATE -> "private";
             case PROTECTED -> "protected";
             default -> throw new NotImplementedException(accessModifier);
