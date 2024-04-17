@@ -131,12 +131,9 @@ public class JasminGenerator {
 
     public String putField(PutFieldInstruction instruction){
         StringBuilder ret = new StringBuilder();
-        int test = currentMethod.getVarTable().keySet().size();
         LiteralElement temp = (LiteralElement) instruction.getOperands().get(2);
         ret.append("aload_0").append(NL);
-        if (temp.isLiteral()){
-            ret.append(generateLiteral(temp));
-        }
+        ret.append(generators.apply(temp));
         String originClassName = ((ClassType) instruction.getOperands().get(0).getType()).getName();
         String fieldName = instruction.getField().getName();
         ret.append("putfield ").append(originClassName).append("/").append(fieldName)
