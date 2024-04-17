@@ -168,6 +168,16 @@ public class JasminGenerator {
         };
     }
 
+    private String translateAccessModifier(AccessModifier accessModifier) {
+        return switch (accessModifier) {
+            case DEFAULT -> "";
+            case PUBLIC -> "public";
+            case PRIVATE -> "private";
+            case PROTECTED -> "protected";
+            default -> throw new NotImplementedException(accessModifier);
+        };
+    }
+
     private String generateClassUnit(ClassUnit classUnit) {
 
         var code = new StringBuilder();
@@ -180,7 +190,7 @@ public class JasminGenerator {
         code.append(".super java/lang/Object").append(NL).append(NL);
 
         for(var field : classUnit.getFields()){
-            code.append(".field ").append("public ").append(field.getFieldName())
+            code.append(".field ").append(translateAccessModifier(field.getFieldAccessModifier())).append(field.getFieldName())
                     .append(" ").append(translateType(field.getFieldType()))
                     .append(" = ").append(field.getInitialValue()).append(NL);
         }
