@@ -187,9 +187,10 @@ public class JasminGenerator {
         var className = ollirResult.getOllirClass().getClassName();
         code.append(".class ").append(className).append(NL);
 
-        if (classUnit.getSuperClass() == null){
+        //if (classUnit.getSuperClass() == null){
             code.append(".super java/lang/Object");
-        }
+       // }
+        /*
         else {
             for (String str : classUnit.getImports()){
                 String[] parts = str.split("\\.");
@@ -197,12 +198,12 @@ public class JasminGenerator {
                 if (lastWord.startsWith(".")) {
                     lastWord = lastWord.substring(1);
                 }
-                if(lastWord.equals(classUnit.getSuperClass())){
-
+                String temp = classUnit.getSuperClass().toString();
+                if(lastWord.equals(classUnit.getSuperClass().toString())){
                     code.append(".super ").append(str.replace(".","/"));
                 }
             }
-        }
+        }*/
         code.append(NL).append(NL);
 
         for(var field : classUnit.getFields()){
