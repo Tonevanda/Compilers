@@ -178,6 +178,7 @@ public class JasminGenerator {
         };
     }
 
+
     private String generateClassUnit(ClassUnit classUnit) {
 
         var code = new StringBuilder();
@@ -186,8 +187,23 @@ public class JasminGenerator {
         var className = ollirResult.getOllirClass().getClassName();
         code.append(".class ").append(className).append(NL);
 
-        // TODO: Hardcoded to Object, needs to be expanded
-        code.append(".super java/lang/Object").append(NL).append(NL);
+        if (classUnit.getSuperClass() == null){
+            code.append(".super java/lang/Object");
+        }
+        else {
+            for (String str : classUnit.getImports()){
+                String[] parts = str.split("\\.");
+                String lastWord = parts[parts.length - 1];
+                if (lastWord.startsWith(".")) {
+                    lastWord = lastWord.substring(1);
+                }
+                if(lastWord.equals(classUnit.getSuperClass())){
+
+                    code.append(".super ").append(str.replace(".","/"));
+                }
+            }
+        }
+        code.append(NL).append(NL);
 
         for(var field : classUnit.getFields()){
             code.append(".field ").append(translateAccessModifier(field.getFieldAccessModifier())).append(field.getFieldName())
