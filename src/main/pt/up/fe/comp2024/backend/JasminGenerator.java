@@ -218,7 +218,7 @@ public class JasminGenerator {
                 .method public <init>()V
                     aload_0
                     """;
-        defaultConstructor += "    invokespecial " + extend+"/<init>()V\n";
+        defaultConstructor+= "    invokespecial " + extend+"/<init>()V\n";
         defaultConstructor+="""
                         return
                     .end method
@@ -328,18 +328,11 @@ public class JasminGenerator {
     private String generateOperand(Operand operand) {
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-        switch (operand.getType().toString()) {
-            case "INT32", "BOOLEAN" -> {
-                return "iload " + reg + NL;
-            }
-            case "STRING" -> {
-                return "aload " + reg + NL;
-            }
-            default -> {
-                return "aload " + reg + NL;
-            }
-        }
-        //return "iload " + reg + NL;
+        return switch (operand.getType().toString()) {
+            case "INT32", "BOOLEAN" -> "iload " + reg + NL;
+            //case "STRING" ->  "aload " + reg + NL;
+            default -> "aload " + reg + NL;
+        };
     }
 
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
@@ -365,11 +358,17 @@ public class JasminGenerator {
 
     private String generateReturn(ReturnInstruction returnInst) {
         var code = new StringBuilder();
-
-        // TODO: Hardcoded to int return type, needs to be expanded
         if (returnInst.getOperand() != null) {
             code.append(generators.apply(returnInst.getOperand()));
-            code.append("ireturn").append(NL);
+            switch (returnInst.getReturnType().getTypeOfElement().name().toString()) {
+                case "INT32", "BOOLEAN" -> {
+                    code.append("ireturn").append(NL);
+                }
+                //case "STRING" ->  "aload " + reg + NL;
+                default -> {
+                    code.append("areturn").append(NL);
+                }
+            }
         }
         else
             code.append("return").append(NL);
