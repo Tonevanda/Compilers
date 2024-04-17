@@ -16,6 +16,7 @@ import pt.up.fe.comp2024.analysis.passes.KeywordUsage;
 import pt.up.fe.comp2024.analysis.passes.IndexingNotArray;
 import pt.up.fe.comp2024.analysis.passes.ArrayIndexNotInt;
 import pt.up.fe.comp2024.analysis.passes.WrongIfConditionType;
+import pt.up.fe.comp2024.analysis.passes.ExtendsNotImported;
 import pt.up.fe.comp2024.analysis.passes.WrongWhileConditionType;
 import pt.up.fe.comp2024.analysis.passes.DifferentTypeOperands;
 import pt.up.fe.comp2024.analysis.passes.IncompatibleReturn;
@@ -38,6 +39,7 @@ public class JmmAnalysisImpl implements JmmAnalysis {
 
         this.analysisPasses = List.of(
                 new IncorrectMainDeclaration(),
+                new ExtendsNotImported(),
                 new UndeclaredVariable(),
                 new DuplicatedMisc(),
                 new UndeclaredMethod(),
