@@ -73,7 +73,7 @@ public class JasminGenerator {
                         arguments += translateType(argument.getType());
                     }
                 }
-                ret.append("invokevirtual ").append(className).append("/").append(((LiteralElement) instruction.getMethodName()).getLiteral().replace("\"", "")).append("(").append(arguments).append(")").append(translateType(instruction.getReturnType())).append(NL);
+                ret.append("invokevirtual ").append(translateClassPath(className)).append("/").append(((LiteralElement) instruction.getMethodName()).getLiteral().replace("\"", "")).append("(").append(arguments).append(")").append(translateType(instruction.getReturnType())).append(NL);
                 break;
             }
             case "invokestatic": {
@@ -84,15 +84,15 @@ public class JasminGenerator {
                         arguments += translateType(argument.getType());
                     }
                 }
-                ret.append("invokestatic ").append(((Operand) instruction.getCaller()).getName()).append("/").append(((LiteralElement) instruction.getMethodName()).getLiteral().replace("\"", "")).append("(").append(arguments).append(")").append(translateType(instruction.getReturnType())).append(NL);
+                ret.append("invokestatic ").append(translateClassPath(((Operand) instruction.getCaller()).getName())).append("/").append(((LiteralElement) instruction.getMethodName()).getLiteral().replace("\"", "")).append("(").append(arguments).append(")").append(translateType(instruction.getReturnType())).append(NL);
                 break;
             }
             case "invokespecial":{
-                ret.append("invokespecial ").append(className).append("/<init>()V").append(NL);
+                ret.append("invokespecial ").append(translateClassPath(className)).append("/<init>()V").append(NL);
                 break;
             }
             case "NEW": {
-                ret.append("new ").append(className).append(NL).append("dup").append(NL);
+                ret.append("new ").append(translateClassPath(className)).append(NL).append("dup").append(NL);
                 break;
             }
         }
@@ -164,7 +164,7 @@ public class JasminGenerator {
             case "BOOLEAN" -> "Z";
             case "STRING" -> "Ljava/lang/String;";
             case "VOID" -> "V";
-            default -> throw new NotImplementedException(type);
+            default -> "L"+translateClassPath(((ClassType) type).getName())+";";
         };
     }
 
@@ -178,11 +178,23 @@ public class JasminGenerator {
         };
     }
 
+    private String translateClassPath(String className){
+        for (String str : ollirResult.getOllirClass().getImports()){
+            String[] parts = str.split("\\.");
+            String lastWord = parts[parts.length - 1];
+            if (lastWord.startsWith(".")) {
+                lastWord = lastWord.substring(1);
+            }
+            if(lastWord.equals(className)){
+                return str.replace(".","/");
+            }
+        }
+        return className;
+    }
+
 
     private String generateClassUnit(ClassUnit classUnit) {
-
         var code = new StringBuilder();
-
         // generate class name
         var className = ollirResult.getOllirClass().getClassName();
         code.append(".class ").append(className).append(NL);
@@ -192,17 +204,8 @@ public class JasminGenerator {
             extend = "java/lang/Object";
         }
         else {
-            for (String str : classUnit.getImports()){
-                String[] parts = str.split("\\.");
-                String lastWord = parts[parts.length - 1];
-                if (lastWord.startsWith(".")) {
-                    lastWord = lastWord.substring(1);
-                }
-                if(lastWord.equals(classUnit.getSuperClass().toString())){
-                    code.append(".super ").append(str.replace(".","/"));
-                    extend=str.replace(".","/");
-                }
-            }
+            extend = translateClassPath(ollirResult.getOllirClass().getSuperClass().toString());
+            code.append(".super ").append(extend);
         }
         code.append(NL).append(NL);
 
@@ -327,6 +330,9 @@ public class JasminGenerator {
 
     private String generateOperand(Operand operand) {
         // get register
+        if(operand.getName().equals("this")){
+            return "aload 0" + NL;
+        }
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
         return switch (operand.getType().toString()) {
             case "INT32", "BOOLEAN" -> "iload " + reg + NL;
