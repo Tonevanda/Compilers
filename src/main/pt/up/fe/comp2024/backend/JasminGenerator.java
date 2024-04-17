@@ -88,7 +88,7 @@ public class JasminGenerator {
                 break;
             }
             case "invokespecial":{
-                ret.append("invokespecial ").append(translateClassPath(className)).append("/<init>()V").append(NL);
+                ret.append("invokespecial ").append(translateClassPath(className)).append("/<init>()V").append(NL).append("pop").append(NL);
                 break;
             }
             case "NEW": {
@@ -277,10 +277,16 @@ public class JasminGenerator {
         code.append(TAB).append(".limit locals 99").append(NL);
 
         for (var inst : method.getInstructions()) {
+
             var instCode = StringLines.getLines(generators.apply(inst)).stream()
                     .collect(Collectors.joining(NL + TAB, TAB, NL));
-
             code.append(instCode);
+            if (inst instanceof CallInstruction){
+                
+                if((((CallInstruction) inst).getInvocationType().name().equals("invokevirtual")|| ((CallInstruction) inst).getInvocationType().name().equals("invokestatic")) && !(((CallInstruction) inst).getReturnType().toString().equals("VOID"))){
+                    code.append(TAB).append("pop").append(NL);
+                }
+            }
         }
 
         code.append(".end method\n");
