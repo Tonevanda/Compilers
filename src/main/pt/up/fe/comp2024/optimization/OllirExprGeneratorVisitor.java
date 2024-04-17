@@ -52,7 +52,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     private OllirExprResult visitBoolean(JmmNode node, Void unused){
         var boolType = new Type(TypeUtils.getBooleanTypeName(), false);
         String ollirBoolType = OptUtils.toOllirType(boolType);
-        String code = node.get("value") + ollirBoolType;
+        String code = (node.get("value").equals("true") ? "1" : "0")  + ollirBoolType;
         return new OllirExprResult(code);
     }
 
