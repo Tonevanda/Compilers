@@ -211,8 +211,8 @@ public class JasminGenerator {
 
         for(var field : classUnit.getFields()){
             code.append(".field ").append(translateAccessModifier(field.getFieldAccessModifier())).append(field.getFieldName())
-                    .append(" ").append(translateType(field.getFieldType()))
-                    .append(" = ").append(field.getInitialValue()).append(NL);
+                    .append(" ").append(translateType(field.getFieldType())).append(NL);
+                    //.append(" = ").append(field.getInitialValue()).append(NL);
         }
 
         // generate a single constructor method
