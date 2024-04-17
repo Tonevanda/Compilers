@@ -186,11 +186,11 @@ public class JasminGenerator {
         // generate class name
         var className = ollirResult.getOllirClass().getClassName();
         code.append(".class ").append(className).append(NL);
-
-        //if (classUnit.getSuperClass() == null){
+        String extend= "";
+        if (classUnit.getSuperClass() == null || classUnit.getSuperClass().equals("Object")){
             code.append(".super java/lang/Object");
-       // }
-        /*
+            extend = "java/lang/Object";
+        }
         else {
             for (String str : classUnit.getImports()){
                 String[] parts = str.split("\\.");
@@ -198,12 +198,12 @@ public class JasminGenerator {
                 if (lastWord.startsWith(".")) {
                     lastWord = lastWord.substring(1);
                 }
-                String temp = classUnit.getSuperClass().toString();
                 if(lastWord.equals(classUnit.getSuperClass().toString())){
                     code.append(".super ").append(str.replace(".","/"));
+                    extend=str.replace(".","/");
                 }
             }
-        }*/
+        }
         code.append(NL).append(NL);
 
         for(var field : classUnit.getFields()){
@@ -217,10 +217,12 @@ public class JasminGenerator {
                 ;default constructor
                 .method public <init>()V
                     aload_0
-                    invokespecial java/lang/Object/<init>()V
-                    return
-                .end method
-                """;
+                    """;
+        defaultConstructor += "    invokespecial " + extend+"/<init>()V\n";
+        defaultConstructor+="""
+                        return
+                    .end method
+                    """;
         code.append(defaultConstructor);
 
         // generate code for all other methods
