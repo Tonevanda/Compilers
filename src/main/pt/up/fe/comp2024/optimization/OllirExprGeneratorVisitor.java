@@ -115,7 +115,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
         boolean isStatic = false;
         if(!node.getChild(0).isInstance(FUNCTION_CALL)){
-            if((!table.getMethods().contains(methodName) || methodName.equals("main")) && !isObject(node.getChild(0))){
+            if(!isObject(node.getChild(0))){
                 computation.append("invokestatic(");
                 computation.append(node.getChild(0).get("name"));
                 isStatic = true;
@@ -232,6 +232,9 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
     private boolean isObject(JmmNode node){
         var methodParentName = node.getAncestor(METHOD_DECL).get().get("name");
+        if(node.get(("name")).equals("this")){
+            return true;
+        }
         if(table.getLocalVariables(methodParentName).stream().anyMatch(var -> var.getName().equals(node.get("name")))){
             return true;
         }
