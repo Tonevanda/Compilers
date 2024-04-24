@@ -51,18 +51,6 @@ public class IncompatibleArguments extends AnalysisVisitor{
 
         var arguments = functionCall.getChildren().subList(1, functionCall.getNumChildren());
 
-        if(arguments.size() < parameters.size()){
-            var message = String.format("Incompatible number of arguments, expected '%s' but got '%s'.", parameters.size(), arguments.size());
-            addReport(Report.newError(
-                    Stage.SEMANTIC,
-                    NodeUtils.getLine(functionCall),
-                    NodeUtils.getColumn(functionCall),
-                    message,
-                    null)
-            );
-            return null;
-        }
-
         // If the method being called has varargs as parameter
         if(table.getParameters(functionName).stream().
                 anyMatch(parameter -> parameter.getType().getObject("isVarargs").toString().equals("true"))){
@@ -73,8 +61,10 @@ public class IncompatibleArguments extends AnalysisVisitor{
             // Get the arguments being passed as varargs
             List<JmmNode> varargs = arguments.subList(lastNonVarargsParamIndex + 1, arguments.size());
 
-            // Check if any varargs is not integer
-            if (!varargs.stream().allMatch(arg -> TypeUtils.getExprType(arg, table).getName().equals(TypeUtils.getIntTypeName()))) {
+            // Check if all varargs are integers
+            if (varargs.stream().allMatch(arg -> TypeUtils.getExprType(arg, table).getName().equals(TypeUtils.getIntTypeName()))) {
+                return null;
+            } else {
                 // Create error report
                 var message = "Incompatible arguments. Varargs parameters must be of type int.";
                 addReport(Report.newError(
