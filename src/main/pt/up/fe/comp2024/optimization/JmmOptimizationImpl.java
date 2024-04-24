@@ -24,4 +24,9 @@ public class JmmOptimizationImpl implements JmmOptimization {
 
         return ollirResult;
     }
+
+    @Override
+    public JmmSemanticsResult optimize(JmmSemanticsResult semanticsResult) {
+        return JmmOptimization.super.optimize(semanticsResult);
+    }
 }

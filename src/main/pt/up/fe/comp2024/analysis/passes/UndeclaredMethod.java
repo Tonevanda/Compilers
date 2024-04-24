@@ -37,6 +37,7 @@ public class UndeclaredMethod extends AnalysisVisitor{
             return null;
         }
 
+        // TODO: OPTIONAL THROWS ERROR
         // Get name and type of variable that called the method
         var varName = functionCall.getChild(0).get("name");
         var varType = table.getLocalVariables(currentMethod).stream()

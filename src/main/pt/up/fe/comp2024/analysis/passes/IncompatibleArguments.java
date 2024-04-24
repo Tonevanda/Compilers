@@ -12,6 +12,7 @@ import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Checks if the type trying to be indexed is an array
@@ -53,12 +54,17 @@ public class IncompatibleArguments extends AnalysisVisitor{
         // If the method being called has varargs as parameter
         if(table.getParameters(functionName).stream().
                 anyMatch(parameter -> parameter.getType().getObject("isVarargs").toString().equals("true"))){
-            // If the arguments are all integers, return
-            if(arguments.stream().
-                    allMatch(arg -> TypeUtils.getExprType(arg, table).getName().equals(TypeUtils.getIntTypeName()))){
+
+            // Get the index of the last non-varargs parameter
+            int lastNonVarargsParamIndex = table.getParameters(functionName).size() - 2; // -2 because indices start at 0
+
+            // Get the arguments being passed as varargs
+            List<JmmNode> varargs = arguments.subList(lastNonVarargsParamIndex + 1, arguments.size());
+
+            // Check if all varargs are integers
+            if (varargs.stream().allMatch(arg -> TypeUtils.getExprType(arg, table).getName().equals(TypeUtils.getIntTypeName()))) {
                 return null;
-            }
-            else{
+            } else {
                 // Create error report
                 var message = "Incompatible arguments. Varargs parameters must be of type int.";
                 addReport(Report.newError(

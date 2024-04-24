@@ -72,6 +72,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         return new OllirExprResult(code, computation);
     }
 
+    // This is a mess
     private OllirExprResult visitFunctionCall(JmmNode node, Void unused) {
 
         var lhs = visit(node.getJmmChild(0));
