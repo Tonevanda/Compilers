@@ -51,31 +51,16 @@ public class IncompatibleArguments extends AnalysisVisitor{
 
         var arguments = functionCall.getChildren().subList(1, functionCall.getNumChildren());
 
-        // If the method being called has varargs as parameter
-        if(table.getParameters(functionName).stream().
-                anyMatch(parameter -> parameter.getType().getObject("isVarargs").toString().equals("true"))){
-
-            // Get the index of the last non-varargs parameter
-            int lastNonVarargsParamIndex = table.getParameters(functionName).size() - 2; // -2 because indices start at 0
-
-            // Get the arguments being passed as varargs
-            List<JmmNode> varargs = arguments.subList(lastNonVarargsParamIndex + 1, arguments.size());
-
-            // Check if all varargs are integers
-            if (varargs.stream().allMatch(arg -> TypeUtils.getExprType(arg, table).getName().equals(TypeUtils.getIntTypeName()))) {
-                return null;
-            } else {
-                // Create error report
-                var message = "Incompatible arguments. Varargs parameters must be of type int.";
-                addReport(Report.newError(
-                        Stage.SEMANTIC,
-                        NodeUtils.getLine(functionCall),
-                        NodeUtils.getColumn(functionCall),
-                        message,
-                        null)
-                );
-                return null;
-            }
+        if(arguments.size() < parameters.size()){
+            var message = String.format("Incompatible number of arguments, expected '%s' but got '%s'.", parameters.size(), arguments.size());
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(functionCall),
+                    NodeUtils.getColumn(functionCall),
+                    message,
+                    null)
+            );
+            return null;
         }
 
         // If correct number of arguments
@@ -101,6 +86,34 @@ public class IncompatibleArguments extends AnalysisVisitor{
         }
         // If incorrect number of arguments
         else{
+            // If the method being called has varargs as parameter
+            if(table.getParameters(functionName).stream().
+                    anyMatch(parameter -> parameter.getType().getObject("isVarargs").toString().equals("true"))){
+                System.out.println("Varargs");
+
+                // Get the index of the last non-varargs parameter
+                int lastNonVarargsParamIndex = table.getParameters(functionName).size() - 2; // -2 because indices start at 0
+
+                System.out.println("Last non varargs param index: " + lastNonVarargsParamIndex);
+                // Get the arguments being passed as varargs
+                List<JmmNode> varargs = arguments.subList(lastNonVarargsParamIndex + 1, arguments.size());
+                System.out.println("Varargs: " + varargs);
+
+                // Check if all varargs are integers
+                if (!varargs.stream().allMatch(arg -> TypeUtils.getExprType(arg, table).getName().equals(TypeUtils.getIntTypeName()))) {
+                    // Create error report
+                    var message = "Incompatible arguments. Varargs parameters must be of type int.";
+                    addReport(Report.newError(
+                            Stage.SEMANTIC,
+                            NodeUtils.getLine(functionCall),
+                            NodeUtils.getColumn(functionCall),
+                            message,
+                            null)
+                    );
+                    return null;
+                }
+                return null;
+            }
             // Create error report
             var message = String.format("Incompatible arguments. Expected %d arguments but got %d.", parameters.size(), arguments.size());
             addReport(Report.newError(
