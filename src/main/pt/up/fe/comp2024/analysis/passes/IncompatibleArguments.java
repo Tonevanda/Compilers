@@ -30,6 +30,11 @@ public class IncompatibleArguments extends AnalysisVisitor{
         var variable = functionCall.getChild(0);
         var varType = TypeUtils.getExprType(variable, table);
 
+        // If vartype is null, the method is imported so we assume
+        if(varType.getName().equals("import")){
+            return null;
+        }
+
         // If type is in imports, assume the arguments are correct
         if(table.getImports().stream()
                 .flatMap(importName -> Arrays.stream(importName.substring(1, importName.length() - 1).split(","))) // Remove the square brackets and split by comma

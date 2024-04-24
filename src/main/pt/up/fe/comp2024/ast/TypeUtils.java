@@ -80,15 +80,18 @@ public class TypeUtils {
     }
 
     private static Type getFunctionCallType(JmmNode functionCall, SymbolTable table){
-        // Get the method name
-        var methodName = functionCall.get("func");
-
-        // Check return type of method
-        if(table.getMethods().stream()
-                .anyMatch(method -> method.equals(methodName))){
-            return table.getReturnType(methodName);
+        String methodName = functionCall.get("func");
+        Type returnType = table.getReturnType(methodName);
+        Type importType = new Type("import", false);
+        if (returnType == null) {
+            return importType;
+        } else {
+            Type varType = getExprType(functionCall.getChildren().get(0), table);
+            if(isImported(varType,table)){
+                return importType;
+            }
+            return new Type(returnType.getName(), returnType.isArray());
         }
-        return null;
     }
 
     // TODO: need to refactor this in regards to imported classes
@@ -170,5 +173,10 @@ public class TypeUtils {
     public static boolean areTypesAssignable(Type sourceType, Type destinationType) {
         // TODO: Simple implementation that needs to be expanded
         return sourceType.getName().equals(destinationType.getName());
+    }
+
+    private static boolean isImported(Type type, SymbolTable table){
+        return table.getImports().stream().flatMap(importName -> List.of(importName.substring(1, importName.length() - 1).split(",")).stream())
+                .anyMatch(importName -> importName.trim().equals(type.getName()));
     }
 }

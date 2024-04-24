@@ -7,6 +7,7 @@ import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2024.analysis.AnalysisVisitor;
 import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
+import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 import java.util.Arrays;
 
@@ -25,58 +26,35 @@ public class UndeclaredMethod extends AnalysisVisitor{
         return null;
     }
 
+
+    //
     public Void visitFunctionCall(JmmNode functionCall, SymbolTable table){
-        SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
+        String methodName = functionCall.get("func");
 
-        // Get method name of FunctionCall node
-        var methodName = functionCall.get("func");
+        if (table.getMethods().stream().noneMatch(method -> method.equals(methodName))) {
 
-        // If methodName is in method list, return
-        if(table.getMethods().stream()
-                .anyMatch(methodDecl -> methodDecl.equals(methodName))){
-            return null;
+            // if the class extends another class, we assume that said method is in the super class
+            if (table.getSuper() != null) {
+                return null;
+            }
+
+            var varType = TypeUtils.getExprType(functionCall.getChild(0), table);
+
+            // if varType is from import    s, we accept
+            if (table.getImports().stream().flatMap(importName -> Arrays.stream(importName.substring(1, importName.length() - 1).split(",")))
+                    .anyMatch(importName -> importName.trim().equals(varType.getName()))) {
+                return null;
+            }
+
+            var message = String.format("Method '%s' is not declared in class '%s'.", methodName, table.getClassName());
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(functionCall),
+                    NodeUtils.getColumn(functionCall),
+                    message,
+                    null
+            ));
         }
-
-        // TODO: OPTIONAL THROWS ERROR
-        // Get name and type of variable that called the method
-        var varName = functionCall.getChild(0).get("name");
-        var varType = table.getLocalVariables(currentMethod).stream()
-                .filter(var -> var.getName().equals(varName))
-                .map(type -> type.getType())
-                .findFirst();
-
-        // If className is in import list, return
-        // This is for static function calls
-        if(table.getImports().stream()
-                .flatMap(importName -> Arrays.stream(importName.substring(1, importName.length() - 1).split(","))) // Remove the square brackets and split by comma
-                .anyMatch(importName -> importName.trim().equals(varName))){
-            return null;
-        }
-
-        // If the type of the variable is in the import list, return
-        // This is for object function calls
-        if(table.getImports().stream()
-                .flatMap(importName -> Arrays.stream(importName.substring(1, importName.length() - 1).split(","))) // Remove the square brackets and split by comma
-                .anyMatch(importName -> importName.trim().equals(varType.get().getName()))){
-            return null;
-        }
-
-        // If variable is of type "this class" and the class extends another, we assume the extended class has the method
-        if(table.getClassName().equals(varType.get().getName())
-                && table.getSuper() != null){
-            return null;
-        }
-
-        // Create error report
-        var message = String.format("Method '%s' does not exist.", methodName);
-        addReport(Report.newError(
-                Stage.SEMANTIC,
-                NodeUtils.getLine(functionCall),
-                NodeUtils.getColumn(functionCall),
-                message,
-                null)
-        );
-
         return null;
     }
 }
