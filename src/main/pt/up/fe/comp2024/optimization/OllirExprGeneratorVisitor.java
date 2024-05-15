@@ -142,8 +142,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
         computation.append(")").append(OptUtils.toOllirType(type)).append(END_STMT);
 
-        //System.out.println(computation);
-
         return new OllirExprResult(code, computation.toString());
     }
 

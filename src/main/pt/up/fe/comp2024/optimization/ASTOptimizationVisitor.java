@@ -30,6 +30,9 @@ public class ASTOptimizationVisitor extends AJmmVisitor<Void, Void> {
         // Get the function name
         var funcName = node.get("func");
 
+        // Check if function is local method, if not we don't change the AST
+        if (!table.getMethods().contains(funcName)) return null;
+
         // Get the function arguments
         var arguments = table.getParameters(funcName);
 
