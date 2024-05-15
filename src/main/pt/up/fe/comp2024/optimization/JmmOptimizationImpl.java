@@ -21,12 +21,16 @@ public class JmmOptimizationImpl implements JmmOptimization {
     public OllirResult optimize(OllirResult ollirResult) {
 
         //TODO: Do your OLLIR-based optimizations here
-
+        // Constant folding deveria ser post order
         return ollirResult;
     }
 
     @Override
     public JmmSemanticsResult optimize(JmmSemanticsResult semanticsResult) {
-        return JmmOptimization.super.optimize(semanticsResult);
+
+        var visitor = new ASTOptimizationVisitor(semanticsResult.getSymbolTable());
+        visitor.visit(semanticsResult.getRootNode());
+
+        return semanticsResult;
     }
 }

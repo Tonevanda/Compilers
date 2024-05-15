@@ -94,12 +94,10 @@ public class IncompatibleArguments extends AnalysisVisitor{
             // If the method being called has varargs as parameter
             if(table.getParameters(functionName).stream().
                     anyMatch(parameter -> parameter.getType().getObject("isVarargs").toString().equals("true"))){
-                System.out.println("Varargs");
 
                 // Get the index of the last non-varargs parameter
                 int lastNonVarargsParamIndex = table.getParameters(functionName).size() - 2; // -2 because indices start at 0
 
-                System.out.println("Last non varargs param index: " + lastNonVarargsParamIndex);
                 // Get the arguments being passed as varargs
                 List<JmmNode> varargs = arguments.subList(lastNonVarargsParamIndex + 1, arguments.size());
                 System.out.println("Varargs: " + varargs);
