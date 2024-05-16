@@ -100,7 +100,6 @@ public class IncompatibleArguments extends AnalysisVisitor{
 
                 // Get the arguments being passed as varargs
                 List<JmmNode> varargs = arguments.subList(lastNonVarargsParamIndex + 1, arguments.size());
-                System.out.println("Varargs: " + varargs);
 
                 // Check if all varargs are integers
                 if (!varargs.stream().allMatch(arg -> TypeUtils.getExprType(arg, table).getName().equals(TypeUtils.getIntTypeName()))) {

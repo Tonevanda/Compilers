@@ -1,13 +1,9 @@
-class ArrayVarargs {
-
-    public static void main(String[] args) {
-        ArrayVarargs a;
-        a = new ArrayVarargs();
-
-        a.foo(1,2,3);
-    }
-
-    int foo(int... a) {
+ class MyClass {
+     public int foo(int... a) {
         return 0;
+     }
+
+    public int bar() {
+        return this.foo(1 , 2);
     }
 }

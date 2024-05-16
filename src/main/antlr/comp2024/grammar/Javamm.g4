@@ -130,7 +130,7 @@ stmt
     | RETURN expr SEMI #ReturnStmt
     ;
 
-expr locals[int numArgs=0]
+expr locals[int numArgs=0, int numArrayArgs=0]
     : expr LBRACK expr RBRACK #ArrAccessExpr
     | LPAREN expr RPAREN #ParenExpr
     | expr DOT func=ID #LengthCall
@@ -143,7 +143,7 @@ expr locals[int numArgs=0]
     | expr op=(LT | LE | GT | GE) expr #BinaryExpr
     | expr op=AND expr #BinaryExpr
     | expr op=OR expr #BinaryExpr
-    | LBRACK (expr (COMMA expr)*)? RBRACK #ArrayInit
+    | LBRACK (expr {$numArrayArgs+=1;} (COMMA expr {$numArrayArgs+=1;})*)? RBRACK #ArrayInit
     | value=INTEGER #IntLiteral
     | value=(TRUE | FALSE) #BoolLiteral
     | name=ID #Var

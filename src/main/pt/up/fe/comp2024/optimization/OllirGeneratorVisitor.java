@@ -27,6 +27,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     private boolean methodIsPublic;
 
+    private boolean methodIsVarargs;
+
     private final SymbolTable table;
 
     private final OllirExprGeneratorVisitor exprVisitor;
@@ -156,6 +158,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         this.methodIsPublic = NodeUtils.getBooleanAttribute(node, "isPublic", "false");
         this.methodIsStatic = NodeUtils.getBooleanAttribute(node, "isStatic", "false");
 
+
         if (methodIsPublic) {
             code.append("public ");
         }
@@ -164,12 +167,19 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             code.append("static ");
         }
 
+        // get number of parameters
+        var numParams = NodeUtils.getIntegerAttribute(node, "numParams", "0");
+
+        // Check if method is varargs by checking if the last parameter is varargs
+        if (numParams > 0) {
+            var lastParam = node.getJmmChild(numParams).getChild(0);
+            if(lastParam.getObject("isVarargs").equals(true)) code.append("varargs ");
+        }
+
         // name
         var name = node.get("name");
         code.append(name);
 
-        // get number of parameters
-        var numParams = NodeUtils.getIntegerAttribute(node, "numParams", "0");
 
         // visit every parameter
         code.append("(");

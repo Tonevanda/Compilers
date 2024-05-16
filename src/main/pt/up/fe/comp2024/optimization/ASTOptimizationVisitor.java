@@ -7,6 +7,9 @@ import pt.up.fe.comp.jmm.ast.JmmNodeImpl;
 import pt.up.fe.comp2024.ast.NodeUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
 
@@ -37,6 +40,8 @@ public class ASTOptimizationVisitor extends AJmmVisitor<Void, Void> {
         var arguments = table.getParameters(funcName);
 
         // Check if last argument is varargs
+        if(arguments.isEmpty()) return null;
+
         var lastArg = arguments.get(arguments.size() - 1);
         var isVarArgs = lastArg.getType().getObject("isVarargs") != null;
         if(!isVarArgs) return null;
@@ -59,13 +64,24 @@ public class ASTOptimizationVisitor extends AJmmVisitor<Void, Void> {
         }
 
         // Create ArrayInitCall node
-        JmmNode arrayInit = new JmmNodeImpl(ARRAY_INIT.toString());
+        JmmNodeImpl arrayInit = new JmmNodeImpl(ARRAY_INIT.toString());
         arrayInit.setChildren(varArgs);
+
+        // Set ArrayInit Attributes
+        arrayInit.putObject("isArray", true);
+        arrayInit.putObject("numArrayArgs", numVarArgs);
+
+        // Set ArrayInit Hierarchy
+        Collection<String> hierarchy = new ArrayList<>();
+        hierarchy.add(ARRAY_INIT.toString());
+        hierarchy.add("Expr");
+        arrayInit.setHierarchy(hierarchy);
+
         node.add(arrayInit);
 
-        System.out.println("Function children: " + node.getChildren());
-        System.out.println("ArrayInit children: " + arrayInit.getChildren());
-        System.out.println(node.getChildren().subList(1, node.getNumChildren()));
+        // Update function call numArgs
+        String newNumArgs = String.valueOf(nonVarArgsCount + 1);
+        node.putObject("numArgs", newNumArgs);
 
         return null;
     }
