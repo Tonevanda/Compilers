@@ -84,9 +84,13 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
             return computation.toString();
         }
+        var node1 = node.getJmmChild(0);
+        var node2 = node.getJmmChild(1);
 
-        var lhs = exprVisitor.visit(node.getJmmChild(0));
-        var rhs = exprVisitor.visit(node.getJmmChild(1));
+        node1.put("isLeftSide", "true");
+
+        var lhs = exprVisitor.visit(node1);
+        var rhs = exprVisitor.visit(node2);
 
         StringBuilder code = new StringBuilder();
 
@@ -309,6 +313,9 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     // Returns true if the node is a field, not a local or parameter
     public boolean isField(JmmNode node){
+        // If the node is not a variable, it is not a field
+        if(!node.getKind().equals(VAR.toString())) return false;
+
         var methodParentName = node.getAncestor(METHOD_DECL).get().get("name");
         if(table.getLocalVariables(methodParentName).stream().anyMatch(var -> var.getName().equals(node.get("name")))){
             return false;

@@ -40,6 +40,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         addVisit(FUNCTION_CALL, this::visitFunctionCall);
         addVisit(NEW_CLASS_OBJ, this::visitNewClassObj);
         addVisit(NEW_ARRAY, this::visitNewArray);
+        addVisit(ARR_ACCESS_EXPR, this::visitArrAccessExpr);
 
         setDefaultVisit(this::defaultVisit);
     }
@@ -92,6 +93,43 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                 .append(ollirType).append(END_STMT);
 
         return new OllirExprResult(code.toString(), computation);
+    }
+
+    private OllirExprResult visitArrAccessExpr(JmmNode node, Void unused){
+
+        // If it has the attribute isLeftSide, it means that the array access is on the left side of an assignment
+        var isLeftSide = node.getOptionalObject("isLeftSide").isPresent() ? node.getObject("isLeftSide").toString() : "false";
+
+        StringBuilder computation = new StringBuilder();
+        var arrayNode = node.getJmmChild(0);
+        var array = visit(node.getJmmChild(0));
+        var index = visit(node.getJmmChild(1));
+
+        computation.append(array.getComputation());
+        computation.append(index.getComputation());
+
+        String name;
+        if(arrayNode.isInstance(ARRAY_INIT)){
+            // Only the name of the array is needed, not the ollir type
+            name = array.getCode().split("\\.")[0];
+        } else {
+            name = arrayNode.get("name");
+        }
+
+        // If the array access is on the left side of an assignment, we don't create a temp variable
+        if(isLeftSide.equals("true")){
+            String code = name + "[" + index.getCode() + "]" +
+                    OptUtils.toOllirType(TypeUtils.getExprType(node, table));
+            return new OllirExprResult(code, computation);
+        }
+
+        String code = OptUtils.getTemp() + OptUtils.toOllirType(TypeUtils.getExprType(node, table));
+        computation.append(code).append(SPACE).append(ASSIGN).
+                append(OptUtils.toOllirType(TypeUtils.getExprType(node, table))).append(SPACE)
+                .append(name).append("[").append(index.getCode()).append("]")
+                .append(OptUtils.toOllirType(TypeUtils.getExprType(node, table))).append(END_STMT);
+
+        return new OllirExprResult(code, computation);
     }
 
     private OllirExprResult visitArrayInit(JmmNode node, Void unused){
