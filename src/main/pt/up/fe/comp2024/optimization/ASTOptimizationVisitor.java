@@ -43,7 +43,7 @@ public class ASTOptimizationVisitor extends AJmmVisitor<Void, Void> {
         if(arguments.isEmpty()) return null;
 
         var lastArg = arguments.get(arguments.size() - 1);
-        var isVarArgs = lastArg.getType().getObject("isVarargs") != null;
+        var isVarArgs = lastArg.getType().getObject("isVarargs").equals(true);
         if(!isVarArgs) return null;
 
         var argumentCount = arguments.size();
