@@ -5,19 +5,17 @@ import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.JmmNodeImpl;
 import pt.up.fe.comp2024.ast.NodeUtils;
-
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
+
 
 import static pt.up.fe.comp2024.ast.Kind.*;
 
-public class ASTOptimizationVisitor extends AJmmVisitor<Void, Void> {
+public class ASTVisitor extends AJmmVisitor<Void, Void> {
 
     private final SymbolTable table;
 
-    public ASTOptimizationVisitor(SymbolTable table) {
+    public ASTVisitor(SymbolTable table) {
         this.table = table;
     }
 

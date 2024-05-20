@@ -28,7 +28,7 @@ public class JmmOptimizationImpl implements JmmOptimization {
     @Override
     public JmmSemanticsResult optimize(JmmSemanticsResult semanticsResult) {
 
-        var visitor = new ASTOptimizationVisitor(semanticsResult.getSymbolTable());
+        var visitor = new ASTVisitor(semanticsResult.getSymbolTable());
         visitor.visit(semanticsResult.getRootNode());
 
         return semanticsResult;

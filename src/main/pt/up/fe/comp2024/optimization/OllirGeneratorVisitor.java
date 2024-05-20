@@ -143,9 +143,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         var typeCode = OptUtils.toOllirType(node.getJmmChild(0));
         var id = node.get("name");
-        boolean isArray = NodeUtils.getBooleanAttribute(node.getChild(0), "isArray", "false");
 
-        String code = id + (isArray ? ".array" : "") + typeCode;
+        String code = id + typeCode;
 
         return code;
     }

@@ -39,6 +39,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         addVisit(ARRAY_INIT, this::visitArrayInit);
         addVisit(FUNCTION_CALL, this::visitFunctionCall);
         addVisit(NEW_CLASS_OBJ, this::visitNewClassObj);
+        //addVisit(NEW_ARRAY, this::visitNewArray);
 
         setDefaultVisit(this::defaultVisit);
     }
@@ -79,13 +80,13 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         var numArgs = Integer.parseInt(node.getObject("numArrayArgs").toString());
 
         String temp = OptUtils.getTemp();
-        String code = temp + ".array" + OptUtils.toOllirType(TypeUtils.getExprType(node, table));
+        String code = temp + OptUtils.toOllirType(TypeUtils.getExprType(node, table));
         StringBuilder computation = new StringBuilder();
 
         // Initialize the array
-        computation.append(code).append(SPACE).append(ASSIGN).append(".array").append(OptUtils.toOllirType(TypeUtils.getExprType(node, table))).
+        computation.append(code).append(SPACE).append(ASSIGN).append(OptUtils.toOllirType(TypeUtils.getExprType(node, table))).
                 append(SPACE).append("new").append("(").append("array").append(", ").append(numArgs).append(".i32").append(")")
-                .append(".array.i32").append(END_STMT);
+                .append(OptUtils.toOllirType(TypeUtils.getExprType(node, table))).append(END_STMT);
 
         // Get the computation of the children
         ArrayList<String> codeArguments = new ArrayList<>();
