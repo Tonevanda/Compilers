@@ -76,15 +76,20 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     }
 
     private OllirExprResult visitNewArray(JmmNode node, Void unused){
+
         StringBuilder computation = new StringBuilder();
-        StringBuilder code = new StringBuilder();
+        var classType = TypeUtils.getExprType(node, table);
+        var ollirType = OptUtils.toOllirType(classType);
+
+        String code = OptUtils.getTemp() + ollirType;
 
         // Visit what's between brackets to get the computation
         var child = visit(node.getJmmChild(0));
         computation.append(child.getComputation());
 
-        code.append("new").append("(").append("array").append(", ").append(child.getCode()).append(")")
-                .append(OptUtils.toOllirType(TypeUtils.getExprType(node, table)));
+        computation.append(code).append(SPACE).append(ASSIGN).append(ollirType).append(SPACE)
+                .append("new").append("(").append("array").append(", ").append(child.getCode()).append(")")
+                .append(ollirType).append(END_STMT);
 
         return new OllirExprResult(code.toString(), computation);
     }
