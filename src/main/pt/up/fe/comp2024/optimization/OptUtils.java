@@ -1,21 +1,17 @@
 package pt.up.fe.comp2024.optimization;
 
-import org.specs.comp.ollir.Instruction;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
-import pt.up.fe.comp2024.ast.NodeUtils;
-import pt.up.fe.specs.util.exceptions.NotImplementedException;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static pt.up.fe.comp2024.ast.Kind.TYPE;
 
 public class OptUtils {
     private static int tempNumber = -1;
-    private static int labelNumber = -1;
+    private static int ifLabelNumber = -1;
+    private static int whileLabelNumber = -1;
 
     public static String getTemp() {
 
@@ -33,14 +29,14 @@ public class OptUtils {
         return tempNumber;
     }
 
-    public static List<String> getLabels() {
+    public static List<String> getIfLabels() {
 
-        return getLabels("if", "endif");
+        return getIfLabels("if", "endif");
     }
 
-    public static List<String> getLabels(String prefix1, String prefix2) {
+    public static List<String> getIfLabels(String prefix1, String prefix2) {
 
-        int labelNum = getNextLabelNum();
+        int labelNum = getNextIfLabelNum();
 
         ArrayList<String> labels = new ArrayList<>();
 
@@ -51,10 +47,35 @@ public class OptUtils {
         return labels;
     }
 
-    public static int getNextLabelNum() {
+    public static int getNextIfLabelNum() {
 
-        labelNumber += 1;
-        return labelNumber;
+        ifLabelNumber += 1;
+        return ifLabelNumber;
+    }
+
+    public static List<String> getWhileLabels() {
+
+        return getWhileLabels("whileCond", "whileLoop", "whileEnd");
+    }
+
+    public static List<String> getWhileLabels(String prefix1, String prefix2, String prefix3) {
+
+        int labelNum = getNextWhileLabelNum();
+
+        ArrayList<String> labels = new ArrayList<>();
+
+        // Add condition, body and end labels
+        labels.add(prefix1 + labelNum);
+        labels.add(prefix2 + labelNum);
+        labels.add(prefix3 + labelNum);
+
+        return labels;
+    }
+
+    public static int getNextWhileLabelNum() {
+
+        whileLabelNumber += 1;
+        return whileLabelNumber;
     }
 
     public static String toOllirType(JmmNode typeNode) {

@@ -1,6 +1,5 @@
 package pt.up.fe.comp2024.optimization;
 
-import org.w3c.dom.Node;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
@@ -50,6 +49,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(RETURN_STMT, this::visitReturn);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
         addVisit(EXPR_STMT, this::visitExprStmt);
+        addVisit(WHILE_STMT, this::visitWhileStmt);
         addVisit(MULT_STMT, this::visitMultStmt);
         addVisit(IF_STMT, this::visitIfStmt);
 
@@ -89,7 +89,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(condition.getComputation());
 
         // Get the next labels
-        var labels = OptUtils.getLabels();
+        var labels = OptUtils.getIfLabels();
         var ifLabel = labels.get(0);
         var endifLabel = labels.get(1);
 
@@ -115,6 +115,55 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(visit(thenStmt));
 
         code.append(endifLabel);
+        code.append(":");
+        code.append(NL);
+
+        return code.toString();
+    }
+
+    private String visitWhileStmt(JmmNode node, Void unused){
+        StringBuilder code = new StringBuilder();
+
+        // Get the next labels
+        var labels = OptUtils.getWhileLabels();
+        var whileCondLabel = labels.get(0);
+        var whileLoopLabel = labels.get(1);
+        var whileEndLabel = labels.get(2);
+
+        // Loop pre-condition
+        code.append(whileCondLabel);
+        code.append(":");
+        code.append(NL);
+
+        var condition = exprVisitor.visit(node.getJmmChild(0));
+        var whileBody = node.getJmmChild(1);
+
+        code.append(condition.getComputation());
+
+        code.append("if ");
+        code.append("(");
+        code.append(condition.getCode());
+        code.append(") ");
+        code.append("goto ");
+        code.append(whileLoopLabel);
+        code.append(END_STMT);
+        code.append("goto ");
+        code.append(whileEndLabel);
+        code.append(END_STMT);
+
+        // Loop body
+        code.append(whileLoopLabel);
+        code.append(":");
+        code.append(NL);
+
+        code.append(visit(whileBody));
+
+        code.append("goto ");
+        code.append(whileCondLabel);
+        code.append(END_STMT);
+
+        // Loop post-condition
+        code.append(whileEndLabel);
         code.append(":");
         code.append(NL);
 
