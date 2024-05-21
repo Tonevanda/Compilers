@@ -6,6 +6,8 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +15,7 @@ import static pt.up.fe.comp2024.ast.Kind.TYPE;
 
 public class OptUtils {
     private static int tempNumber = -1;
+    private static int labelNumber = -1;
 
     public static String getTemp() {
 
@@ -28,6 +31,30 @@ public class OptUtils {
 
         tempNumber += 1;
         return tempNumber;
+    }
+
+    public static List<String> getLabels() {
+
+        return getLabels("if", "endif");
+    }
+
+    public static List<String> getLabels(String prefix1, String prefix2) {
+
+        int labelNum = getNextLabelNum();
+
+        ArrayList<String> labels = new ArrayList<>();
+
+        // Add if and corresponding endif
+        labels.add(prefix1 + labelNum);
+        labels.add(prefix2 + labelNum);
+
+        return labels;
+    }
+
+    public static int getNextLabelNum() {
+
+        labelNumber += 1;
+        return labelNumber;
     }
 
     public static String toOllirType(JmmNode typeNode) {

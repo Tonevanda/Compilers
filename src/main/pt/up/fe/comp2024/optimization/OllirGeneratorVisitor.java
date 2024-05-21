@@ -50,6 +50,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(RETURN_STMT, this::visitReturn);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
         addVisit(EXPR_STMT, this::visitExprStmt);
+        addVisit(MULT_STMT, this::visitMultStmt);
+        addVisit(IF_STMT, this::visitIfStmt);
 
         setDefaultVisit(this::defaultVisit);
     }
@@ -62,7 +64,59 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(expr.getComputation());
         code.append(expr.getCode());
 
-        //code.append(END_STMT);
+        return code.toString();
+    }
+
+    private String visitMultStmt(JmmNode node, Void unused) {
+
+        StringBuilder code = new StringBuilder();
+
+        for (var child : node.getChildren()) {
+            code.append(visit(child));
+        }
+
+        return code.toString();
+    }
+
+    private String visitIfStmt(JmmNode node, Void unused) {
+
+        StringBuilder code = new StringBuilder();
+
+        var condition = exprVisitor.visit(node.getJmmChild(0));
+        var thenStmt = node.getJmmChild(1);
+        var elseStmt = node.getJmmChild(2);
+
+        code.append(condition.getComputation());
+
+        // Get the next labels
+        var labels = OptUtils.getLabels();
+        var ifLabel = labels.get(0);
+        var endifLabel = labels.get(1);
+
+        code.append("if ");
+        code.append("(");
+        code.append(condition.getCode());
+        code.append(") ");
+        code.append("goto ");
+        code.append(ifLabel);
+        code.append(END_STMT);
+
+        // Append all the code inside the else statement
+        code.append(visit(elseStmt));
+
+        code.append("goto ");
+        code.append(endifLabel);
+        code.append(END_STMT);
+
+        code.append(ifLabel);
+        code.append(":");
+        code.append(NL);
+
+        code.append(visit(thenStmt));
+
+        code.append(endifLabel);
+        code.append(":");
+        code.append(NL);
 
         return code.toString();
     }

@@ -19,6 +19,7 @@ public enum Kind {
     WHILE_STMT,
     EXPR_STMT,
     RETURN_STMT,
+    MULT_STMT,
     FUNCTION_CALL,
     ARR_ACCESS_EXPR,
     PAREN_EXPR,
@@ -33,7 +34,7 @@ public enum Kind {
     THIS,
     VAR;
 
-    private static final Set<Kind> STATEMENTS = Set.of(ASSIGN_STMT, RETURN_STMT, IF_STMT, WHILE_STMT, EXPR_STMT);
+    private static final Set<Kind> STATEMENTS = Set.of(ASSIGN_STMT, RETURN_STMT, IF_STMT, WHILE_STMT, EXPR_STMT, MULT_STMT);
     private static final Set<Kind> EXPRESSIONS = Set.of(BINARY_EXPR, UNARY_EXPR, INT_LITERAL, BOOL_LITERAL, VAR,
             NEW_CLASS_OBJ, FUNCTION_CALL, ARR_ACCESS_EXPR, ARRAY_INIT, PAREN_EXPR, THIS, LENGTH_CALL, NEW_ARRAY);
 
