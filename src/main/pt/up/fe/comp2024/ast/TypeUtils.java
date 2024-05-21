@@ -93,8 +93,7 @@ public class TypeUtils {
             return new Type(returnType.getName(), returnType.isArray());
         }
     }
-
-    // TODO: need to refactor this in regards to imported classes
+    
     private static Type getVarExprType(JmmNode varRefExpr, SymbolTable table) {
         Type type = null;
 

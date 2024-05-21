@@ -1,17 +1,13 @@
 package pt.up.fe.comp2024.optimization;
 
-import org.w3c.dom.Node;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
-import pt.up.fe.comp2024.ast.Kind;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
 
@@ -286,13 +282,29 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
         // code to compute the children
         computation.append(lhs.getComputation());
-        computation.append(rhs.getComputation());
 
         // code to compute self
         Type resType = TypeUtils.getExprType(node, table);
         String resOllirType = OptUtils.toOllirType(resType);
         String code = OptUtils.getTemp() + resOllirType;
 
+        var operator = node.get("op");
+        // In case the operator is short-circuit
+        if(operator.equals("&&")){
+            var labels = OptUtils.getIfLabels();
+            var trueLabel = labels.get(0);
+            var falseLabel = labels.get(1);
+            computation.append("if (").append(lhs.getCode()).append(") goto ").append(trueLabel).append(END_STMT);
+            computation.append(code).append(SPACE).append(ASSIGN).append(resOllirType).append(SPACE).append("0").append(resOllirType).append(END_STMT);
+            computation.append("goto ").append(falseLabel).append(END_STMT);
+            computation.append(trueLabel).append(":").append("\n");
+            computation.append(rhs.getComputation());
+            computation.append(code).append(SPACE).append(ASSIGN).append(resOllirType).append(SPACE).append(rhs.getCode()).append(END_STMT);
+            computation.append(falseLabel).append(":").append("\n");
+            return new OllirExprResult(code, computation);
+        }
+
+        computation.append(rhs.getComputation());
         computation.append(code).append(SPACE)
                 .append(ASSIGN).append(resOllirType).append(SPACE)
                 .append(lhs.getCode()).append(SPACE);
