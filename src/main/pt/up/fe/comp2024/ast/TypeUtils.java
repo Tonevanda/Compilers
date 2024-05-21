@@ -101,7 +101,7 @@ public class TypeUtils {
         // Get the variable name
         var varName = varRefExpr.get("name");
 
-        if(table.getImports().stream().anyMatch(imported -> imported.contains(varName))){
+        if(table.getImports().stream().anyMatch(imported -> isImported(varName, table))){
             var importedType = new Type(varName, false);
             importedType.putObject("isImported", true);
             return importedType;
@@ -178,5 +178,10 @@ public class TypeUtils {
     private static boolean isImported(Type type, SymbolTable table){
         return table.getImports().stream().flatMap(importName -> List.of(importName.substring(1, importName.length() - 1).split(",")).stream())
                 .anyMatch(importName -> importName.trim().equals(type.getName()));
+    }
+
+    private static boolean isImported(String typeName, SymbolTable table){
+        return table.getImports().stream().flatMap(importName -> List.of(importName.substring(1, importName.length() - 1).split(",")).stream())
+                .anyMatch(importName -> importName.trim().equals(typeName));
     }
 }
