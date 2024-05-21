@@ -3,6 +3,7 @@ package pt.up.fe.comp2024.optimization;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.ollir.JmmOptimization;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
+import pt.up.fe.comp2024.CompilerConfig;
 
 import java.util.Collections;
 
@@ -30,7 +31,10 @@ public class JmmOptimizationImpl implements JmmOptimization {
 
         var visitor = new ASTVisitor(semanticsResult.getSymbolTable());
         visitor.visit(semanticsResult.getRootNode());
-
+        if (CompilerConfig.getOptimize(semanticsResult.getConfig())) {
+            var constPropagationVisitor = new ASTConstPropagationVisitor();
+            constPropagationVisitor.visit(semanticsResult.getRootNode());
+        }
         return semanticsResult;
     }
 }
