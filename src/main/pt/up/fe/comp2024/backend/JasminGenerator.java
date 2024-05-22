@@ -381,6 +381,9 @@ public class JasminGenerator {
                 code.append("iconst_1").append(NL);
                 code.append("boolSaveEnd_").append(idCounter).append(":").append(NL);
                 code.append("istore ").append(reg).append(NL);
+                idCounter++;
+                checkStackSize();
+                stackSize--;
             }
         } else{
             code.append("astore ").append(reg).append(NL);
@@ -458,21 +461,21 @@ public class JasminGenerator {
         var code = new StringBuilder();
 
         //if(unaryOp.getOperation().getOpType().name().equals("NOTB")){   NOT SURE WHY THIS IS HERE
-            if(unaryOp.getOperand().isLiteral()) {
-                if (((LiteralElement) unaryOp.getOperand()).getLiteral().equals("1")) {
-                    code.append("ldc 0");
-                } else {
-                    code.append("ldc 1");
-                }
-                stackSize++;
+        if(unaryOp.getOperand().isLiteral()) {
+            if (((LiteralElement) unaryOp.getOperand()).getLiteral().equals("1")) {
+                code.append("ldc 0");
+            } else {
+                code.append("ldc 1");
             }
-            else{
-                code.append(generators.apply(unaryOp.getOperand()));
-                code.append("iconst_1\nixor");
-                stackSize++;
-                checkStackSize();
-                stackSize--;
-            }
+            stackSize++;
+        }
+        else{
+            code.append(generators.apply(unaryOp.getOperand()));
+            code.append("iconst_1\nixor");
+            stackSize++;
+            checkStackSize();
+            stackSize--;
+        }
         //}
         code.append(NL);
 
