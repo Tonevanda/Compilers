@@ -1,10 +1,10 @@
 package pt.up.fe.comp2024.optimization;
 
-import org.antlr.v4.runtime.misc.Pair;
-import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
+import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.JmmNodeImpl;
+import pt.up.fe.comp2024.ast.Kind;
 
 import java.util.*;
 
@@ -12,11 +12,13 @@ import static pt.up.fe.comp2024.ast.Kind.*;
 
 public class ASTConstPropagationVisitor extends AJmmVisitor<Void, Void> {
 
-    // Map of variable names and their constant values
-    private HashMap<String, Integer> constants;
+    // Map of int variable names and their constant values
+    private HashMap<String, Integer> int_constants;
+    private HashMap<String, Boolean> bool_constants;
 
     public ASTConstPropagationVisitor() {
-        this.constants = new HashMap<>();
+        this.int_constants = new HashMap<>();
+        this.bool_constants = new HashMap<>();
     }
 
     @Override
@@ -28,40 +30,50 @@ public class ASTConstPropagationVisitor extends AJmmVisitor<Void, Void> {
     }
 
     private Void visitAssignStmt(JmmNode assignStmt, Void unused) {
-        // Get assignment left side
+        // Get assignment's right side
         var assignVal = assignStmt.getChild(1);
+        if (!assignStmt.getChild(0).isInstance(VAR)) return null;
+        var assignId = assignStmt.getChild(0).get("name");
         // Check if a constant value is being assigned
         if (Objects.equals(assignVal.getKind(), INT_LITERAL.toString())) {
-            var assignId = assignStmt.getChild(0).get("name");
             // Add to constants map
-            this.constants.put(assignId, Integer.parseInt(assignVal.get("value")));
+            this.int_constants.put(assignId, Integer.parseInt(assignVal.get("value")));
+            // Remove assign statement
+            assignStmt.getParent().removeChild(assignStmt);
+        } else if (Objects.equals(assignVal.getKind(), BOOL_LITERAL.toString())) {
+            // Add to constants map
+            this.bool_constants.put(assignId, Boolean.parseBoolean(assignVal.get("value")));
             // Remove assign statement
             assignStmt.getParent().removeChild(assignStmt);
         } else { // If not continue visiting
-            defaultVisit(assignStmt, unused);
+            this.int_constants.remove(assignId);
+            visit(assignVal);
         }
         return null;
     }
 
     private Void visitVar(JmmNode var, Void unused) {
-        // If the visiting var isn't a constant nothing must be done
-        if (this.constants.containsKey(var.get("name"))) return null;
+        Kind type;
+        // If the visiting var is a constant, we must change it
+        if (this.int_constants.containsKey(var.get("name"))) type = INT_LITERAL;
+        else if (this.bool_constants.containsKey(var.get("name"))) type = BOOL_LITERAL;
+        else return null;
 
         var index = var.getIndexOfSelf();
         var varParent = var.getParent();
         varParent.removeChild(index);
 
         // new IntLiteral node
-        JmmNodeImpl intLiteral = new JmmNodeImpl(INT_LITERAL.toString());
-        intLiteral.putObject("value", this.constants.get(var.get("name")));
+        JmmNodeImpl literal = new JmmNodeImpl(type.toString());
+        literal.putObject("value", ((type==INT_LITERAL)?this.int_constants:this.bool_constants).get(var.get("name")));
 
         //add hierarchy
         Collection<String> hierarchy = new ArrayList<>();
-        hierarchy.add(INT_LITERAL.toString());
+        hierarchy.add(type.toString());
         hierarchy.add("Expr");
-        intLiteral.setHierarchy(hierarchy);
+        literal.setHierarchy(hierarchy);
 
-        varParent.add(intLiteral,index);
+        varParent.add(literal, index);
 
         return null;
     }
