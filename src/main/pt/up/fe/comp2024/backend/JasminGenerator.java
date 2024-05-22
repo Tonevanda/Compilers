@@ -36,7 +36,7 @@ public class JasminGenerator {
     int stackSize = 0;
     int maxStackSize = 0;
     private final FunctionClassMap<TreeNode, String> generators;
-
+    int idCounter = 0;
     public JasminGenerator(OllirResult ollirResult) {
         this.ollirResult = ollirResult;
         
@@ -297,6 +297,7 @@ public class JasminGenerator {
                     .collect(Collectors.joining(NL + TAB, TAB, NL));
             temp.append(instCode);
             if (inst instanceof CallInstruction && !(((CallInstruction) inst).getReturnType().toString().equals("VOID"))){
+
                 temp.append(TAB).append("pop").append(NL);
                 checkStackSize();
                 this.stackSize--;
@@ -357,10 +358,31 @@ public class JasminGenerator {
         code.append(generators.apply(assign.getRhs()));
 
         // TODO: Hardcoded for int type, needs to be expanded
-        if(lhs.getType().toString().equals("INT32") || lhs.getType().toString().equals("BOOLEAN")){
+        if(lhs.getType().toString().equals("INT32")){
             code.append("istore ").append(reg).append(NL);
-        }
-        else{
+        } else if (lhs.getType().toString().equals("BOOLEAN")) {
+            if(((assign.getRhs() instanceof SingleOpInstruction singleOpInstruction) && (singleOpInstruction.getSingleOperand().isLiteral() || singleOpInstruction.getSingleOperand() instanceof Operand) || (assign.getRhs() instanceof UnaryOpInstruction)) || (assign.getRhs() instanceof CallInstruction)){
+                code.append("istore ").append(reg).append(NL);
+            }
+            else {
+                var op = switch (((BinaryOpInstruction)assign.getRhs()).getOperation().getOpType()) {
+                    case EQ -> "ifeq ";
+                    case NEQ, AND, OR, ANDB, ORB, NOT, NOTB -> "ifne ";
+                    case LTH -> "iflt ";
+                    case LTE -> "ifle ";
+                    case GTH -> "ifgt ";
+                    case GTE -> "ifge ";
+                    default -> throw new NotImplementedException(((BinaryOpInstruction)assign.getRhs()).getOperation().getOpType());
+                };
+                code.append(op).append("boolSaveJump_").append(idCounter).append(NL);
+                code.append("iconst_0").append(NL);
+                code.append("goto ").append("boolSaveEnd_").append(idCounter).append(NL);
+                code.append("boolSaveJump_").append(idCounter).append(":").append(NL);
+                code.append("iconst_1").append(NL);
+                code.append("boolSaveEnd_").append(idCounter).append(":").append(NL);
+                code.append("istore ").append(reg).append(NL);
+            }
+        } else{
             code.append("astore ").append(reg).append(NL);
         }
         checkStackSize();
@@ -408,25 +430,23 @@ public class JasminGenerator {
         return code.toString();
     }
 
+
     private String generateOpCondition(OpCondInstruction opCond) {
         var code = new StringBuilder();
+        code.append(generators.apply(opCond.getCondition()));
 
-        code.append(generators.apply(opCond.getOperands().get(0)));
-        code.append(generators.apply(opCond.getOperands().get(1)));
-
-
-        // apply operation
-        var op = switch (opCond.getCondition().getOperation().getOpType().name()) {
-            case "EQ" -> "if_icmpeq ";
-            case "NE" -> "if_icmpne ";
-            case "LTH" -> "if_icmplt ";
-            case "LTE" -> "if_icmple ";
-            case "GTH" -> "if_icmpgt ";
-            case "GTE" -> "if_icmpge ";
+        var op = switch (opCond.getCondition().getOperation().getOpType()) {
+            case EQ -> "ifeq ";
+            case NEQ, AND, OR, ANDB, ORB, NOT, NOTB -> "ifne ";
+            case LTH -> "iflt ";
+            case LTE -> "ifle ";
+            case GTH -> "ifgt ";
+            case GTE -> "ifge ";
             default -> throw new NotImplementedException(opCond.getCondition().getOperation().getOpType());
         };
+        checkStackSize();
+        stackSize--;
         code.append(op).append(opCond.getLabel()).append(NL);
-
         return code.toString();
     }
 
@@ -466,10 +486,11 @@ public class JasminGenerator {
         code.append(generators.apply(binaryOp.getLeftOperand()));
         code.append(generators.apply(binaryOp.getRightOperand()));
 
+
         // apply operation
         var op = switch (binaryOp.getOperation().getOpType()) {
             case ADD -> "iadd";
-            case SUB -> "isub";
+            case SUB, EQ, NEQ, LTH, LTE, GTH, GTE  -> "isub";
             case MUL -> "imul";
             case DIV -> "idiv";
             default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
