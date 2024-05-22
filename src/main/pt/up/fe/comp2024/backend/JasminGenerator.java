@@ -294,27 +294,45 @@ public class JasminGenerator {
         //.method public methodname(...
 
 
-        // Add limits
-        code.append(TAB).append(".limit stack 99").append(NL);
-        code.append(TAB).append(".limit locals 99").append(NL);
 
 
+        var temp = new StringBuilder();
         for (var inst : method.getInstructions()) {
             for(var label : method.getLabels(inst)){
-                code.append(label).append(":").append(NL);
+                temp.append(label).append(":").append(NL);
             }
             var instCode = StringLines.getLines(generators.apply(inst)).stream()
                     .collect(Collectors.joining(NL + TAB, TAB, NL));
-            code.append(instCode);
+            temp.append(instCode);
             if (inst instanceof CallInstruction){
                 if((((CallInstruction) inst).getInvocationType().name().equals("invokevirtual")|| ((CallInstruction) inst).getInvocationType().name().equals("invokestatic") ||((CallInstruction) inst).getInvocationType().name().equals("invokespecial")) && !(((CallInstruction) inst).getReturnType().toString().equals("VOID"))){
-                    code.append(TAB).append("pop").append(NL);
+                    temp.append(TAB).append("pop").append(NL);
+                    this.stackSize--;
                 }
             }
         }
-
-        code.append(".end method\n");
-
+        temp.append(".end method\n");
+        // Add limits
+        //code.append(TAB).append(".limit stack ").append(stackSize).append(NL);
+        code.append(TAB).append(".limit stack 99").append(NL);
+        boolean flag = true;
+        int counter = 0;
+        for(var var : method.getVarTable().values()){
+            if(var.getScope().equals("FIELD")){
+                continue;
+            }
+            if(var.getVarType().getTypeOfElement().name().equals("THIS")){
+                flag = false;
+            }
+            counter++;
+        }
+        if(flag && !methodName.equals("main")){
+            code.append(TAB).append(".limit locals ").append(counter+1).append(NL);
+        }
+        else {
+            code.append(TAB).append(".limit locals ").append(counter).append(NL);
+        }
+        code.append(temp);
         // unset method
         currentMethod = null;
 
