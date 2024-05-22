@@ -34,6 +34,9 @@ public class JmmOptimizationImpl implements JmmOptimization {
         if (CompilerConfig.getOptimize(semanticsResult.getConfig())) {
             var constPropagationVisitor = new ASTConstPropagationVisitor();
             constPropagationVisitor.visit(semanticsResult.getRootNode());
+
+            var constFoldingVisitor = new ASTConstFoldingVisitor();
+            constFoldingVisitor.visit(semanticsResult.getRootNode());
         }
         return semanticsResult;
     }
