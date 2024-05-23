@@ -116,7 +116,8 @@ public class JasminGenerator {
                 break;
             }
             case "invokespecial":{
-                stackSize++;
+                checkStackSize();
+                stackSize--;
                 ret.append("invokespecial ").append(translateClassPath(className)).append("/<init>()V").append(NL);
                 break;
             }
@@ -315,8 +316,8 @@ public class JasminGenerator {
         code.append(TAB).append(".limit stack ").append(maxStackSize).append(NL);
         boolean flag = true;
         int counter = 0;
-        for(var var : method.getVarTable().values()){
-            if(var.getScope().equals("FIELD")){
+        for(Descriptor var : method.getVarTable().values()){
+            if(var.getScope().toString().equals("FIELD")){
                 continue;
             }
             if(var.getVarType().getTypeOfElement().name().equals("THIS")){
