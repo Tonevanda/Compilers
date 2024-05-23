@@ -42,12 +42,18 @@ public class JmmOptimizationImpl implements JmmOptimization {
 
         var visitor = new ASTVisitor(semanticsResult.getSymbolTable());
         visitor.visit(semanticsResult.getRootNode());
-        if (CompilerConfig.getOptimize(semanticsResult.getConfig())) {
-            var constPropagationVisitor = new ASTConstPropagationVisitor();
-            constPropagationVisitor.visit(semanticsResult.getRootNode());
 
-            var constFoldingVisitor = new ASTConstFoldingVisitor();
-            constFoldingVisitor.visit(semanticsResult.getRootNode());
+        if (CompilerConfig.getOptimize(semanticsResult.getConfig())) {
+            while (true) {
+                var constPropagationVisitor = new ASTConstPropagationVisitor();
+                constPropagationVisitor.visit(semanticsResult.getRootNode());
+
+                var constFoldingVisitor = new ASTConstFoldingVisitor();
+                constFoldingVisitor.visit(semanticsResult.getRootNode());
+
+                // If none of the visitors made changes we end the loop
+                if (!constPropagationVisitor.madeChanges() && !constFoldingVisitor.madeChanges()) break;
+            }
         }
         return semanticsResult;
     }
