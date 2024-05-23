@@ -7,13 +7,12 @@ class CompileChainedMethod {
     }
 
 
-    public int foo(int x, int z) {
-        int a;
+    public CompileChainedMethod foo(int x, int z) {
+        CompileChainedMethod a;
 
-        a = 1+2;
+        a = new CompileChainedMethod();
 
-
-        return 0;
+        return a;
     }
 
     public int bar() {

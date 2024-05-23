@@ -29,6 +29,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     @Override
     protected void buildVisitor() {
         addVisit(VAR, this::visitVarRef);
+        addVisit(THIS, this::visitThis);
         addVisit(BINARY_EXPR, this::visitBinExpr);
         addVisit(UNARY_EXPR, this::visitUnExpr);
         addVisit(INT_LITERAL, this::visitInteger);
@@ -55,6 +56,13 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         var boolType = new Type(TypeUtils.getBooleanTypeName(), false);
         String ollirBoolType = OptUtils.toOllirType(boolType);
         String code = (node.get("value").equals("true") ? "1" : "0")  + ollirBoolType;
+        return new OllirExprResult(code);
+    }
+
+    private OllirExprResult visitThis(JmmNode node, Void unused){
+        var type = TypeUtils.getExprType(node, table);
+        String ollirType = OptUtils.toOllirType(type);
+        String code = "this" + ollirType;
         return new OllirExprResult(code);
     }
 
@@ -182,18 +190,17 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
     private OllirExprResult visitFunctionCall(JmmNode node, Void unused) {
 
-        var lhs = visit(node.getJmmChild(0));
-        var methodName = node.get("func");
-
         StringBuilder computation = new StringBuilder();
 
-        // Get the computation of the left function call
+        var lhs = visit(node.getJmmChild(0));
         computation.append(lhs.getComputation());
 
+        var methodName = node.get("func");
+
+        // Infer the type of the method
         var type = table.getReturnType(methodName);
         var assignStmt = node.getAncestor(ASSIGN_STMT);
         boolean isPartOfAssignment = assignStmt.isPresent();
-        boolean isExprStmt = node.getParent().getKind().equals(EXPR_STMT.toString());
         if(isPartOfAssignment){
             var assignLHS = assignStmt.get().getJmmChild(0);
             type = TypeUtils.getExprType(assignLHS, table);
@@ -202,7 +209,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             type = new Type("void", false);
         }
 
-        String code = !isExprStmt ? OptUtils.getTemp() + OptUtils.toOllirType(type) : "";
 
         var numArgs = NodeUtils.getIntegerAttribute(node, "numArgs", "0");
         var arguments = node.getChildren().subList(1, node.getNumChildren());
@@ -215,29 +221,25 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             codeArguments.add(argumentCode.getCode());
         }
 
+        // If it's not a void method, we assign the result to a temp variable
+        boolean isVoid = type.getName().equals("void");
+        String code = !isVoid ? OptUtils.getTemp() + OptUtils.toOllirType(type) : "";
 
-        if(!isExprStmt){
+        if(!isVoid){
             computation.append(code).append(SPACE).append(ASSIGN)
                     .append(OptUtils.toOllirType(type)).append(SPACE);
         }
 
-        boolean isStatic = false;
-        if(!node.getChild(0).isInstance(FUNCTION_CALL)){
-            if(!isObject(node.getChild(0))){
-                computation.append("invokestatic(");
-                computation.append(node.getChild(0).get("name"));
-                isStatic = true;
-            } else if (methodName.equals(table.getClassName())){
-                computation.append("invokespecial(this");
-            } else {
-                computation.append("invokevirtual(");
-                computation.append(node.getChild(0).get("name"));
-            }
-        }
-
-        if(!isStatic){
-            computation.append(".");
-            computation.append(TypeUtils.getExprType(node.getChild(0), table).getName());
+        // Infer the type of invoke to use
+        if(!isObject(node.getChild(0))){
+            computation.append("invokestatic(");
+            computation.append(node.getChild(0).get("name"));
+        } else if (methodName.equals(table.getClassName())){
+            computation.append("invokespecial(");
+            computation.append(lhs.getCode());
+        } else {
+            computation.append("invokevirtual(");
+            computation.append(lhs.getCode());
         }
 
         computation.append(", ");
@@ -407,19 +409,29 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     }
 
     private boolean isObject(JmmNode node){
-        var methodParentName = node.getAncestor(METHOD_DECL).get().get("name");
-        if(node.get(("name")).equals("this")){
-            return true;
+        var type = TypeUtils.getExprType(node, table);
+
+        // If the node is a function call, it's an object
+        if(node.getKind().equals(FUNCTION_CALL.toString())) return true;
+
+        if(node.getKind().equals(THIS.toString())) return true;
+
+        if(node.getKind().equals(VAR.toString())){
+            var methodParentName = node.getAncestor(METHOD_DECL).get().get("name");
+            if(table.getLocalVariables(methodParentName).stream().anyMatch(var -> var.getName().equals(node.get("name")))){
+                return true;
+            }
+            if(table.getParameters(methodParentName).stream().anyMatch(var -> var.getName().equals(node.get("name")))){
+                return true;
+            }
+            if(table.getFields().stream().anyMatch(var -> var.getName().equals(node.get("name")))){
+                return true;
+            }
         }
-        if(table.getLocalVariables(methodParentName).stream().anyMatch(var -> var.getName().equals(node.get("name")))){
-            return true;
-        }
-        if(table.getParameters(methodParentName).stream().anyMatch(var -> var.getName().equals(node.get("name")))){
-            return true;
-        }
-        if(table.getFields().stream().anyMatch(var -> var.getName().equals(node.get("name")))){
-            return true;
-        }
+
+        // If method from imported class, it's static
+        if(type.getName().equals("import")) return false;
+
         return false;
     }
 }

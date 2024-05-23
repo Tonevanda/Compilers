@@ -62,7 +62,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         StringBuilder code = new StringBuilder();
 
         code.append(expr.getComputation());
-        code.append(expr.getCode());
+        //code.append(expr.getCode());
 
         return code.toString();
     }
@@ -216,6 +216,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(rhs.getCode());
 
         code.append(END_STMT);
+
 
         return code.toString();
     }
