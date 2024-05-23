@@ -67,6 +67,13 @@ public class JasminGenerator {
             maxStackSize = stackSize;
         }
     }
+
+    private String isByte(int value){
+        if(value<4){
+            return "_"+value;
+        }
+        return " "+value;
+    }
     public String callMethod(CallInstruction instruction) {
         StringBuilder ret = new StringBuilder();
 
@@ -330,6 +337,17 @@ public class JasminGenerator {
         return code.toString();
     }
 
+    private int valueTranslation(int value, OperationType opType){
+        if(opType == OperationType.ADD){
+            return value;
+        }
+        else if(opType == OperationType.SUB){
+            return -value;
+        }
+        else {
+            return 128;
+        }
+    }
     private String generateAssign(AssignInstruction assign) {
         var code = new StringBuilder();
 
@@ -343,9 +361,28 @@ public class JasminGenerator {
         // get register
         var reg = currentMethod.getVarTable().get(((Operand) lhs).getName()).getVirtualReg();
 
+        if(assign.getRhs() instanceof BinaryOpInstruction rhs){
+            if(rhs.getLeftOperand() instanceof Operand left && rhs.getRightOperand() instanceof LiteralElement right){
+                var leftReg = currentMethod.getVarTable().get(left.getName()).getVirtualReg();
+                int literalInt = Integer.parseInt(right.getLiteral());
+                literalInt = valueTranslation(literalInt, rhs.getOperation().getOpType());
+                if(leftReg == reg && literalInt >= -128 && literalInt <= 127){
+                    code.append("iinc ").append(reg).append(" ").append(literalInt).append(NL);
+                    return code.toString();
+                }
+            } else if (rhs.getLeftOperand() instanceof LiteralElement left && rhs.getRightOperand() instanceof Operand right) {
+                var rightReg = currentMethod.getVarTable().get(right.getName()).getVirtualReg();
+                int literalInt = Integer.parseInt(left.getLiteral());
+                literalInt = valueTranslation(literalInt, rhs.getOperation().getOpType());
+                if(rightReg == reg && literalInt >= -128 && literalInt <= 127){
+                    code.append("iinc ").append(reg).append(" ").append(literalInt).append(NL);
+                    return code.toString();
+                }
+            }
+        }
         if(lhs instanceof ArrayOperand){
             stackSize++;
-            code.append("aload ").append(reg).append(NL);
+            code.append("aload").append(isByte(reg)).append(NL);
             code.append(generators.apply(((ArrayOperand) lhs).getIndexOperands().get(0)));
             code.append(generators.apply(assign.getRhs()));
             code.append("iastore").append(NL);
@@ -359,10 +396,10 @@ public class JasminGenerator {
 
         // TODO: Hardcoded for int type, needs to be expanded
         if(lhs.getType().toString().equals("INT32")){
-            code.append("istore ").append(reg).append(NL);
+            code.append("istore").append(isByte(reg)).append(NL);
         } else if (lhs.getType().toString().equals("BOOLEAN")) {
             if(((assign.getRhs() instanceof SingleOpInstruction singleOpInstruction) && (singleOpInstruction.getSingleOperand().isLiteral() || singleOpInstruction.getSingleOperand() instanceof Operand) || (assign.getRhs() instanceof UnaryOpInstruction)) || (assign.getRhs() instanceof CallInstruction)){
-                code.append("istore ").append(reg).append(NL);
+                code.append("istore").append(isByte(reg)).append(NL);
             }
             else {
                 var op = switch (((BinaryOpInstruction)assign.getRhs()).getOperation().getOpType()) {
@@ -380,13 +417,13 @@ public class JasminGenerator {
                 code.append("boolSaveJump_").append(idCounter).append(":").append(NL);
                 code.append("iconst_1").append(NL);
                 code.append("boolSaveEnd_").append(idCounter).append(":").append(NL);
-                code.append("istore ").append(reg).append(NL);
+                code.append("istore").append(isByte(reg)).append(NL);
                 idCounter++;
                 checkStackSize();
                 stackSize--;
             }
         } else{
-            code.append("astore ").append(reg).append(NL);
+            code.append("astore").append(isByte(reg)).append(NL);
         }
         checkStackSize();
         stackSize--;
@@ -399,7 +436,22 @@ public class JasminGenerator {
 
     private String generateLiteral(LiteralElement literal) {
         stackSize++;
-        return "ldc " + literal.getLiteral() + NL;
+        int literalInt = Integer.parseInt(literal.getLiteral());
+        if(literalInt == -1){
+            return "iconst_m1" + NL;
+        }
+        else if (literalInt >= 0 && literalInt <= 5){
+            return "iconst_" + literalInt + NL;
+        }//-128 and 127
+        else if (literalInt>= -128 && literalInt<=127){
+            return "bipush " + literalInt + NL;
+        }
+        else if (literalInt>=-32768 && literalInt<=32767) {
+            return  "sipush " + literalInt + NL;
+        }
+        else {
+            return "ldc " + literal.getLiteral() + NL;
+        }
     }
 
     private String generateOperand(Operand operand) {
@@ -407,11 +459,11 @@ public class JasminGenerator {
 
         stackSize++;
         if(operand.getName().equals("this")){
-            return "aload 0" + NL;
+            return "aload_0" + NL;
         }
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
         if(operand instanceof ArrayOperand){
-            code.append("aload ").append(reg).append(NL);
+            code.append("aload").append(isByte(reg)).append(NL);
             code.append(generators.apply(((ArrayOperand) operand).getIndexOperands().get(0)));
             code.append("iaload").append(NL);
             checkStackSize();
@@ -419,8 +471,8 @@ public class JasminGenerator {
             return code.toString();
         }
         return switch (operand.getType().toString()) {
-            case "INT32", "BOOLEAN" -> "iload " + reg + NL;
-            default -> "aload " + reg + NL;
+            case "INT32", "BOOLEAN" -> "iload" + isByte(reg) + NL;
+            default -> "aload" + isByte(reg) + NL;
         };
     }
 
@@ -463,9 +515,9 @@ public class JasminGenerator {
         //if(unaryOp.getOperation().getOpType().name().equals("NOTB")){   NOT SURE WHY THIS IS HERE
         if(unaryOp.getOperand().isLiteral()) {
             if (((LiteralElement) unaryOp.getOperand()).getLiteral().equals("1")) {
-                code.append("ldc 0");
+                code.append("iconst_0");
             } else {
-                code.append("ldc 1");
+                code.append("iconst_1");
             }
             stackSize++;
         }
