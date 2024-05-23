@@ -286,9 +286,48 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         // code to compute self
         Type resType = TypeUtils.getExprType(node, table);
         String resOllirType = OptUtils.toOllirType(resType);
+
+        // Specific case where we increment the variable by a constant value between -128 and 127
+        // This is to avoid the creation of a temp variable
+        // It's really ugly and I hate it but it's to simplify the jasmin generation to use the iinc instruction
+        var assignNode = node.getAncestor(ASSIGN_STMT);
+        if(assignNode.isPresent()){
+            var assignLHS = assignNode.get().getJmmChild(0);
+            if(assignLHS.getKind().equals(VAR.toString())){
+                var varName = assignLHS.get("name");
+                var assignRHSNode1 = node.getJmmChild(0);
+                var assignRHSNode2 = node.getJmmChild(1);
+                // If one of the binaryExpr operands is a variable and the other is an int literal
+                if(assignRHSNode1.getKind().equals(VAR.toString()) && assignRHSNode2.getKind().equals(INT_LITERAL.toString())){
+                    var varName2 = assignRHSNode1.get("name");
+                    var intVal = Integer.parseInt(assignRHSNode2.get("value"));
+                    // If the variable names are the same and the int value is between -128 and 127
+                    if(varName.equals(varName2) && intVal >= -128 && intVal <= 127){
+                        StringBuilder code = new StringBuilder();
+                        code.append(lhs.getCode()).append(SPACE).append(node.get("op")).append(".i32").append(SPACE)
+                                .append(rhs.getCode());
+                        return new OllirExprResult(code.toString(), computation);
+                    }
+                }
+                // Same case as before but with the operands inverted
+                else if (assignRHSNode2.getKind().equals(VAR.toString()) && assignRHSNode1.getKind().equals(INT_LITERAL.toString())){
+                    var varName2 = assignRHSNode2.get("name");
+                    var intVal = Integer.parseInt(assignRHSNode1.get("value"));
+                    if(varName.equals(varName2) && intVal >= -128 && intVal <= 127){
+                        StringBuilder code = new StringBuilder();
+                        code.append(lhs.getCode()).append(SPACE).append(node.get("op")).append(".i32").append(SPACE)
+                                .append(rhs.getCode());
+                        return new OllirExprResult(code.toString(), computation);
+                    }
+
+                }
+            }
+        }
+
         String code = OptUtils.getTemp() + resOllirType;
 
         var operator = node.get("op");
+
         // In case the operator is short-circuit
         if(operator.equals("&&")){
             var labels = OptUtils.getIfLabels();
