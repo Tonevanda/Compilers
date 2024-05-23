@@ -9,8 +9,14 @@ import java.util.*;
 import static pt.up.fe.comp2024.ast.Kind.*;
 
 public class ASTConstFoldingVisitor extends AJmmVisitor<Void, Void> {
-    public ASTConstFoldingVisitor() {}
+    private boolean madeChanges;
 
+    public ASTConstFoldingVisitor() {
+        this.madeChanges=false;
+    }
+    public boolean madeChanges() {
+        return madeChanges;
+    }
     @Override
     protected void buildVisitor() {
         addVisit(BINARY_EXPR, this::visitBinaryExpr);
@@ -46,6 +52,8 @@ public class ASTConstFoldingVisitor extends AJmmVisitor<Void, Void> {
             // new IntLiteral node
             literal = new JmmNodeImpl(INT_LITERAL.toString());
             literal.putObject("value", result);
+            literal.putObject("numArgs", 0);
+            literal.putObject("numArrayArgs", 0);
             // hierarchy
             Collection<String> hierarchy = new ArrayList<>();
             hierarchy.add(INT_LITERAL.toString());
@@ -67,6 +75,8 @@ public class ASTConstFoldingVisitor extends AJmmVisitor<Void, Void> {
             // new BoolLiteral node
             literal = new JmmNodeImpl(BOOL_LITERAL.toString());
             literal.putObject("value", result);
+            literal.putObject("numArgs", 0);
+            literal.putObject("numArrayArgs", 0);
             // hierarchy
             Collection<String> hierarchy = new ArrayList<>();
             hierarchy.add(BOOL_LITERAL.toString());
@@ -78,6 +88,7 @@ public class ASTConstFoldingVisitor extends AJmmVisitor<Void, Void> {
         int i = binaryExpr.getIndexOfSelf();
         parent.removeChild(binaryExpr);
         parent.add(literal, i);
+        this.madeChanges= true;
         return null;
     }
 

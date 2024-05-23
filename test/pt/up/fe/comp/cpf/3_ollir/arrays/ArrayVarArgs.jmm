@@ -16,7 +16,7 @@ class ArrayVarargs {
     int bar() {
         int res;
 
-        res = this.foo(1, 2, 3);
+        res = this.foo();
         io.println(res);
 
         res = this.foo(4);
