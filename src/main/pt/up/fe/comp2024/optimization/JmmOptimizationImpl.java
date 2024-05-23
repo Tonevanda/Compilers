@@ -21,8 +21,19 @@ public class JmmOptimizationImpl implements JmmOptimization {
     @Override
     public OllirResult optimize(OllirResult ollirResult) {
 
-        //TODO: Do your OLLIR-based optimizations here
-        // Constant folding deveria ser post order
+        // Get the register allocation value from the config
+        int maxRegisters = CompilerConfig.getRegisterAllocation(ollirResult.getConfig());
+
+        // If it's -1, return the result without optimizing
+        if (maxRegisters == -1) return ollirResult;
+
+        // Otherwise, optimize the result
+        ollirResult.getOllirClass().buildCFGs();
+        var CFG = ollirResult.getOllirClass();
+
+        var regAlloc = new RegAlloc(CFG, maxRegisters);
+        regAlloc.allocateRegisters();
+
         return ollirResult;
     }
 
