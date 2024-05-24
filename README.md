@@ -19,10 +19,13 @@
 
 ## Extra Elements
 
-Our project has in place 2 optimizations:
+Our project has in place 3 optimizations:
 
-- Constant Propagation
-- Constant Folding
+- Constant Propagation, by manipulating the AST
+- Constant Folding, by manipulating the AST
+- Instruction Selection, during the Jasmin code generation
+
+### AST Optimizations
 
 This is done using a `visitor` for each one of these optimizations that changes the `AST`, in a loop. When no more changes to the `AST` have been made, the loop stops. 
 
@@ -112,3 +115,6 @@ private Void visitFunctionCall(JmmNode node, Void unused) {
         return null;
     }
 ```
+
+### Jasmin Optimizations
+
