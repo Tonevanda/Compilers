@@ -199,4 +199,118 @@ All that need to be done is check wheater or not the reg number is between [0,3]
 ```
 This function is called following every adition of load/store to the code string
 
-- 
+- iconst_0, bipush, sipush, ldc:
+Also relatively simple, just need to check if the variable is between the apropriate intervals:
+
+```java
+    if(literalInt == -1){
+        return "iconst_m1" + NL;
+    }
+    else if (literalInt >= 0 && literalInt <= 5){
+        return "iconst_" + literalInt + NL;
+    }
+    else if (literalInt >= -128 && literalInt <= 127){
+        return "bipush " + literalInt + NL;
+    }
+    else if (literalInt >= -32768 && literalInt <= 32767) {
+        return "sipush " + literalInt + NL;
+    }
+    else {
+        return "ldc " + literal.getLiteral() + NL;
+    }
+```
+
+- iinc:
+We calculate the literal value (including the combinations of negative simbols)
+and if the value is inbetween -128 and 127:
+
+```java
+    //On the left is an operand and on the right a literal 
+    if(rhs.getLeftOperand() instanceof Operand left && rhs.getRightOperand() instanceof LiteralElement right){
+        int leftReg = currentMethod.getVarTable().get(left.getName()).getVirtualReg();
+        int literalInt = Integer.parseInt(right.getLiteral());
+        literalInt = valueTranslation(literalInt, rhs.getOperation().getOpType());
+        if(leftReg == reg && literalInt >= -128 && literalInt <= 127){
+            code.append("iinc ").append(reg).append(" ").append(literalInt).append(NL);
+            return code.toString();
+        }
+    }
+    //On the left is a literal and on the right an operand  
+    else if (rhs.getLeftOperand() instanceof LiteralElement left && rhs.getRightOperand() instanceof Operand right) {
+        int rightReg = currentMethod.getVarTable().get(right.getName()).getVirtualReg();
+        int literalInt = Integer.parseInt(left.getLiteral());
+        literalInt = valueTranslation(literalInt, rhs.getOperation().getOpType());
+        //if the literal is on the left the operation has to be an add because for example i = 1 - i can't be written with an iinc 
+        if(rightReg == reg && rhs.getOperation().getOpType().equals(OperationType.ADD) && literalInt >= -128 && literalInt <= 127){
+            code.append("iinc ").append(reg).append(" ").append(literalInt).append(NL);
+            return code.toString();
+        }
+    }
+```
+Value translation just does the operation itself:
+```java
+    private int valueTranslation(int value, OperationType opType){
+        if(opType == OperationType.ADD)
+            return value;
+        else if(opType == OperationType.SUB)
+            return -value;
+        else
+            return 128;
+    }
+```
+
+- iflt, ifne, etc: 
+Added the boolean cases to binary operation switch case:
+```java
+    String op = switch (binaryOp.getOperation().getOpType()) {
+        case ADD -> "iadd";
+        case SUB, EQ, NEQ, LTH, LTE, GTH, GTE  -> "isub";
+        case MUL -> "imul";
+        case DIV -> "idiv";
+        default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
+    };
+```
+Added switch case to extract apropriate if instructuion:
+```java
+private String extractIf(OperationType opType){
+        return switch (opType) {
+            case EQ -> "ifeq ";
+            case NEQ, AND, OR, ANDB, ORB, NOT, NOTB -> "ifne ";
+            case LTH -> "iflt ";
+            case LTE -> "ifle ";
+            case GTH -> "ifgt ";
+            case GTE -> "ifge ";
+            default -> throw new NotImplementedException(opType);
+        };
+    }
+```
+Witch is now used for 2 situations:
+- A binary operation on an assign:
+```java
+    if(assign.getRhs() instanceof BinaryOpInstruction binaryOp){
+        String op = extractIf(binaryOp.getOperation().getOpType());
+        code.append(op).append("boolSaveJump_").append(idCounter).append(NL);
+        code.append("iconst_0").append(NL);
+        code.append("goto ").append("boolSaveEnd_").append(idCounter).append(NL);
+        code.append("boolSaveJump_").append(idCounter).append(":").append(NL);
+        code.append("iconst_1").append(NL);
+        code.append("boolSaveEnd_").append(idCounter).append(":").append(NL);
+        code.append("istore").append(isByte(reg)).append(NL);
+        idCounter++;
+        checkStackSize();
+        stackSize--;
+    }
+```
+- and any other regular Branch instruction:
+```java
+    private String generateOpCondition(OpCondInstruction opCond) {
+        var code = new StringBuilder();
+        code.append(generators.apply(opCond.getCondition()));
+
+        String op = extractIf(opCond.getCondition().getOperation().getOpType());
+        checkStackSize();
+        stackSize--;
+        code.append(op).append(opCond.getLabel()).append(NL);
+        return code.toString();
+    }
+```

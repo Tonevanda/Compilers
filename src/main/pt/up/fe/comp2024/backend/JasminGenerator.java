@@ -71,8 +71,7 @@ public class JasminGenerator {
     }
 
     private String isByte(int value){
-        if(value < 4)
-            return "_" + value;
+        if(value < 4) return "_" + value;
         return " " + value;
     }
 
