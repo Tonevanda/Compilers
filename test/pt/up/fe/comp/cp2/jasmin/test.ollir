@@ -1,0 +1,86 @@
+Test {
+
+    .field public testField.Test;
+
+    .method public static main(args.array.String).V {
+
+        ret.V;
+
+    }
+
+    .method public foo().Test {
+
+        t1.Test :=.Test new(Test).Test;
+        invokespecial(t1.Test, "<init>").V;
+        putfield(this.Test, testField.Test, t1.Test).V;
+
+        a.Test :=.Test getfield(this.Test, testField.Test).Test;
+
+        ret.Test a.Test;
+
+    }
+
+    .construct Test().V {
+        invokespecial(this, "<init>").V;
+    }
+}
+
+import io;
+import foo.Bar;
+import comp.Table;
+SymbolTable extends Table {
+
+.field public intField.i32;
+
+.field public boolField.bool;
+
+
+.method public method1().i32 {
+ret.i32 0.i32;
+}
+
+.method public method2(intParam1.i32, boolParam1.bool, barParam1.Bar).Bar {
+ret.Bar barParam1.Bar;
+}
+
+.method public static main(args.array.String).V {
+ret.V;
+}
+
+.construct SymbolTable().V {
+invokespecial(this, "<init>").V;
+}
+}
+
+.class SymbolTable
+.super comp/Table
+
+.field public intField I
+.field public boolField Z
+;default constructor
+.method public <init>()V
+    aload_0
+    invokespecial comp/Table/<init>()V
+    return
+.end method
+
+.method public method1()I
+   .limit stack 1
+   .limit locals 1
+   iconst_0
+   ireturn
+.end method
+
+.method public method2(IZLfoo/Bar;)Lfoo/Bar;
+   .limit stack 1
+   .limit locals 4
+   aload_3
+   areturn
+.end method
+
+.method public static main([Ljava/lang/String;)V
+   .limit stack 1
+   .limit locals 1
+   return
+.end method
+

@@ -30,6 +30,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     protected void buildVisitor() {
         addVisit(VAR, this::visitVarRef);
         addVisit(THIS, this::visitThis);
+        addVisit(PAREN_EXPR, this::visitParenExpr);
         addVisit(BINARY_EXPR, this::visitBinExpr);
         addVisit(UNARY_EXPR, this::visitUnExpr);
         addVisit(INT_LITERAL, this::visitInteger);
@@ -64,6 +65,11 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         String ollirType = OptUtils.toOllirType(type);
         String code = "this" + ollirType;
         return new OllirExprResult(code);
+    }
+
+    private OllirExprResult visitParenExpr(JmmNode node, Void unused){
+        var child = visit(node.getJmmChild(0));
+        return new OllirExprResult(child.getCode(), child.getComputation());
     }
 
     private OllirExprResult visitNewClassObj(JmmNode node, Void unused) {
@@ -192,6 +198,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
         StringBuilder computation = new StringBuilder();
 
+        // Append the computation of the caller
         var lhs = visit(node.getJmmChild(0));
         computation.append(lhs.getComputation());
 
@@ -210,6 +217,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         }
 
 
+        // Append the computation of the arguments
         var numArgs = NodeUtils.getIntegerAttribute(node, "numArgs", "0");
         var arguments = node.getChildren().subList(1, node.getNumChildren());
 
@@ -224,24 +232,26 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         // If it's not a void method, we assign the result to a temp variable
         boolean isVoid = type.getName().equals("void");
         String code = !isVoid ? OptUtils.getTemp() + OptUtils.toOllirType(type) : "";
-
         if(!isVoid){
             computation.append(code).append(SPACE).append(ASSIGN)
                     .append(OptUtils.toOllirType(type)).append(SPACE);
         }
 
+        var callerType = TypeUtils.getExprType(node.getJmmChild(0), table);
+
         // Infer the type of invoke to use
-        if(!isObject(node.getChild(0))){
+        if(callerType.getName().equals("import") || (callerType.getOptionalObject("import").isPresent()) && callerType.getOptionalObject("import").get().equals(true)){
             computation.append("invokestatic(");
-            computation.append(node.getChild(0).get("name"));
         } else if (methodName.equals(table.getClassName())){
             computation.append("invokespecial(");
-            computation.append(lhs.getCode());
         } else {
             computation.append("invokevirtual(");
-            computation.append(lhs.getCode());
         }
 
+        // Append the code of the caller
+        computation.append(lhs.getCode());
+
+        // Append the code of the arguments
         computation.append(", ");
         computation.append(String.format("\"%s\"", methodName));
         for(int i = 1; i <= numArgs; i++){
@@ -361,6 +371,10 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
         var id = node.get("name");
         Type type = TypeUtils.getExprType(node, table);
+
+        if(type.getOptionalObject("import").isPresent() && type.getOptionalObject("import").get().equals(true)){
+            return new OllirExprResult(id);
+        }
 
         String ollirType = OptUtils.toOllirType(type);
 

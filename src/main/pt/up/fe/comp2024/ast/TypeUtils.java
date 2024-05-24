@@ -101,7 +101,9 @@ public class TypeUtils {
         var varName = varRefExpr.get("name");
 
         if(table.getImports().stream().anyMatch(imported -> isImported(varName, table))){
-            return new Type(varName, false);
+            var importType = new Type(varName, false);
+            importType.putObject("import", true);
+            return importType;
         }
 
         // Get the method where the variable is being used
