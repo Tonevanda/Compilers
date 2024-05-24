@@ -395,7 +395,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 .map(this::visit)
                 .forEach(code::append);
 
-        System.out.println(code);
         return code.toString();
     }
 

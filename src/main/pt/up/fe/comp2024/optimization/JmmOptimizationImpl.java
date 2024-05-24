@@ -27,7 +27,7 @@ public class JmmOptimizationImpl implements JmmOptimization {
         // If it's -1, return the result without optimizing
         if (maxRegisters == -1) return ollirResult;
 
-        boolean success = true;
+        boolean success;
         do {
             // Otherwise, optimize the result
             ollirResult.getOllirClass().buildCFGs();
@@ -38,6 +38,7 @@ public class JmmOptimizationImpl implements JmmOptimization {
 
             maxRegisters++;
         } while (!success);
+
         //report here
         return ollirResult;
     }

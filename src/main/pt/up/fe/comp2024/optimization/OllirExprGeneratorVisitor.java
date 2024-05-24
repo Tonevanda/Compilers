@@ -104,7 +104,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                 .append("new").append("(").append("array").append(", ").append(child.getCode()).append(")")
                 .append(ollirType).append(END_STMT);
 
-        return new OllirExprResult(code.toString(), computation);
+        return new OllirExprResult(code, computation);
     }
 
     private OllirExprResult visitArrAccessExpr(JmmNode node, Void unused){
@@ -315,10 +315,9 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                     var intVal = Integer.parseInt(assignRHSNode2.get("value"));
                     // If the variable names are the same and the int value is between -128 and 127
                     if(varName.equals(varName2) && intVal >= -128 && intVal <= 127){
-                        StringBuilder code = new StringBuilder();
-                        code.append(lhs.getCode()).append(SPACE).append(node.get("op")).append(".i32").append(SPACE)
-                                .append(rhs.getCode());
-                        return new OllirExprResult(code.toString(), computation);
+                        String code = lhs.getCode() + SPACE + node.get("op") + ".i32" + SPACE +
+                                rhs.getCode();
+                        return new OllirExprResult(code, computation);
                     }
                 }
                 // Same case as before but with the operands inverted
@@ -326,10 +325,9 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                     var varName2 = assignRHSNode2.get("name");
                     var intVal = Integer.parseInt(assignRHSNode1.get("value"));
                     if(varName.equals(varName2) && intVal >= -128 && intVal <= 127){
-                        StringBuilder code = new StringBuilder();
-                        code.append(lhs.getCode()).append(SPACE).append(node.get("op")).append(".i32").append(SPACE)
-                                .append(rhs.getCode());
-                        return new OllirExprResult(code.toString(), computation);
+                        String code = lhs.getCode() + SPACE + node.get("op") + ".i32" + SPACE +
+                                rhs.getCode();
+                        return new OllirExprResult(code, computation);
                     }
 
                 }
@@ -394,10 +392,9 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
     /**
      * Default visitor. Visits every child node and return an empty result.
-     *
-     * @param node
-     * @param unused
-     * @return
+     * @param node The node to visit
+     * @param unused Unused parameter
+     * @return An empty OllirExprResult
      */
     private OllirExprResult defaultVisit(JmmNode node, Void unused) {
 
@@ -419,33 +416,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         if(table.getFields().stream().anyMatch(var -> var.getName().equals(node.get("name")))){
             return true;
         }
-        return false;
-    }
-
-    private boolean isObject(JmmNode node){
-        var type = TypeUtils.getExprType(node, table);
-
-        // If the node is a function call, it's an object
-        if(node.getKind().equals(FUNCTION_CALL.toString())) return true;
-
-        if(node.getKind().equals(THIS.toString())) return true;
-
-        if(node.getKind().equals(VAR.toString())){
-            var methodParentName = node.getAncestor(METHOD_DECL).get().get("name");
-            if(table.getLocalVariables(methodParentName).stream().anyMatch(var -> var.getName().equals(node.get("name")))){
-                return true;
-            }
-            if(table.getParameters(methodParentName).stream().anyMatch(var -> var.getName().equals(node.get("name")))){
-                return true;
-            }
-            if(table.getFields().stream().anyMatch(var -> var.getName().equals(node.get("name")))){
-                return true;
-            }
-        }
-
-        // If method from imported class, it's static
-        if(type.getName().equals("import")) return false;
-
         return false;
     }
 }

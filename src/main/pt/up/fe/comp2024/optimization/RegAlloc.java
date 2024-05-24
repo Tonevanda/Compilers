@@ -1,23 +1,15 @@
 package pt.up.fe.comp2024.optimization;
 
-import org.antlr.v4.codegen.model.SrcOp;
 import org.antlr.v4.runtime.misc.Pair;
 import org.specs.comp.ollir.*;
-import pt.up.fe.comp.jmm.analysis.table.Type;
-import pt.up.fe.comp.jmm.ast.AJmmVisitor;
-import pt.up.fe.comp.jmm.ast.JmmNode;
-import pt.up.fe.comp.jmm.ast.JmmNodeImpl;
-import pt.up.fe.comp2024.ast.Kind;
-
 import java.util.*;
-import java.util.stream.IntStream;
 
 public class RegAlloc {
 
     ClassUnit cfg;
     int maxRegisters;
 
-    // Each instruction has a list of sets of variables, with each set being a list of strings
+    // Each node has a pair of sets of strings
     // First set is liveIn, second set is liveOut
     HashMap<Method, HashMap<Node, Pair<Set<String>, Set<String>>>> sets;
     HashMap<Method, HashMap<String, Set<String>>> graph;
@@ -47,22 +39,27 @@ public class RegAlloc {
             while (stay) {
                 stay = false;
                 for (Node instr : method.getInstructions())  {
+
                     var oldLiveIn = new HashSet<>(this.sets.get(method).get(instr).a);
                     var oldLiveOut = new HashSet<>(this.sets.get(method).get(instr).b);
                     Set<String> liveIn;
                     Set<String> liveOut = this.sets.get(method).get(instr).b;
+
                     // LIVEin(n) = use[n] U (LIVEout(n) - def[n])
                     liveIn = use(instr);
                     liveOut.removeAll(def(instr));
                     liveIn.addAll(liveOut);
                     liveOut.clear();
+
                     // LIVEout(n) = U LIVEin(s)
                     for (Node succ :instr.getSuccessors())
                         if (succ.getNodeType()!=NodeType.END) liveOut.addAll(this.sets.get(method).get(succ).a);
-                    // update this.sets
-                    Pair<Set<String>, Set<String>> newPair = new Pair(liveIn, liveOut);
+
+                    // Update sets
+                    Pair<Set<String>, Set<String>> newPair = new Pair<>(liveIn, liveOut);
                     this.sets.get(method).put(instr, newPair);
-                    // if something changed, cant leave will be true
+
+                    // If something changed, stay will be true
                     stay = stay || (!oldLiveIn.equals(liveIn) || !oldLiveOut.equals(liveOut));
                 }
             }
@@ -166,38 +163,48 @@ public class RegAlloc {
     public boolean colorGraph() {
         for (var method : this.cfg.getMethods()) {
             this.color.put(method, new HashMap<>());
-            Stack stack = new Stack();
+            Stack<Pair<String, Set<String>>> stack = new Stack<>();
+
             while (!this.graph.get(method).isEmpty()) {
+
                 boolean foundOne = false;
-                List keys = new ArrayList(this.graph.get(method).keySet());
+                List<String> keys = new ArrayList<>(this.graph.get(method).keySet());
+
                 for (var var : keys) {
                     if (this.maxRegisters==0 || this.graph.get(method).get(var).size()<(this.maxRegisters-method.getParams().size())) {
                         foundOne = true;
-                        //add to stack
+
+                        // Add to stack
                         stack.add(new Pair<>(var, this.graph.get(method).get(var)));
                         this.graph.get(method).remove(var);
                     }
                 }
+
                 if (!foundOne) return false;
             }
-            // register alloc
+
+            // Register Allocation
             int register = 1 + method.getParams().size();
             while (!stack.empty()) {
-                Pair<String, Set<String>> p = (Pair) stack.pop();
+                Pair<String, Set<String>> p = stack.pop();
                 List<Integer> minNeighbour = new ArrayList<>();
-                // put node back
+
+                // Put node back
                 this.graph.get(method).put(p.a, p.b);
                 for (String otherNode : p.b) {
                     minNeighbour.add(this.color.get(method).get(otherNode));
                 }
-                // update
+
+                // Update
                 Integer color = null;
                 for (int i = register; i<=((this.maxRegisters==0)?Integer.MAX_VALUE:this.maxRegisters+register); i++) {
                     if (minNeighbour.contains(i)) continue;
                     color = i;
                     break;
                 }
+
                 if (color==null) return false;
+
                 method.getVarTable().get(p.a).setVirtualReg(color);
                 this.color.get(method).put(p.a,color);
             }

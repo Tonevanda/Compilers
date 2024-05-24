@@ -9,14 +9,17 @@ import java.util.*;
 import static pt.up.fe.comp2024.ast.Kind.*;
 
 public class ASTConstFoldingVisitor extends AJmmVisitor<Void, Void> {
+
     private boolean madeChanges;
 
     public ASTConstFoldingVisitor() {
         this.madeChanges=false;
     }
+
     public boolean madeChanges() {
         return madeChanges;
     }
+
     @Override
     protected void buildVisitor() {
         addVisit(BINARY_EXPR, this::visitBinaryExpr);
