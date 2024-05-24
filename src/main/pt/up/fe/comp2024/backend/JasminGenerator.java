@@ -71,11 +71,53 @@ public class JasminGenerator {
     }
 
     private String isByte(int value){
-        if(value<4){
-            return "_"+value;
-        }
-        return " "+value;
+        if(value < 4)
+            return "_" + value;
+        return " " + value;
     }
+
+    private int valueTranslation(int value, OperationType opType){
+        if(opType == OperationType.ADD)
+            return value;
+        else if(opType == OperationType.SUB)
+            return -value;
+        else
+            return 128;
+    }
+
+    private String extractIf(OperationType opType){
+        return switch (opType) {
+            case EQ -> "ifeq ";
+            case NEQ, AND, OR, ANDB, ORB, NOT, NOTB -> "ifne ";
+            case LTH -> "iflt ";
+            case LTE -> "ifle ";
+            case GTH -> "ifgt ";
+            case GTE -> "ifge ";
+            default -> throw new NotImplementedException(opType);
+        };
+    }
+
+    private String translateType(Type type) {
+        return switch (type.getTypeOfElement()) {
+            case INT32 -> "I";
+            case BOOLEAN -> "Z";
+            case STRING -> "Ljava/lang/String;";
+            case VOID -> "V";
+            case ARRAYREF -> "[I";
+            default -> "L"+translateClassPath(((ClassType) type).getName())+";";
+        };
+    }
+
+    private String translateAccessModifier(AccessModifier accessModifier) {
+        return switch (accessModifier) {
+            case DEFAULT -> "";
+            case PUBLIC -> "public ";
+            case PRIVATE -> "private ";
+            case PROTECTED -> "protected ";
+            default -> throw new NotImplementedException(accessModifier);
+        };
+    }
+
     public String callMethod(CallInstruction instruction) {
         StringBuilder ret = new StringBuilder();
 
@@ -179,27 +221,6 @@ public class JasminGenerator {
         }
 
         return code;
-    }
-
-    private String translateType(Type type) {
-        return switch (type.getTypeOfElement()) {
-            case INT32 -> "I";
-            case BOOLEAN -> "Z";
-            case STRING -> "Ljava/lang/String;";
-            case VOID -> "V";
-            case ARRAYREF -> "[I";
-            default -> "L"+translateClassPath(((ClassType) type).getName())+";";
-        };
-    }
-
-    private String translateAccessModifier(AccessModifier accessModifier) {
-        return switch (accessModifier) {
-            case DEFAULT -> "";
-            case PUBLIC -> "public ";
-            case PRIVATE -> "private ";
-            case PROTECTED -> "protected ";
-            default -> throw new NotImplementedException(accessModifier);
-        };
     }
 
     private String translateClassPath(String className){
@@ -332,17 +353,6 @@ public class JasminGenerator {
         return code.toString();
     }
 
-    private int valueTranslation(int value, OperationType opType){
-        if(opType == OperationType.ADD){
-            return value;
-        }
-        else if(opType == OperationType.SUB){
-            return -value;
-        }
-        else {
-            return 128;
-        }
-    }
     private String generateAssign(AssignInstruction assign) {
         var code = new StringBuilder();
 
@@ -470,18 +480,6 @@ public class JasminGenerator {
         // apply operation
         code.append("ifne ").append(singleOpCond.getLabel()).append(NL);
         return code.toString();
-    }
-
-    private String extractIf(OperationType opType){
-        return switch (opType) {
-            case EQ -> "ifeq ";
-            case NEQ, AND, OR, ANDB, ORB, NOT, NOTB -> "ifne ";
-            case LTH -> "iflt ";
-            case LTE -> "ifle ";
-            case GTH -> "ifgt ";
-            case GTE -> "ifge ";
-            default -> throw new NotImplementedException(opType);
-        };
     }
 
     private String generateOpCondition(OpCondInstruction opCond) {
