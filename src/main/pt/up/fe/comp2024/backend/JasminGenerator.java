@@ -81,19 +81,19 @@ public class JasminGenerator {
 
         Operand caller = (Operand) instruction.getCaller();
         if(this.currentMethod.getVarTable().get(caller.getName()) != null){
-            ret.append(generators.apply((Operand) instruction.getCaller()));
+            ret.append(generators.apply(caller));
         }
-        //if the tipe is castable to ClassType
+        //if the type is not castable to ClassType than it doesn't have a className, so it is an array
         String className = "";
-        if(instruction.getCaller().getType() instanceof ClassType){
-            className = ((ClassType) instruction.getCaller().getType()).getName();
+        if(instruction.getCaller().getType() instanceof ClassType Callertype){
+            className = Callertype.getName();
         }
 
-        int added = stackSize;
-        switch (instruction.getInvocationType().toString()) {
-            case "invokevirtual": {
+        switch (instruction.getInvocationType()) {
+            case invokevirtual, invokestatic: {
+                int added = stackSize;
                 String arguments = "";
-                if (instruction.getArguments().size()!=0) {
+                if (!instruction.getArguments().isEmpty()) {
                     for (Element argument : instruction.getArguments()) {
                         ret.append(generators.apply(argument));
                         arguments += translateType(argument.getType());
@@ -101,31 +101,23 @@ public class JasminGenerator {
                 }
                 checkStackSize();
                 stackSize = added;
-                ret.append("invokevirtual ").append(translateClassPath(className)).append("/").append(((LiteralElement) instruction.getMethodName()).getLiteral().replace("\"", "")).append("(").append(arguments).append(")").append(translateType(instruction.getReturnType())).append(NL);
-                break;
-            }
-            case "invokestatic": {
-                String arguments = "";
-                if (instruction.getArguments().size()!=0) {
-                    for (Element argument : instruction.getArguments()) {
-                        ret.append(generators.apply(argument));
-                        arguments += translateType(argument.getType());
-                    }
+                if(instruction.getInvocationType().equals(CallType.invokevirtual)){
+                    ret.append("invokevirtual ").append(translateClassPath(className)).append("/").append(((LiteralElement) instruction.getMethodName()).getLiteral().replace("\"", "")).append("(").append(arguments).append(")").append(translateType(instruction.getReturnType())).append(NL);
                 }
-                checkStackSize();
-                stackSize = added;
-                ret.append("invokestatic ").append(translateClassPath(((Operand) instruction.getCaller()).getName())).append("/").append(((LiteralElement) instruction.getMethodName()).getLiteral().replace("\"", "")).append("(").append(arguments).append(")").append(translateType(instruction.getReturnType())).append(NL);
+                else {
+                    ret.append("invokestatic ").append(translateClassPath(((Operand) instruction.getCaller()).getName())).append("/").append(((LiteralElement) instruction.getMethodName()).getLiteral().replace("\"", "")).append("(").append(arguments).append(")").append(translateType(instruction.getReturnType())).append(NL);
+                }
                 break;
             }
-            case "invokespecial":{
+            case invokespecial:{
                 checkStackSize();
                 stackSize--;
                 ret.append("invokespecial ").append(translateClassPath(className)).append("/<init>()V").append(NL);
                 break;
             }
-            case "NEW": {
-                if(className.equals("")){
-                    if (instruction.getArguments().size()!=0) {
+            case NEW: {
+                if(className.isEmpty()){
+                    if (!instruction.getArguments().isEmpty()) {
                         ret.append(generators.apply(instruction.getArguments().get(0)));
                         ret.append("newarray int").append(NL);
                     }
@@ -136,7 +128,7 @@ public class JasminGenerator {
                 }
                 break;
             }
-            case "arraylength": {
+            case arraylength: {
                 ret.append("arraylength").append(NL);
                 break;
             }
@@ -144,33 +136,35 @@ public class JasminGenerator {
         return ret.toString();
     }
 
+    //get the field of a class
     public String getField(GetFieldInstruction instruction){
         StringBuilder ret = new StringBuilder();
         String originClassName = ((ClassType) instruction.getOperands().get(0).getType()).getName();
         String fieldName = instruction.getField().getName();
+        String returnType = translateType(instruction.getField().getType());
         stackSize++;
         ret.append("aload_0").append(NL)
                 .append("getfield ").append(originClassName).append("/").append(fieldName)
-                .append(" ").append(translateType(instruction.getField().getType())).append(NL);
-        //IN CASE I DO NEED TO DIFFERENTIATE
-        //if (instruction.getOperands().get(0).getType().getTypeOfElement().name() == "THIS") {
+                .append(" ").append(returnType).append(NL);
         return ret.toString();
     }
 
+    //put in the field of a class
     public String putField(PutFieldInstruction instruction){
         StringBuilder ret = new StringBuilder();
         ret.append("aload_0").append(NL);
         stackSize++;
         ret.append(generators.apply(instruction.getOperands().get(2)));
+
         String originClassName = ((ClassType) instruction.getOperands().get(0).getType()).getName();
-        ret.append("putfield ").append(originClassName).append("/").append(instruction.getField().getName())
-                .append(" ").append(translateType(instruction.getField().getType())).append(NL);
+        String fieldName = instruction.getField().getName();
+        String inputType = translateType(instruction.getField().getType());
+        ret.append("putfield ").append(originClassName).append("/").append(fieldName)
+                .append(" ").append(inputType).append(NL);
 
         checkStackSize();
         stackSize-=2;
 
-        //IN CASE I DO NEED TO DIFFERENTIATE
-        //if (instruction.getOperands().get(0).getType().getTypeOfElement().name() == "THIS") {
         return ret.toString();
     }
 
@@ -188,12 +182,12 @@ public class JasminGenerator {
     }
 
     private String translateType(Type type) {
-        return switch (type.toString()) {
-            case "INT32" -> "I";
-            case "BOOLEAN" -> "Z";
-            case "STRING" -> "Ljava/lang/String;";
-            case "VOID" -> "V";
-            case "INT32[]" -> "[I";
+        return switch (type.getTypeOfElement()) {
+            case INT32 -> "I";
+            case BOOLEAN -> "Z";
+            case STRING -> "Ljava/lang/String;";
+            case VOID -> "V";
+            case ARRAYREF -> "[I";
             default -> "L"+translateClassPath(((ClassType) type).getName())+";";
         };
     }
@@ -396,7 +390,6 @@ public class JasminGenerator {
         // generate code for loading what's on the right
         code.append(generators.apply(assign.getRhs()));
 
-        // TODO: Hardcoded for int type, needs to be expanded
         if(lhs.getType().toString().equals("INT32")){
             code.append("istore").append(isByte(reg)).append(NL);
         } else if (lhs.getType().toString().equals("BOOLEAN")) {
