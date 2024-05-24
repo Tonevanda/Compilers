@@ -219,12 +219,12 @@ public class JasminGenerator {
     private String generateClassUnit(ClassUnit classUnit) {
         var code = new StringBuilder();
         // generate class name
-        var className = ollirResult.getOllirClass().getClassName();
+        String className = ollirResult.getOllirClass().getClassName();
         code.append(".class ").append(className).append(NL);
-        String extend= "";
+        String extend;
         if (classUnit.getSuperClass() == null || classUnit.getSuperClass().equals("Object")){
-            code.append(".super java/lang/Object");
             extend = "java/lang/Object";
+            code.append(".super java/lang/Object");
         }
         else {
             extend = translateClassPath(ollirResult.getOllirClass().getSuperClass().toString());
@@ -235,7 +235,6 @@ public class JasminGenerator {
         for(var field : classUnit.getFields()){
             code.append(".field ").append(translateAccessModifier(field.getFieldAccessModifier())).append(field.getFieldName())
                     .append(" ").append(translateType(field.getFieldType())).append(NL);
-                    //.append(" = ").append(field.getInitialValue()).append(NL);
         }
 
         // generate a single constructor method
@@ -279,7 +278,7 @@ public class JasminGenerator {
                 method.getMethodAccessModifier().name().toLowerCase() + " " :
                 "";
 
-        var methodName = method.getMethodName();
+        String methodName = method.getMethodName();
         code.append("\n.method ").append(modifier);
         if(methodName.equals("main")){
             code.append("static ").append(methodName).append("([Ljava/lang/String;)V").append(NL);
@@ -348,26 +347,26 @@ public class JasminGenerator {
         var code = new StringBuilder();
 
         // store value in the stack in destination
-        var lhs = assign.getDest();
+        Element lhs = assign.getDest();
 
         if (!(lhs instanceof Operand)) {
             throw new NotImplementedException(lhs.getClass());
         }
 
         // get register
-        var reg = currentMethod.getVarTable().get(((Operand) lhs).getName()).getVirtualReg();
+        int reg = currentMethod.getVarTable().get(((Operand) lhs).getName()).getVirtualReg();
 
         if(assign.getRhs() instanceof BinaryOpInstruction rhs){
             if(rhs.getLeftOperand() instanceof Operand left && rhs.getRightOperand() instanceof LiteralElement right){
-                var leftReg = currentMethod.getVarTable().get(left.getName()).getVirtualReg();
+                int leftReg = currentMethod.getVarTable().get(left.getName()).getVirtualReg();
                 int literalInt = Integer.parseInt(right.getLiteral());
                 literalInt = valueTranslation(literalInt, rhs.getOperation().getOpType());
                 if(leftReg == reg && literalInt >= -128 && literalInt <= 127){
                     code.append("iinc ").append(reg).append(" ").append(literalInt).append(NL);
                     return code.toString();
                 }
-            } else if (rhs.getLeftOperand() instanceof LiteralElement left && rhs.getRightOperand() instanceof Operand right) {
-                var rightReg = currentMethod.getVarTable().get(right.getName()).getVirtualReg();
+            } else if (rhs.getLeftOperand() instanceof LiteralElement left && rhs.getRightOperand() instanceof Operand right) { // this isn't quite right either
+                int rightReg = currentMethod.getVarTable().get(right.getName()).getVirtualReg();
                 int literalInt = Integer.parseInt(left.getLiteral());
                 literalInt = valueTranslation(literalInt, rhs.getOperation().getOpType());
                 if(rightReg == reg && literalInt >= 1 && literalInt <= 127){
@@ -376,10 +375,10 @@ public class JasminGenerator {
                 }
             }
         }
-        if(lhs instanceof ArrayOperand){
+        if(lhs instanceof ArrayOperand lhsArray){
             stackSize++;
             code.append("aload").append(isByte(reg)).append(NL);
-            code.append(generators.apply(((ArrayOperand) lhs).getIndexOperands().get(0)));
+            code.append(generators.apply(lhsArray.getIndexOperands().get(0)));
             code.append(generators.apply(assign.getRhs()));
             code.append("iastore").append(NL);
             checkStackSize();
