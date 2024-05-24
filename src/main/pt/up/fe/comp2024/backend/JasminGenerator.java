@@ -376,7 +376,7 @@ public class JasminGenerator {
                 var rightReg = currentMethod.getVarTable().get(right.getName()).getVirtualReg();
                 int literalInt = Integer.parseInt(left.getLiteral());
                 literalInt = valueTranslation(literalInt, rhs.getOperation().getOpType());
-                if(rightReg == reg && literalInt >= -128 && literalInt <= 127){
+                if(rightReg == reg && literalInt >= 1 && literalInt <= 127){
                     code.append("iinc ").append(reg).append(" ").append(literalInt).append(NL);
                     return code.toString();
                 }
