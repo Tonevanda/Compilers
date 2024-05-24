@@ -7,7 +7,7 @@ class RegAlloc {
        a = 0;
        b = a;
        c = b;
-       d = a;
+       d = c;
        return d;
     }
 

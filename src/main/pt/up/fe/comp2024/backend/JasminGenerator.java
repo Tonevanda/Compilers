@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Optional;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 /**
  * Generates Jasmin code from an OllirResult.
  * <p>
@@ -314,22 +316,20 @@ public class JasminGenerator {
         temp.append(".end method\n");
 
         code.append(TAB).append(".limit stack ").append(maxStackSize).append(NL);
-        boolean flag = true;
-        int counter = 0;
+        Set<Integer> registers = new HashSet<>();
         for(Descriptor var : method.getVarTable().values()){
             if(var.getScope().toString().equals("FIELD")){
                 continue;
             }
-            if(var.getVarType().getTypeOfElement().name().equals("THIS")){
-                flag = false;
+            if(!registers.contains(var.getVirtualReg())){
+                registers.add(var.getVirtualReg());
             }
-            counter++;
         }
-        if(flag && !methodName.equals("main")){
-            code.append(TAB).append(".limit locals ").append(counter+1).append(NL);
+        if(!registers.contains(0) && !methodName.equals("main")){
+            code.append(TAB).append(".limit locals ").append(registers.size()+1).append(NL);
         }
         else {
-            code.append(TAB).append(".limit locals ").append(counter).append(NL);
+            code.append(TAB).append(".limit locals ").append(registers.size()).append(NL);
         }
         code.append(temp);
         // unset method
