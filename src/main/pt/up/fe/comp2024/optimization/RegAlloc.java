@@ -37,25 +37,15 @@ public class RegAlloc {
             for (Node instr : method.getInstructions())  {
                 this.sets.get(method).put(instr, new Pair<>(new HashSet<>(), new HashSet<>()));
             }
-            /*
-            Queue<Node> queue = new Queue<>();
-            Node root = method.getBeginNode();
-            queue. add(root);
-
-            while (queue.peek().getNodeType().name().equals("BEGIN")) {
-                Node current = queue.poll();
-                this.sets.put(current, new Pair<>(new HashSet<>(), new HashSet<>()));
-                for (var node : current.getSuccessors()) queue.add(node);
-            }*/
         }
     }
 
     private void buildSets(){
         initSets();
-        boolean stay = true;
-        while (stay) {
-            stay = false;
-            for (var method : cfg.getMethods()) {
+        for (var method : cfg.getMethods()) {
+            boolean stay = true;
+            while (stay) {
+                stay = false;
                 for (Node instr : method.getInstructions())  {
                     var oldLiveIn = new HashSet<>(this.sets.get(method).get(instr).a);
                     var oldLiveOut = new HashSet<>(this.sets.get(method).get(instr).b);
@@ -106,6 +96,18 @@ public class RegAlloc {
                         }
                         break;
                 }
+                break;
+            case RETURN:
+                Operand op;
+                ReturnInstruction retInst = (ReturnInstruction) inst;
+                if (retInst.hasReturnValue()){
+                    Element e = retInst.getOperand();
+                    if (!e.isLiteral()) {
+                        op = (Operand) e;
+                        use.add(op.getName());
+                    }
+                }
+                break;
         }
         return use;
     }
@@ -119,16 +121,6 @@ public class RegAlloc {
                 AssignInstruction assInst = (AssignInstruction) inst;
                 op = (Operand) assInst.getDest();
                 def.add(op.getName());
-                break;
-            case RETURN:
-                ReturnInstruction retInst = (ReturnInstruction) inst;
-                if (retInst.hasReturnValue()){
-                    Element e = retInst.getOperand();
-                    if (!e.isLiteral()) {
-                        op = (Operand) e;
-                        def.add(op.getName());
-                    }
-                }
                 break;
         }
         return def;
@@ -148,18 +140,24 @@ public class RegAlloc {
     public void buildEdges() {
         for (var method : cfg.getMethods()) {
             for (var inst : this.sets.get(method).keySet()) {
-                var compare = new HashSet<>(this.sets.get(method).get(inst).a);
-                var compare_temp = new HashSet<>(this.sets.get(method).get(inst).b);
-                compare_temp.retainAll(def(inst));
-                compare.retainAll(compare_temp);
-                for (String a : compare) {
-                    for (String b : compare) {
+                var liveIn = new HashSet<>(this.sets.get(method).get(inst).a);
+                var liveOut = new HashSet<>(this.sets.get(method).get(inst).b);
+                liveOut.addAll(def(inst));
+                for (String a : liveIn) {
+                    for (String b : liveIn) {
                         if (!a.equals(b)) {
                             this.graph.get(method).get(a).add(b);
                             this.graph.get(method).get(b).add(a);
                         }
                     }
-
+                }
+                for (String a : liveOut) {
+                    for (String b : liveOut) {
+                        if (!a.equals(b)) {
+                            this.graph.get(method).get(a).add(b);
+                            this.graph.get(method).get(b).add(a);
+                        }
+                    }
                 }
             }
         }
@@ -173,20 +171,16 @@ public class RegAlloc {
                 boolean foundOne = false;
                 List keys = new ArrayList(this.graph.get(method).keySet());
                 for (var var : keys) {
-                    if (this.graph.get(method).get(var).size()<this.maxRegisters) {
+                    if (this.maxRegisters==0 || this.graph.get(method).get(var).size()<(this.maxRegisters-method.getParams().size())) {
                         foundOne = true;
                         //add to stack
                         stack.add(new Pair<>(var, this.graph.get(method).get(var)));
-                        // remove edges
-                        //for (var otherVar : this.graph.get(method).keySet()) {
-                        //    if (!otherVar.equals(var)) this.graph.get(method).get(otherVar).remove(var);
-                        //}
                         this.graph.get(method).remove(var);
                     }
                 }
                 if (!foundOne) return false;
             }
-            // register aloc
+            // register alloc
             int register = 1 + method.getParams().size();
             while (!stack.empty()) {
                 Pair<String, Set<String>> p = (Pair) stack.pop();
@@ -194,15 +188,16 @@ public class RegAlloc {
                 // put node back
                 this.graph.get(method).put(p.a, p.b);
                 for (String otherNode : p.b) {
-                    this.graph.get(method).get(otherNode).add(p.a);
                     minNeighbour.add(this.color.get(method).get(otherNode));
                 }
                 // update
-                Integer color = this.maxRegisters+register;
-                for (int i = register; i<=this.maxRegisters+register; i++) {
+                Integer color = null;
+                for (int i = register; i<=((this.maxRegisters==0)?Integer.MAX_VALUE:this.maxRegisters+register); i++) {
                     if (minNeighbour.contains(i)) continue;
-                    color = i; break;
+                    color = i;
+                    break;
                 }
+                if (color==null) return false;
                 method.getVarTable().get(p.a).setVirtualReg(color);
                 this.color.get(method).put(p.a,color);
             }
@@ -210,11 +205,11 @@ public class RegAlloc {
         return true;
     }
 
-    public void allocateRegisters(){
+    public boolean allocateRegisters(){
         buildSets();
         buildGraph();
         buildEdges();
-        colorGraph();
+        return colorGraph();
     }
 
 }

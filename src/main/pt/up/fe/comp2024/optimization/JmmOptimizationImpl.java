@@ -27,13 +27,18 @@ public class JmmOptimizationImpl implements JmmOptimization {
         // If it's -1, return the result without optimizing
         if (maxRegisters == -1) return ollirResult;
 
-        // Otherwise, optimize the result
-        ollirResult.getOllirClass().buildCFGs();
-        var CFG = ollirResult.getOllirClass();
+        boolean success = true;
+        do {
+            // Otherwise, optimize the result
+            ollirResult.getOllirClass().buildCFGs();
+            var CFG = ollirResult.getOllirClass();
 
-        var regAlloc = new RegAlloc(CFG, maxRegisters);
-        regAlloc.allocateRegisters();
+            var regAlloc = new RegAlloc(CFG, maxRegisters);
+            success = regAlloc.allocateRegisters();
 
+            maxRegisters++;
+        } while (!success);
+        //report here
         return ollirResult;
     }
 
