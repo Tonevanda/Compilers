@@ -54,7 +54,7 @@ This is done using a `visitor` for each one of these optimizations that changes 
 
 Additionally, along with the `ASTConstPropagationVisitor` and the `ASTConstFoldingVisitor`, there is another visitor - the `ASTVisitor`. This visitor is unrelated to the optimizations taking place, which is noticeable by the fact that it's outside the loop that checks for the optimization flag.
 
-This `ASTVisitor` is used specifically to support the `varargs` feature. Because `varargs` is just syntactic sugar, we can just replace the variables being called as part of the `varargs` by an array:
+This `ASTVisitor` is used specifically to support the `varargs` feature. Because `varargs` is just syntactic sugar for an array, we can just create an `ArrayInit` node and put all the arguments that belong to the `varargs` as children of the `ArrayInit` node:
 
 ```java
 private Void visitFunctionCall(JmmNode node, Void unused) {
@@ -73,6 +73,8 @@ private Void visitFunctionCall(JmmNode node, Void unused) {
 
         var lastArg = arguments.get(arguments.size() - 1);
         var isVarArgs = lastArg.getType().getObject("isVarargs").equals(true);
+
+        // If the last parameter is not varargs, we do nothing
         if(!isVarArgs) return null;
 
         var argumentCount = arguments.size();
