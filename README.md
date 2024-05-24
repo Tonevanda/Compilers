@@ -134,8 +134,9 @@ public OllirResult optimize(OllirResult ollirResult) {
 
     // If it's -1, return the result without optimizing
     if (maxRegisters == -1) return ollirResult;
-
+    
     // Otherwise, optimize the result
+    int ogMaxReg = maxRegisters;
     boolean success;
     do {
         ollirResult.getOllirClass().buildCFGs();
@@ -146,7 +147,19 @@ public OllirResult optimize(OllirResult ollirResult) {
 
         maxRegisters++;
     } while (!success);
+    maxRegisters--;
 
+    //If we had to increment the max register
+    if (maxRegisters!=ogMaxReg) {
+        var message = String.format("%s register(s) is not enough. Cannot allocate with less than %s", ogMaxReg, maxRegisters);
+        Report error = Report.newError(
+                Stage.OPTIMIZATION,
+                0,
+                0,
+                message,
+                null);
+        ollirResult.getReports().add(error);
+    }
     return ollirResult;
 }
 ```
@@ -164,7 +177,7 @@ public boolean allocateRegisters(){
 
 It calls upon 4 methods:
 
-- `buildSets()`: This method builds the `use`, `def`, `live-in` and `live-out` sets for each instruction
+- `buildSets()`: This method builds the `live-in` and `live-out` sets for each instruction, with the help of the `use` and `def` sets.
 - `buildGraph()`: This method builds the **Interference Graph**
 - `buildEdges()`: This method adds the edges to the **Interference Graph**
 - `colorGraph()`: This method uses the `Graph Coloring` algorithm to color the graph

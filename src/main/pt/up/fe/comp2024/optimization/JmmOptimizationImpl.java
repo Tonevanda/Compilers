@@ -29,10 +29,10 @@ public class JmmOptimizationImpl implements JmmOptimization {
         // If it's -1, return the result without optimizing
         if (maxRegisters == -1) return ollirResult;
 
+        // Otherwise, optimize the result
         int ogMaxReg = maxRegisters;
         boolean success;
         do {
-            // Otherwise, optimize the result
             ollirResult.getOllirClass().buildCFGs();
             var CFG = ollirResult.getOllirClass();
 
@@ -43,7 +43,7 @@ public class JmmOptimizationImpl implements JmmOptimization {
         } while (!success);
         maxRegisters--;
 
-        //report here
+        //If we had to increment the max register
         if (maxRegisters!=ogMaxReg) {
             var message = String.format("%s register(s) is not enough. Cannot allocate with less than %s", ogMaxReg, maxRegisters);
             Report error = Report.newError(
