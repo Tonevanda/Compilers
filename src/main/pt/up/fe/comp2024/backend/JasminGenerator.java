@@ -334,7 +334,8 @@ public class JasminGenerator {
         code.append(temp);
         // unset method
         currentMethod = null;
-
+        maxStackSize = 0;
+        stackSize = 0;
         return code.toString();
     }
 
