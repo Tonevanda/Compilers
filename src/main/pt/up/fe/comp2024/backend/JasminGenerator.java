@@ -393,15 +393,7 @@ public class JasminGenerator {
             code.append("istore").append(isByte(reg)).append(NL);
         } else if (lhs.getType().toString().equals("BOOLEAN")) {
             if(assign.getRhs() instanceof BinaryOpInstruction binaryOp){
-                var op = switch (binaryOp.getOperation().getOpType()) {
-                    case EQ -> "ifeq ";
-                    case NEQ, AND, OR, ANDB, ORB, NOT, NOTB -> "ifne ";
-                    case LTH -> "iflt ";
-                    case LTE -> "ifle ";
-                    case GTH -> "ifgt ";
-                    case GTE -> "ifge ";
-                    default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
-                };
+                String op = extractIf(binaryOp.getOperation().getOpType());
                 code.append(op).append("boolSaveJump_").append(idCounter).append(NL);
                 code.append("iconst_0").append(NL);
                 code.append("goto ").append("boolSaveEnd_").append(idCounter).append(NL);
@@ -436,12 +428,12 @@ public class JasminGenerator {
         }
         else if (literalInt >= 0 && literalInt <= 5){
             return "iconst_" + literalInt + NL;
-        }//-128 and 127
-        else if (literalInt>= -128 && literalInt<=127){
+        }
+        else if (literalInt >= -128 && literalInt <= 127){
             return "bipush " + literalInt + NL;
         }
-        else if (literalInt>=-32768 && literalInt<=32767) {
-            return  "sipush " + literalInt + NL;
+        else if (literalInt >= -32768 && literalInt <= 32767) {
+            return "sipush " + literalInt + NL;
         }
         else {
             return "ldc " + literal.getLiteral() + NL;
@@ -455,7 +447,7 @@ public class JasminGenerator {
         if(operand.getName().equals("this")){
             return "aload_0" + NL;
         }
-        var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
+        int reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
         if(operand instanceof ArrayOperand){
             code.append("aload").append(isByte(reg)).append(NL);
             code.append(generators.apply(((ArrayOperand) operand).getIndexOperands().get(0)));
@@ -479,20 +471,23 @@ public class JasminGenerator {
         return code.toString();
     }
 
-
-    private String generateOpCondition(OpCondInstruction opCond) {
-        var code = new StringBuilder();
-        code.append(generators.apply(opCond.getCondition()));
-
-        var op = switch (opCond.getCondition().getOperation().getOpType()) {
+    private String extractIf(OperationType opType){
+        return switch (opType) {
             case EQ -> "ifeq ";
             case NEQ, AND, OR, ANDB, ORB, NOT, NOTB -> "ifne ";
             case LTH -> "iflt ";
             case LTE -> "ifle ";
             case GTH -> "ifgt ";
             case GTE -> "ifge ";
-            default -> throw new NotImplementedException(opCond.getCondition().getOperation().getOpType());
+            default -> throw new NotImplementedException(opType);
         };
+    }
+
+    private String generateOpCondition(OpCondInstruction opCond) {
+        var code = new StringBuilder();
+        code.append(generators.apply(opCond.getCondition()));
+
+        String op = extractIf(opCond.getCondition().getOperation().getOpType());
         checkStackSize();
         stackSize--;
         code.append(op).append(opCond.getLabel()).append(NL);
@@ -506,7 +501,6 @@ public class JasminGenerator {
     private String generateUnaryOp(UnaryOpInstruction unaryOp) {
         var code = new StringBuilder();
 
-        //if(unaryOp.getOperation().getOpType().name().equals("NOTB")){   NOT SURE WHY THIS IS HERE
         if(unaryOp.getOperand().isLiteral()) {
             if (((LiteralElement) unaryOp.getOperand()).getLiteral().equals("1")) {
                 code.append("iconst_0");
@@ -522,7 +516,6 @@ public class JasminGenerator {
             checkStackSize();
             stackSize--;
         }
-        //}
         code.append(NL);
 
         return code.toString();
@@ -537,7 +530,7 @@ public class JasminGenerator {
 
 
         // apply operation
-        var op = switch (binaryOp.getOperation().getOpType()) {
+        String op = switch (binaryOp.getOperation().getOpType()) {
             case ADD -> "iadd";
             case SUB, EQ, NEQ, LTH, LTE, GTH, GTE  -> "isub";
             case MUL -> "imul";
