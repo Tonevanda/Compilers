@@ -392,18 +392,15 @@ public class JasminGenerator {
         if(lhs.getType().toString().equals("INT32")){
             code.append("istore").append(isByte(reg)).append(NL);
         } else if (lhs.getType().toString().equals("BOOLEAN")) {
-            if(((assign.getRhs() instanceof SingleOpInstruction singleOpInstruction) && (singleOpInstruction.getSingleOperand().isLiteral() || singleOpInstruction.getSingleOperand() instanceof Operand) || (assign.getRhs() instanceof UnaryOpInstruction)) || (assign.getRhs() instanceof CallInstruction)){
-                code.append("istore").append(isByte(reg)).append(NL);
-            }
-            else {
-                var op = switch (((BinaryOpInstruction)assign.getRhs()).getOperation().getOpType()) {
+            if(assign.getRhs() instanceof BinaryOpInstruction binaryOp){
+                var op = switch (binaryOp.getOperation().getOpType()) {
                     case EQ -> "ifeq ";
                     case NEQ, AND, OR, ANDB, ORB, NOT, NOTB -> "ifne ";
                     case LTH -> "iflt ";
                     case LTE -> "ifle ";
                     case GTH -> "ifgt ";
                     case GTE -> "ifge ";
-                    default -> throw new NotImplementedException(((BinaryOpInstruction)assign.getRhs()).getOperation().getOpType());
+                    default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
                 };
                 code.append(op).append("boolSaveJump_").append(idCounter).append(NL);
                 code.append("iconst_0").append(NL);
@@ -415,6 +412,9 @@ public class JasminGenerator {
                 idCounter++;
                 checkStackSize();
                 stackSize--;
+            }
+            else {
+                code.append("istore").append(isByte(reg)).append(NL);
             }
         } else{
             code.append("astore").append(isByte(reg)).append(NL);
