@@ -171,7 +171,7 @@ public class RegAlloc {
                 List<String> keys = new ArrayList<>(this.graph.get(method).keySet());
 
                 for (var var : keys) {
-                    if (this.maxRegisters==0 || this.graph.get(method).get(var).size()<(this.maxRegisters-method.getParams().size())) {
+                    if (this.maxRegisters==0 || this.graph.get(method).get(var).size()<(this.maxRegisters-method.getParams().size()-1)) {
                         foundOne = true;
 
                         // Add to stack
@@ -197,7 +197,7 @@ public class RegAlloc {
 
                 // Update
                 Integer color = null;
-                for (int i = register; i<=((this.maxRegisters==0)?Integer.MAX_VALUE:this.maxRegisters+register); i++) {
+                for (int i = register; i<((this.maxRegisters==0)?Integer.MAX_VALUE:this.maxRegisters); i++) {
                     if (minNeighbour.contains(i)) continue;
                     color = i;
                     break;

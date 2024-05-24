@@ -3,6 +3,8 @@ package pt.up.fe.comp2024.optimization;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.ollir.JmmOptimization;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
+import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2024.CompilerConfig;
 
 import java.util.Collections;
@@ -27,6 +29,7 @@ public class JmmOptimizationImpl implements JmmOptimization {
         // If it's -1, return the result without optimizing
         if (maxRegisters == -1) return ollirResult;
 
+        int ogMaxReg = maxRegisters;
         boolean success;
         do {
             // Otherwise, optimize the result
@@ -38,8 +41,19 @@ public class JmmOptimizationImpl implements JmmOptimization {
 
             maxRegisters++;
         } while (!success);
+        maxRegisters--;
 
         //report here
+        if (maxRegisters!=ogMaxReg) {
+            var message = String.format("%s register(s) is not enough. Cannot allocate with less than %s", ogMaxReg, maxRegisters);
+            Report error = Report.newError(
+                    Stage.OPTIMIZATION,
+                    0,
+                    0,
+                    message,
+                    null);
+            ollirResult.getReports().add(error);
+        }
         return ollirResult;
     }
 
