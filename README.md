@@ -19,37 +19,38 @@
 
 ## Extra Elements
 
-Our project has in place 3 optimizations:
+Our project has in place 4 optimizations:
 
-- Constant Propagation, by manipulating the AST
-- Constant Folding, by manipulating the AST
-- Instruction Selection, during the Jasmin code generation
+- [Constant Propagation](#ast-optimizations), by manipulating the AST
+- [Constant Folding](#ast-optimizations), by manipulating the AST
+- [Register Allocation](#ollir-optimizations), after generating the OLLIR code
+- [Instruction Selection](#jasmin-optimizations), during the Jasmin code generation
 
 ### AST Optimizations
 
 This is done using a `visitor` for each one of these optimizations that changes the `AST`, in a loop. When no more changes to the `AST` have been made, the loop stops. 
 
 ```java
-    @Override
-    public JmmSemanticsResult optimize(JmmSemanticsResult semanticsResult) {
+@Override
+public JmmSemanticsResult optimize(JmmSemanticsResult semanticsResult) {
 
-        var visitor = new ASTVisitor(semanticsResult.getSymbolTable());
-        visitor.visit(semanticsResult.getRootNode());
+    var visitor = new ASTVisitor(semanticsResult.getSymbolTable());
+    visitor.visit(semanticsResult.getRootNode());
 
-        if (CompilerConfig.getOptimize(semanticsResult.getConfig())) {
-            while (true) {
-                var constPropagationVisitor = new ASTConstPropagationVisitor();
-                constPropagationVisitor.visit(semanticsResult.getRootNode());
+    if (CompilerConfig.getOptimize(semanticsResult.getConfig())) {
+        while (true) {
+            var constPropagationVisitor = new ASTConstPropagationVisitor();
+            constPropagationVisitor.visit(semanticsResult.getRootNode());
 
-                var constFoldingVisitor = new ASTConstFoldingVisitor();
-                constFoldingVisitor.visit(semanticsResult.getRootNode());
+            var constFoldingVisitor = new ASTConstFoldingVisitor();
+            constFoldingVisitor.visit(semanticsResult.getRootNode());
 
-                // If none of the visitors made changes we end the loop
-                if (!constPropagationVisitor.madeChanges() && !constFoldingVisitor.madeChanges()) break;
-            }
+            // If none of the visitors made changes we end the loop
+            if (!constPropagationVisitor.madeChanges() && !constFoldingVisitor.madeChanges()) break;
         }
-        return semanticsResult;
     }
+    return semanticsResult;
+}
 ```
 
 Additionally, along with the `ASTConstPropagationVisitor` and the `ASTConstFoldingVisitor`, there is another visitor - the `ASTVisitor`. This visitor is unrelated to the optimizations taking place, which is noticeable by the fact that it's outside the loop that checks for the optimization flag.
@@ -118,16 +119,69 @@ private Void visitFunctionCall(JmmNode node, Void unused) {
     }
 ```
 
+### OLLIR Optimizations
+
+After generating the OLLIR code, to minimize the number of registers used, we used a `Register Allocation` optimization algorithm. This algorithm calculates the `use`, `def`, `live-in` and `live-out` sets for each instructions, builds an interference graph and colors it. The number of colors in the graph represents the number of registers.
+
+We created a class called `RegAlloc` to deal with this optimization, and we call it in the `optimize()` method, in the `JmmOptimizationImpl` class:
+
+```java
+@Override
+public OllirResult optimize(OllirResult ollirResult) {
+
+    // Get the register allocation value from the config
+    int maxRegisters = CompilerConfig.getRegisterAllocation(ollirResult.getConfig());
+
+    // If it's -1, return the result without optimizing
+    if (maxRegisters == -1) return ollirResult;
+
+    // Otherwise, optimize the result
+    boolean success;
+    do {
+        ollirResult.getOllirClass().buildCFGs();
+        var CFG = ollirResult.getOllirClass();
+
+        var regAlloc = new RegAlloc(CFG, maxRegisters);
+        success = regAlloc.allocateRegisters();
+
+        maxRegisters++;
+    } while (!success);
+
+    return ollirResult;
+}
+```
+
+The `allocateRegisters()` method looks like this:
+
+```java
+public boolean allocateRegisters(){
+    buildSets();
+    buildGraph();
+    buildEdges();
+    return colorGraph();
+}
+```
+
+It calls upon 4 methods:
+
+- `buildSets()`: This method builds the `use`, `def`, `live-in` and `live-out` sets for each instruction
+- `buildGraph()`: This method builds the **Interference Graph**
+- `buildEdges()`: This method adds the edges to the **Interference Graph**
+- `colorGraph()`: This method uses the `Graph Coloring` algorithm to color the graph
+
+If the `Graph Coloring` algorithm does not succeed, we increment the number of registers to try, and run the algorithm again. If for an input `n` larger than `0`, the algorithm does not succeed with, at most, `n` registers, then we create an error report and keep going until we find the minimum possible number of registers.
+
 ### Jasmin Optimizations
+
 #### Instruction Selection:
+
 - iload_x, istore_x, astore_x,aload_x:
 All that need to be done is check wheater or not the reg number is between [0,3]:
+
 ```java
     private String isByte(int value){
-        if(value<4){
-            return "_"+value;
-        }
-        return " "+value;
+        if(value < 4) return "_" + value;
+        return " " + value;
     }
 ```
 This function is called following every adition of load/store to the code string
