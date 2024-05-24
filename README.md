@@ -11,7 +11,7 @@
 - João Miguel da Silva Lourenço - 33.33 %
 - Isabel Maria Lima Moutinho - 33.33 %
 - Tomás Filipe Fernandes Xavier - 33.33 %
-- Our lord and savior Jesus Christ - 00.01%
+- Our glorious blue-eyed king Gojou Satoru - 00.01%
 
 ## Self-Assessment
 
