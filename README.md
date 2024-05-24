@@ -188,8 +188,8 @@ If the `Graph Coloring` algorithm does not succeed, we increment the number of r
 
 #### Instruction Selection:
 
-- iload_x, istore_x, astore_x,aload_x:
-All that need to be done is check wheater or not the reg number is between [0,3]:
+- `iload_x`, `istore_x`, `astore_x`, `aload_x`:
+All that needs to be done is check whether or not the reg number is between `0` and `3`:
 
 ```java
     private String isByte(int value){
@@ -197,10 +197,10 @@ All that need to be done is check wheater or not the reg number is between [0,3]
         return " " + value;
     }
 ```
-This function is called following every adition of load/store to the code string
 
-- iconst_0, bipush, sipush, ldc:
-Also relatively simple, just need to check if the variable is between the apropriate intervals:
+This function is called following every addition of load/store to the code string
+
+- `iconst_0`, `bipush`, `sipush`, `ldc`: Also relatively simple, just need to check if the variable is between the apropriate intervals:
 
 ```java
     if(literalInt == -1){
@@ -220,7 +220,7 @@ Also relatively simple, just need to check if the variable is between the apropr
     }
 ```
 
-- iinc:
+- `iinc`:
 We calculate the literal value (including the combinations of negative simbols)
 and if the value is inbetween -128 and 127:
 
@@ -248,6 +248,7 @@ and if the value is inbetween -128 and 127:
     }
 ```
 Value translation just does the operation itself:
+
 ```java
     private int valueTranslation(int value, OperationType opType){
         if(opType == OperationType.ADD)
@@ -259,8 +260,9 @@ Value translation just does the operation itself:
     }
 ```
 
-- iflt, ifne, etc: 
+- `iflt`, `ifne`, `etc`: 
 Added the boolean cases to binary operation switch case:
+
 ```java
     String op = switch (binaryOp.getOperation().getOpType()) {
         case ADD -> "iadd";
@@ -270,7 +272,9 @@ Added the boolean cases to binary operation switch case:
         default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
     };
 ```
+
 Added switch case to extract apropriate if instructuion:
+
 ```java
 private String extractIf(OperationType opType){
         return switch (opType) {
@@ -284,8 +288,10 @@ private String extractIf(OperationType opType){
         };
     }
 ```
+
 Witch is now used for 2 situations:
 - A binary operation on an assign:
+
 ```java
     if(assign.getRhs() instanceof BinaryOpInstruction binaryOp){
         String op = extractIf(binaryOp.getOperation().getOpType());
@@ -301,7 +307,9 @@ Witch is now used for 2 situations:
         stackSize--;
     }
 ```
-- and any other regular Branch instruction:
+
+- And any other regular Branch instruction:
+
 ```java
     private String generateOpCondition(OpCondInstruction opCond) {
         var code = new StringBuilder();
