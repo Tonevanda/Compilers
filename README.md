@@ -119,4 +119,17 @@ private Void visitFunctionCall(JmmNode node, Void unused) {
 ```
 
 ### Jasmin Optimizations
+#### Instruction Selection:
+- iload_x, istore_x, astore_x,aload_x:
+All that need to be done is check wheater or not the reg number is between [0,3]:
+```java
+    private String isByte(int value){
+        if(value<4){
+            return "_"+value;
+        }
+        return " "+value;
+    }
+```
+This function is called following every adition of load/store to the code string
 
+- 
