@@ -1,0 +1,7 @@
+class ThisInStatic {
+
+    public static void main(String[] args) {
+        ThisInStatic t;
+        t = this;
+    }
+}

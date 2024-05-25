@@ -1,0 +1,13 @@
+class miscDuplicatedMethodInvalid {
+    public int foo() {
+        int x;
+        x = 1;
+        return x;
+    }
+
+    public int foo() {
+        int x;
+        x = 2;
+        return x;
+    }
+}

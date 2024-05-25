@@ -1,0 +1,11 @@
+import Array;
+
+class ArrayInitOnCall2Ok {
+    public int foo(){
+        int b;
+        Array c;
+
+        b = c.bar([1,2,3,4]);
+        return b;
+    }
+}

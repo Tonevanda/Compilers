@@ -1,0 +1,11 @@
+class ArrayIndexInvalid {
+    public int foo() {
+        int[] b;
+        int c;
+
+        b = [1, 2, 3];
+        c = b[b];
+
+        return c;
+    }
+}

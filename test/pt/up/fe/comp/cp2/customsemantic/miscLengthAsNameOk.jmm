@@ -1,9 +1,0 @@
-class miscLengthAsNameOk {
-    public int foo() {
-        int length;
-
-        length = 2;
-
-        return length;
-    }
-}

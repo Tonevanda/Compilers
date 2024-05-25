@@ -1,0 +1,6 @@
+class arrayInitReturnOk {
+
+    public int[] bar(){
+        return [1,2,3];
+    }
+}

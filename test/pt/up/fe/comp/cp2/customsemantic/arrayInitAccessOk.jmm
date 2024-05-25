@@ -1,7 +1,0 @@
-class ArrayInitAccessOk {
-    public int foo(){
-        int a;
-        a = [1,2,3,4][0];
-        return 1;
-    }
-}

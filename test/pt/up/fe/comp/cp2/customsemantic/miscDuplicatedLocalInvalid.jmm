@@ -1,8 +1,0 @@
-class miscDuplicatedLocalInvalid {
-    public static void main(String[] args) {
-        int a;
-        int a;
-
-        a = 1;
-    }
-}

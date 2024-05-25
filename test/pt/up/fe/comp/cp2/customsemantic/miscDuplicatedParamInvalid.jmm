@@ -1,6 +1,0 @@
-class miscDuplicatedParamInvalid {
-    public int foo(int a, int a) {
-        a = 1;
-        return a;
-    }
-}

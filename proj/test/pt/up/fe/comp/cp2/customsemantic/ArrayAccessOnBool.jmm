@@ -1,0 +1,11 @@
+class ArrayAccessOnBool {
+    public int foo() {
+        boolean a;
+        int b;
+
+        a = true;
+        b = a[0];
+
+        return b;
+    }
+}

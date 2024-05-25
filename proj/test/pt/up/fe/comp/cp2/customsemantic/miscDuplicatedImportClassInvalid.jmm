@@ -1,0 +1,8 @@
+import ClassA.B;
+import ClassC.B;
+
+class miscDuplicatedImportClassInvalid {
+    public static void main(String[] args) {
+
+    }
+}

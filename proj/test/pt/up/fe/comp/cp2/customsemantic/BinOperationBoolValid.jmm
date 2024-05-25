@@ -1,0 +1,23 @@
+class VarDeclaredClassField {
+
+
+    public boolean foo() {
+        boolean x;
+        boolean y;
+        boolean z;
+
+        int a;
+        int b;
+        boolean c;
+
+        x = true;
+        y = false;
+        z = x && y;
+
+        a = 1;
+        b = 2;
+        c = a < b;
+
+        return c;
+    }
+}

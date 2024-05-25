@@ -1,7 +1,0 @@
-import a;
-import a;
-class miscDuplicatedImportInvalid {
-    public static void main(String[] args) {
-
-    }
-}

@@ -1,9 +1,0 @@
-class AssignIntToBool {
-    public boolean foo() {
-        boolean a;
-
-        a = 1;
-
-        return a;
-    }
-}
