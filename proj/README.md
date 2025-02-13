@@ -289,7 +289,7 @@ private String extractIf(OperationType opType){
     }
 ```
 
-Witch is now used for 2 situations:
+Which is now used for 2 situations:
 - A binary operation on an assign:
 
 ```java
